@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="en" class="no-js" data-palette="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Certificate Audit</title>
+<style>
+/* ==========================================================================
+   House style: base stylesheet (v1.2)
+   Inline this whole file into a <style> tag in every generated page.
+   No external fonts, no CDNs, no frameworks. Everything is a token.
+
+   Switch palette:  <html data-palette="paper|slate|graphite">
+   Force a theme:   <html data-theme="light|dark">  (default follows the OS)
+   Switch density:  <body class="doc">  long reading (default)
+                    <body class="tool"> dashboards, trackers, dense UIs
+   No-JS fallback:  <html class="no-js">; the page script removes the class.
+   Page pattern:    <body data-pattern="decide|understand|look-up|monitor|do|review">
+                    (the reader's job; see PATTERNS.md and section 16)
+   ========================================================================== */
+
+/* ---------- 1. Tokens: raw palettes (never used directly by components) --- */
+
+:root,
+:root[data-palette="paper"] {
+  /* Warm editorial. Paper ground, ink text, deep blue accent, clay second. */
+  --p-bg: #F7F4EE;      --p-surface: #FFFDF9;  --p-sunken: #EFEBE3;
+  --p-fg: #23201C;      --p-fg2: #57514A;      --p-fg3: #6E675E;
+  --p-accent: #2D5283;  --p-accent2: #9A4A2E;
+  --p-border: #8C857A;  --p-hairline: #DDD6CA;
+  --p-tint: #E6ECF4;    --p-tint2: #F4E6DF;
+}
+:root[data-palette="slate"] {
+  /* Cool neutral. Safest choice for a corporate audience. */
+  --p-bg: #F5F6F8;      --p-surface: #FFFFFF;  --p-sunken: #ECEEF2;
+  --p-fg: #1B1F24;      --p-fg2: #4B535D;      --p-fg3: #636C77;
+  --p-accent: #2756C7;  --p-accent2: #9A4A1C;
+  --p-border: #868D96;  --p-hairline: #DADDE3;
+  --p-tint: #E7EDFA;    --p-tint2: #F5E9E0;
+}
+:root[data-palette="graphite"] {
+  /* Near-monochrome. One teal accent. Most austere. */
+  --p-bg: #FAFAF9;      --p-surface: #FFFFFF;  --p-sunken: #F1F1EF;
+  --p-fg: #161616;      --p-fg2: #4A4A48;      --p-fg3: #666663;
+  --p-accent: #0F6E6E;  --p-accent2: #8A3B12;
+  --p-border: #8A8A86;  --p-hairline: #E0E0DC;
+  --p-tint: #E3F0F0;    --p-tint2: #F5E8E0;
+}
+
+/* Status colours are shared by every palette. All pass 5:1 on the grounds.
+   Category colours (--p-cat-1..6) are for series, zones and actor types only.
+   Checked with a script (WCAG contrast, Machado 2009 colour-vision simulation):
+   light: 3.88 to 9.54 on bg and surface; min pairwise dE76 23.2 normal, 20.3 protan, 12.9 deutan, 12.3 tritan.
+   dark:  4.03 to 10.59 on bg and surface; min pairwise dE76 23.1 normal, 17.7 protan, 16.2 deutan, 13.5 tritan.
+   Always label or legend them anyway. */
+:root {
+  --p-danger: #A8281F;  --p-warn: #8A5300;  --p-ok: #2C6B3A;
+  --p-danger-bg: #F8E5E2; --p-warn-bg: #F6ECDA; --p-ok-bg: #E3F0E5;
+  --p-cat-1: #2F7FC1; --p-cat-2: #8C7A0B; --p-cat-3: #C24D7A;   /* sky, olive, rose */
+  --p-cat-4: #4E4AA8; --p-cat-5: #2F8A57; --p-cat-6: #7E2340;   /* indigo, green, wine */
+  --p-scroll-shadow: rgb(0 0 0 / 0.14);
+}
+
+/* Dark theme: one neutral dark ground, palette keeps its accent family.
+   Every dark rule sits under @media screen so print always uses light values. */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --p-bg: #17161A; --p-surface: #1F1E23; --p-sunken: #141317;
+    --p-fg: #ECE7DF; --p-fg2: #BDB6AB; --p-fg3: #9C958A;
+    --p-border: #6F6A63; --p-hairline: #34323A;
+    --p-accent: #8FB0E3; --p-accent2: #E09A7C;
+    --p-tint: #24303F; --p-tint2: #3A2A24;
+    --p-danger: #FF8A80; --p-warn: #F0B44C; --p-ok: #7CCB8F;
+    --p-danger-bg: #3A1E1C; --p-warn-bg: #362A14; --p-ok-bg: #1C3022;
+    --p-cat-1: #86D0F5; --p-cat-2: #C9B23C; --p-cat-3: #F29CBC;
+    --p-cat-4: #8778DC; --p-cat-5: #5DBE88; --p-cat-6: #C25C7C;
+    --p-scroll-shadow: rgb(255 255 255 / 0.12);
+  }
+  :root[data-palette="slate"]:not([data-theme="light"])    { --p-accent: #86A8FF; --p-accent2: #E3A57A; }
+  :root[data-palette="graphite"]:not([data-theme="light"]) { --p-accent: #5FC4C4; --p-accent2: #E8A27C; --p-tint: #1D3233; }
+}
+@media screen {
+  :root[data-theme="dark"] {
+    --p-bg: #17161A; --p-surface: #1F1E23; --p-sunken: #141317;
+    --p-fg: #ECE7DF; --p-fg2: #BDB6AB; --p-fg3: #9C958A;
+    --p-border: #6F6A63; --p-hairline: #34323A;
+    --p-accent: #8FB0E3; --p-accent2: #E09A7C;
+    --p-tint: #24303F; --p-tint2: #3A2A24;
+    --p-danger: #FF8A80; --p-warn: #F0B44C; --p-ok: #7CCB8F;
+    --p-danger-bg: #3A1E1C; --p-warn-bg: #362A14; --p-ok-bg: #1C3022;
+    --p-cat-1: #86D0F5; --p-cat-2: #C9B23C; --p-cat-3: #F29CBC;
+    --p-cat-4: #8778DC; --p-cat-5: #5DBE88; --p-cat-6: #C25C7C;
+    --p-scroll-shadow: rgb(255 255 255 / 0.12);
+  }
+  :root[data-theme="dark"][data-palette="slate"]    { --p-accent: #86A8FF; --p-accent2: #E3A57A; }
+  :root[data-theme="dark"][data-palette="graphite"] { --p-accent: #5FC4C4; --p-accent2: #E8A27C; --p-tint: #1D3233; }
+}
+
+/* ---------- 2. Tokens: functional roles (what components use) ------------ */
+
+:root {
+  --bg: var(--p-bg);            --surface: var(--p-surface);   --sunken: var(--p-sunken);
+  --fg: var(--p-fg);            --fg-muted: var(--p-fg2);      --fg-subtle: var(--p-fg3);
+  --accent: var(--p-accent);    --accent-2: var(--p-accent2);
+  --accent-bg: var(--p-tint);   --accent-2-bg: var(--p-tint2);
+  --border: var(--p-border);    --hairline: var(--p-hairline);
+  --danger: var(--p-danger);    --danger-bg: var(--p-danger-bg);
+  --warn: var(--p-warn);        --warn-bg: var(--p-warn-bg);
+  --ok: var(--p-ok);            --ok-bg: var(--p-ok-bg);
+  --cat-1: var(--p-cat-1); --cat-2: var(--p-cat-2); --cat-3: var(--p-cat-3);
+  --cat-4: var(--p-cat-4); --cat-5: var(--p-cat-5); --cat-6: var(--p-cat-6);
+  --scroll-shadow: var(--p-scroll-shadow);
+
+  /* Type. Local fonts only. Good matches on macOS and Windows; on Linux and
+     ChromeOS the stacks fall back to the system serif, sans and mono. */
+  --font-read: "Iowan Old Style", "Charter", "Bitstream Charter", "Source Serif 4", "Source Serif Pro", "Sitka Text", Cambria, Georgia, serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: Menlo, "Cascadia Code", Consolas, "DejaVu Sans Mono", "Liberation Mono", ui-monospace, monospace;
+
+  /* Scale. Reading sizes step by 1.2 from an 18px base; UI sizes are 14 and 12.
+     Pixel values assume the browser default 16px root. Use only these tokens. */
+  --fs-xs: 0.75rem;    /* 12px: kickers, block labels, sources */
+  --fs-sm: 0.875rem;   /* 14px: interface text, captions, tables, code */
+  --fs-base: 1.125rem; /* 18px: reading text, h4 */
+  --fs-md: 1.35rem;    /* 21.6px: h3, dek */
+  --fs-lg: 1.62rem;    /* 25.9px: h2 */
+  --fs-xl: 1.944rem;   /* 31.1px: stat values, h1 on phones */
+  --fs-2xl: 2.333rem;  /* 37.3px: h1 */
+  --fs-3xl: 2.8rem;    /* 44.8px: display only */
+  --lh-read: 1.62;  --lh-ui: 1.45;     --lh-tight: 1.2;
+  --measure: 64ch;  /* about 70 to 75 characters of running text */
+
+  /* Space: 4px grid. */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+
+  --radius: 6px;    --radius-sm: 4px;   --radius-pill: 999px;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 2px 8px rgb(0 0 0 / 0.04);
+  --ease: cubic-bezier(.2,.7,.2,1);
+  --gutter: 16px;
+}
+
+/* ---------- 3. Base ----------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: var(--font-read); font-size: var(--fs-base); line-height: var(--lh-read);
+  font-optical-sizing: auto; text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased; overflow-wrap: break-word;
+}
+body.tool { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: var(--lh-ui); }
+
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--fg); line-height: var(--lh-tight); font-weight: 600; text-wrap: balance; margin: 0; }
+body.tool h1, body.tool h2, body.tool h3, body.tool h4 { font-family: var(--font-ui); letter-spacing: -0.01em; }
+h1 { font-size: var(--fs-2xl); letter-spacing: -0.015em; }
+h2 { font-size: var(--fs-lg); margin-top: var(--s8); }
+h3 { font-size: var(--fs-md); margin-top: var(--s6); }
+h4 { font-size: var(--fs-base); margin-top: var(--s5); font-family: var(--font-ui); font-weight: 600; }
+h2 + *, h3 + *, h4 + * { margin-top: var(--s3); }
+/* Phones: body 17px; h4 (18) and h3 (21.6) stay above it. */
+@media (max-width: 520px) { body.doc, body:not(.tool) { font-size: 17px; } h1 { font-size: var(--fs-xl); } h2 { margin-top: var(--s7); } }
+body.tool h1 { font-size: var(--fs-xl); } body.tool h2 { font-size: var(--fs-md); margin-top: var(--s7); }
+body.tool h3 { font-size: var(--fs-base); } body.tool h4 { font-size: var(--fs-sm); }
+
+p, ul, ol, dl, blockquote, figure, table, pre, details, .callout, .tabs, form, fieldset { margin: var(--s4) 0 0; }
+.stats, .cards, .compare, .grid, .table-wrap, ol.steps, ol.timeline { margin-top: var(--s5); }
+p { text-wrap: pretty; }
+li + li { margin-top: var(--s2); }
+ul, ol { padding-left: 1.3em; }
+strong { font-weight: 650; }
+small, .small { font-size: var(--fs-sm); }
+.muted { color: var(--fg-muted); }
+.num, td.num, .tabular { font-variant-numeric: tabular-nums lining-nums; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+code, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
+:not(pre) > code { background: var(--sunken); padding: 0.1em 0.35em; border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+pre { background: var(--sunken); padding: var(--s4); border-radius: var(--radius); overflow-x: auto; font-size: var(--fs-sm); line-height: 1.5; }
+pre code { font-size: inherit; }
+/* A code block with a file-name caption. */
+figure.code > figcaption { margin-top: var(--s2); }
+/* Optional hand-written highlighting: wrap tokens in these spans. */
+.tok-k { color: var(--accent); } .tok-s { color: var(--ok); } .tok-c { color: var(--fg-subtle); font-style: italic; }
+
+hr { border: 0; border-top: 1px solid var(--hairline); margin: var(--s7) 0; }
+/* The one ornament: four whole dots. Use at most three times per page. */
+hr.mark { border: 0; height: 12px; margin: var(--s8) auto; width: 64px;
+  background: radial-gradient(circle, var(--accent-2) 2.5px, transparent 3px) 0 50% / 16px 12px repeat-x; }
+
+blockquote { margin-left: 0; padding-left: var(--s4); border-left: 3px solid var(--border); color: var(--fg-muted); font-style: italic; }
+blockquote footer { font-style: normal; font-family: var(--font-ui); font-size: var(--fs-sm); margin-top: var(--s2); }
+
+/* ---------- 4. Layout --------------------------------------------------- */
+
+.page { max-width: 1180px; margin: 0 auto; padding: var(--s7) var(--gutter) var(--s9); }
+@media (min-width: 720px) { :root { --gutter: 32px; } }
+body.tool .page { max-width: 1440px; padding-top: var(--s5); }
+
+/* Reading column: prose holds the measure, wide things may break out. */
+.prose > * { max-width: var(--measure); }
+.prose > .wide, .prose > figure, .prose > .table-wrap, .prose > .grid, .prose > .cards, .prose > .stats, .prose > .compare, .prose > .tabs { max-width: none; }
+.grid > *, .cards > *, .compare > *, .stats > *, .with-toc > * { min-width: 0; }
+
+.bluf > * { max-width: var(--measure); }
+
+/* Contents rail. The list is written into the HTML; script only marks the
+   current section. Markup order is .bluf, nav.toc, .prose, so on a phone the
+   bottom line comes first and the rail is a collapsible box under it. On wide
+   screens the rail sits in its own column beside both. */
+.with-toc { display: block; }
+@media (min-width: 1100px) {
+  .with-toc { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: var(--s8); }
+  .with-toc > .toc { grid-column: 1; grid-row: 1 / span 2; }
+  .with-toc > .bluf { grid-column: 2; grid-row: 1; }
+  .with-toc > .prose { grid-column: 2; }
+}
+.toc { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: 1.4; }
+.toc details { border: 0; background: none; margin: 0; }
+.toc summary, .toc .toc-title { font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); padding: 0; }
+.toc details[open] > summary { border-bottom: 0; margin-bottom: var(--s3); }
+.toc ol { list-style: none; padding: 0; margin: 0; }
+.toc li + li { margin-top: var(--s2); }
+.toc li.annex-start { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--hairline); }
+.toc a { color: var(--fg-muted); text-decoration: none; display: block; padding-left: var(--s3); border-left: 2px solid transparent; }
+.toc a:hover { color: var(--fg); }
+.toc a[aria-current] { color: var(--accent); border-left-color: var(--accent); }
+@media (min-width: 1100px) {
+  .toc { position: sticky; top: var(--s6); align-self: start; max-height: calc(100vh - 64px); overflow-y: auto; }
+  .toc summary { pointer-events: none; }
+}
+@media (max-width: 1099.98px) {
+  .toc { border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s3) var(--s4); margin-top: var(--s5); margin-bottom: 0; background: var(--surface); }
+  .toc summary { padding: var(--s1) 0; }
+}
+
+.grid { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
+/* ---------- 5. Page header and answer-first block ------------------------ */
+
+.masthead { padding-bottom: var(--s5); border-bottom: 1px solid var(--hairline); margin-bottom: var(--s6); }
+.masthead .toolbar { justify-content: flex-end; margin-bottom: var(--s4); }
+.kicker { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
+.masthead h1 { margin-top: var(--s2); max-width: 32ch; }
+.dek { font-size: var(--fs-md); color: var(--fg-muted); margin-top: var(--s3); max-width: 58ch; line-height: 1.45; }
+.meta { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-subtle); margin-top: var(--s4); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.meta > * { min-width: 0; overflow-wrap: anywhere; }
+/* Reference, tool and log pages open with one sentence of purpose instead of .bluf. */
+.purpose { font-size: var(--fs-md); line-height: 1.45; max-width: var(--measure); }
+
+/* The bottom line, up front. One per page that argues or reports a finding.
+   Dashboards: one computed status sentence in .bluf, no list. */
+.bluf { background: var(--surface); border: 1px solid var(--hairline); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: var(--s5); margin-top: var(--s6); }
+.bluf > .label { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.bluf p:first-of-type { margin-top: var(--s2); font-size: var(--fs-md); line-height: 1.5; }
+.bluf ul { margin-top: var(--s3); }
+/* Phones: a tighter masthead so the bottom line starts on the first screen. */
+@media (max-width: 520px) { .page { padding-top: var(--s5); } .dek, .bluf p:first-of-type, .purpose { font-size: var(--fs-base); } .bluf { padding: var(--s4); } }
+
+/* ---------- 6. Callouts ------------------------------------------------- */
+
+.callout { border-radius: var(--radius); padding: var(--s4) var(--s5); background: var(--accent-bg); }
+.callout > :first-child { margin-top: 0; }
+.callout .label { font-family: var(--font-ui); font-weight: 650; font-size: var(--fs-sm); display: block; margin-bottom: var(--s1); }
+.callout.decision { background: var(--accent-2-bg); }
+.callout.risk     { background: var(--warn-bg); }
+.callout.stop     { background: var(--danger-bg); box-shadow: inset 4px 0 0 var(--danger); }
+
+/* ---------- 7. Status: always an icon shape and a word ------------------- */
+
+.status { display: inline-flex; align-items: center; gap: 0.4em; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; padding: 0.1em 0.55em; border-radius: var(--radius-pill); white-space: nowrap; }
+.status::before { content: ""; width: 0.6em; height: 0.6em; background: currentColor; flex: none; }
+.status.ok     { color: var(--ok); background: var(--ok-bg); }     .status.ok::before     { border-radius: 50%; }
+.status.warn   { color: var(--warn); background: var(--warn-bg); } .status.warn::before   { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.status.danger { color: var(--danger); background: var(--danger-bg); } .status.danger::before { border-radius: 1px; }
+.status.idle   { color: var(--fg-muted); background: var(--sunken); } .status.idle::before { border-radius: 50%; background: transparent; border: 1.5px solid currentColor; }
+
+/* ---------- 8. Stats, cards, steps, timeline, comparison ----------------- */
+
+.stats { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+@media (max-width: 520px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat .value { font-size: var(--fs-lg); } }
+.stat { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s4); }
+.stat .value { font-family: var(--font-ui); font-size: var(--fs-xl); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; }
+.stat .what { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); margin-top: var(--s1); }
+.stat .src { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--fg-subtle); margin-top: var(--s2); }
+
+/* Cards only when the grouping is real. Never let two cards touch. */
+.cards { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s5); box-shadow: var(--shadow); }
+.card > :first-child { margin-top: 0; }
+.card h3, .card h4 { margin-top: 0; }
+a.card { display: block; color: inherit; text-decoration: none; transition: border-color .15s var(--ease); }
+a.card:hover { border-color: var(--accent); }
+
+/* Sequential framing: numbered steps with a spine. */
+ol.steps { list-style: none; padding: 0; counter-reset: step; }
+ol.steps > li { position: relative; padding-left: 3rem; padding-bottom: var(--s5); counter-increment: step; }
+ol.steps > li + li { margin-top: 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 0; top: 0.05em; width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 650; color: var(--accent); background: var(--accent-bg); }
+ol.steps > li::after { content: ""; position: absolute; left: calc(1rem - 1px); top: 2.3rem; bottom: 0.2rem; width: 2px; background: var(--hairline); }
+ol.steps > li:last-child::after { display: none; }
+ol.steps > li > strong:first-child { display: block; }
+
+/* Dated events: a date column and the event. Use a table for overlapping work. */
+ol.timeline { list-style: none; padding: 0; border-left: 2px solid var(--hairline); margin-left: var(--s2); }
+ol.timeline > li { position: relative; padding-left: var(--s5); }
+ol.timeline > li + li { margin-top: var(--s4); }
+ol.timeline > li::before { content: ""; position: absolute; left: -7px; top: 0.45em; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); }
+ol.timeline > li.now::before { background: var(--accent); border-color: var(--accent); }
+ol.timeline time { display: block; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+
+/* Side-by-side options. Stacks on narrow screens. */
+.compare { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.compare > .option { border-top: 3px solid var(--hairline); padding-top: var(--s4); }
+.compare > .option.recommended { border-top-color: var(--accent); }
+.compare .option > :is(h3, h4):first-child { margin-top: 0; font: 600 var(--fs-base)/1.3 var(--font-ui); }
+
+/* ---------- 9. Tables: always inside .table-wrap ------------------------- */
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+/* Long tables (about 15+ rows): the wrapper scrolls and the header sticks. */
+.table-wrap.scroll-y { max-height: min(70vh, 640px); overflow: auto; }
+table { border-collapse: collapse; width: 100%; font-family: var(--font-ui); font-size: var(--fs-sm); line-height: 1.45; margin: 0; }
+th, td { text-align: left; vertical-align: top; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--hairline); }
+thead th { font-weight: 650; color: var(--fg-muted); background: var(--sunken); position: sticky; top: 0; z-index: 1; }
+th[scope="row"] { font-weight: 650; color: var(--fg); }
+/* The recommended column: accent rule on the header, light tint below. */
+thead th.rec { color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+td.rec { background: var(--accent-bg); background: color-mix(in srgb, var(--accent-bg) 55%, transparent); }
+tbody tr:last-child > * { border-bottom: 0; }
+tbody tr:hover > * { background: color-mix(in srgb, var(--accent-bg) 45%, transparent); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Keep captions to a short title. The source line goes in .table-note after
+   the wrapper, so it never scrolls off a phone screen. */
+caption { caption-side: top; text-align: left; padding: var(--s3) var(--s4) 0; font-weight: 600; color: var(--fg); }
+.table-note { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--fg-subtle); margin-top: var(--s2); max-width: var(--measure); }
+body.tool th, body.tool td { padding: 6px var(--s3); }
+
+/* ---------- 10. Figures and diagrams ------------------------------------ */
+
+figure { margin-left: 0; margin-right: 0; }
+/* The Enlarge button sits above the frame, right-aligned, so it never covers
+   the figure and never scrolls away with it. */
+figure > .zoom-btn { display: block; margin: 0 0 var(--s2) auto; }
+.figure-frame { position: relative; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s4); overflow-x: auto; }
+.figure-frame img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+/* Figures draw at 1:1 or larger, never smaller. Set style="--fig-min: Wpx" on
+   every figure SVG, W = viewBox width. Below that width the frame scrolls.
+   Above it the SVG may grow to 1.25x and no further. */
+.figure-frame > svg { display: block; width: 100%; height: auto; margin: 0 auto; min-width: var(--fig-min, 0px); max-width: calc(var(--fig-min, 800px) * 1.25); }
+/* Small charts (viewBox up to about 400 wide) keep exactly their own size. */
+.figure-frame > svg.small-ok { max-width: var(--fig-min, 400px); }
+/* Scroll cue: a soft shadow appears at whichever edge has more content. */
+.figure-frame, .table-wrap {
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left / 24px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow), transparent) left / 10px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow), transparent) right / 10px 100% no-repeat scroll,
+    var(--surface);
+}
+figcaption { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); margin-top: var(--s3); max-width: var(--measure); }
+figcaption strong { color: var(--fg); }
+.fig-id { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--fg-subtle); }
+/* "Illustrative" mark: in HTML (caption) use this class; inside an SVG use text.d-mark. */
+.mark-illustrative { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); }
+.zoom-btn { font: 600 var(--fs-xs)/1 var(--font-ui); color: var(--fg-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; cursor: zoom-in; }
+.zoom-btn:hover { color: var(--accent); border-color: var(--accent); }
+dialog.zoom { width: 96vw; height: 92vh; max-width: none; max-height: none; padding: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); overflow: hidden; }
+dialog.zoom::backdrop { background: rgb(0 0 0 / 0.55); }
+dialog.zoom .zoom-bar { display: flex; gap: var(--s2); align-items: center; height: 44px; padding: 0 var(--s3); border-bottom: 1px solid var(--hairline); font: 500 var(--fs-sm) var(--font-ui); }
+dialog.zoom .zoom-bar .spacer { flex: 1; }
+dialog.zoom .zoom-bar button { font: inherit; padding: 4px 10px; border: 1px solid var(--border); background: var(--surface); color: var(--fg); border-radius: var(--radius-sm); cursor: pointer; }
+dialog.zoom .zoom-stage { overflow: auto; height: calc(100% - 44px); padding: var(--s5); }
+dialog.zoom .zoom-stage > * { display: block; max-width: none !important; min-width: 0 !important; margin: 0 auto; }
+
+/* Diagram text and strokes take theme colours. Use these classes inside SVG.
+   Labels are sized in viewBox units; at 1:1 they are the displayed size. */
+svg .d-label { font: 500 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); }
+svg .d-small { font: 400 12px var(--font-ui, system-ui, sans-serif); fill: var(--fg-muted); }
+svg .d-mark  { font: 650 12px var(--font-ui, system-ui, sans-serif); letter-spacing: 0.06em; fill: var(--fg-subtle); }
+svg .d-box   { fill: var(--surface); stroke: var(--border); stroke-width: 1.25; }
+svg .d-focus { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 1.75; }
+svg .d-edge  { fill: none; stroke: var(--fg-muted); stroke-width: 1.5; }
+svg .d-edge.control  { stroke-dasharray: 7 4; }
+svg .d-edge.evidence { stroke-dasharray: 2 3; }
+svg .d-edge.focus    { stroke: var(--accent); stroke-width: 2.25; }
+/* A zone or group boundary: dashed outline, no fill. */
+svg .d-zone  { fill: none; stroke: var(--border); stroke-width: 1; stroke-dasharray: 4 4; }
+/* Arrowheads: colour from CSS, matched to the line where supported. Use two
+   markers per figure: plain, and class="focus" for accent edges. */
+svg marker path { fill: var(--fg-muted); fill: context-stroke; }
+svg marker.focus path { fill: var(--accent); fill: context-stroke; }
+/* Category nodes: tinted fill, category stroke. Text on them stays --fg. */
+svg .d-cat-1 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-1) 14%, var(--surface)); stroke: var(--cat-1); stroke-width: 1.5; }
+svg .d-cat-2 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-2) 14%, var(--surface)); stroke: var(--cat-2); stroke-width: 1.5; }
+svg .d-cat-3 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-3) 14%, var(--surface)); stroke: var(--cat-3); stroke-width: 1.5; }
+svg .d-cat-4 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-4) 14%, var(--surface)); stroke: var(--cat-4); stroke-width: 1.5; }
+svg .d-cat-5 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-5) 14%, var(--surface)); stroke: var(--cat-5); stroke-width: 1.5; }
+svg .d-cat-6 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-6) 14%, var(--surface)); stroke: var(--cat-6); stroke-width: 1.5; }
+/* Charts: bars, axis, light grid, tick labels, direct value labels. */
+svg .c-bar       { fill: var(--fg-subtle); }
+svg .c-bar.focus { fill: var(--accent); }
+svg .c-cat-1 { fill: var(--cat-1); } svg .c-cat-2 { fill: var(--cat-2); } svg .c-cat-3 { fill: var(--cat-3); }
+svg .c-cat-4 { fill: var(--cat-4); } svg .c-cat-5 { fill: var(--cat-5); } svg .c-cat-6 { fill: var(--cat-6); }
+svg :is(.c-cat-1, .c-cat-2, .c-cat-3, .c-cat-4, .c-cat-5, .c-cat-6) { stroke: var(--surface); stroke-width: 1; } /* hairline gap between stacked segments */
+svg .c-line  { fill: none; stroke: var(--accent); stroke-width: 2; }
+svg .c-axis  { stroke: var(--border); stroke-width: 1; fill: none; }
+svg .c-grid  { stroke: var(--hairline); stroke-width: 1; fill: none; }
+svg .c-tick  { font: 400 12px var(--font-ui, system-ui, sans-serif); fill: var(--fg-muted); font-variant-numeric: tabular-nums; }
+svg .c-label { font: 500 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); }
+svg .c-value { font: 600 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); font-variant-numeric: tabular-nums; stroke: var(--surface); stroke-width: 4px; paint-order: stroke; stroke-linejoin: round; }
+/* HTML legend keys for category colours. */
+.key { display: inline-flex; align-items: center; gap: 0.4em; font: 500 var(--fs-sm) var(--font-ui); color: var(--fg-muted); margin-right: var(--s4); }
+.key::before { content: ""; width: 0.8em; height: 0.8em; border-radius: 2px; background: var(--fg-subtle); }
+.key.cat-1::before { background: var(--cat-1); } .key.cat-2::before { background: var(--cat-2); } .key.cat-3::before { background: var(--cat-3); }
+.key.cat-4::before { background: var(--cat-4); } .key.cat-5::before { background: var(--cat-5); } .key.cat-6::before { background: var(--cat-6); }
+.key.focus::before { background: var(--accent); }
+
+/* Annotation focus: dim the context, keep the subject at full contrast. */
+.annotate { position: relative; }
+.annotate .context { opacity: 0.28; filter: saturate(0.4); }
+.annotate .subject { position: relative; z-index: 1; }
+.pointer-note { position: relative; background: var(--surface); border: 1.5px solid var(--accent); border-radius: var(--radius); padding: var(--s3) var(--s4); font: 400 var(--fs-sm)/1.45 var(--font-ui); box-shadow: var(--shadow); max-width: 32ch; }
+.pointer-note::after { content: ""; position: absolute; width: 12px; height: 12px; background: var(--surface); border-right: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent); }
+.pointer-note.down::after  { bottom: -7.5px; left: 24px; transform: rotate(45deg); }
+.pointer-note.up::after    { top: -7.5px; left: 24px; transform: rotate(-135deg); }
+.pointer-note.left::after  { left: -7.5px; top: 16px; transform: rotate(135deg); }
+.pointer-note.right::after { right: -7.5px; top: 16px; transform: rotate(-45deg); }
+.pointer-note .n { font-weight: 700; color: var(--accent); margin-right: 0.35em; }
+
+/* ---------- 11. Terms: hover or tap for a definition --------------------- */
+
+/* Phones: the definition is pinned to the bottom of the screen, full width,
+   so it can never push the page sideways. Wider screens: a bubble under the term. */
+.term { border-bottom: 1px dotted var(--fg-subtle); cursor: help; position: static; }
+.term:hover, .term:focus { border-bottom-color: var(--accent); }
+.term:focus { outline: none; }
+.term:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.term[data-def]:hover::after, .term[data-def]:focus::after {
+  content: attr(data-def); position: fixed; left: var(--gutter); right: var(--gutter); bottom: var(--s4); z-index: 20;
+  padding: var(--s3) var(--s4); background: var(--fg); color: var(--bg); border-radius: var(--radius);
+  font: 400 var(--fs-sm)/1.45 var(--font-ui); font-style: normal; box-shadow: var(--shadow); white-space: normal;
+}
+@media (min-width: 720px) {
+  .term { position: relative; }
+  .term[data-def]:hover::after, .term[data-def]:focus::after {
+    position: absolute; left: 0; right: auto; bottom: auto; top: calc(100% + 6px);
+    width: max-content; max-width: min(36ch, calc(100vw - 2 * var(--gutter)));
+  }
+}
+dl.glossary dt { font-family: var(--font-ui); font-weight: 650; margin-top: var(--s4); }
+dl.glossary dd { margin: var(--s1) 0 0; color: var(--fg-muted); }
+
+/* ---------- 12. Progressive disclosure ---------------------------------- */
+
+details { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+details > summary { cursor: pointer; padding: var(--s3) var(--s4); font-family: var(--font-ui); font-weight: 600; font-size: var(--fs-sm); list-style: none; display: flex; gap: var(--s2); align-items: baseline; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "+"; font-family: var(--font-mono); color: var(--accent); width: 1ch; }
+details[open] > summary::before { content: "\2212"; }
+details[open] > summary { border-bottom: 1px solid var(--hairline); }
+details > .body { padding: var(--s2) var(--s4) var(--s4); }
+details + details { margin-top: var(--s3); }
+@media (min-width: 1100px) { .toc details > summary::before { content: none; } }
+
+/* Tabs. Markup: .tabs > [role=tablist] > button[role=tab][aria-controls],
+   then [role=tabpanel] with ids. Author panels WITHOUT hidden; the script
+   hides the inactive ones. Without script, every panel shows with its label. */
+.tabs [role="tablist"] { display: flex; gap: var(--s1); border-bottom: 1px solid var(--hairline); overflow-x: auto; }
+.tabs [role="tab"] { font: 600 var(--fs-sm) var(--font-ui); padding: var(--s2) var(--s4); border: 0; background: none; color: var(--fg-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; min-height: 40px; }
+.tabs [role="tab"][aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tabs [role="tabpanel"] { padding-top: var(--s4); }
+.tabs [role="tabpanel"][hidden] { display: none; }
+.tabs .tab-label { display: none; font: 650 var(--fs-sm) var(--font-ui); }
+.no-js .tabs [role="tablist"] { display: none; }
+.no-js .tabs .tab-label { display: block; }
+
+/* ---------- 13. Forms and controls --------------------------------------- */
+
+label { font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; color: var(--fg); }
+.field { display: grid; gap: var(--s1); margin-top: var(--s4); max-width: 40ch; }
+.field .hint { font: 400 var(--fs-xs) var(--font-ui); color: var(--fg-subtle); }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea {
+  font: 400 var(--fs-sm) var(--font-ui); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; min-height: 40px; width: 100%; max-width: 100%;
+}
+textarea { min-height: 96px; line-height: var(--lh-ui); resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+.check { display: flex; align-items: center; gap: var(--s2); min-height: 40px; font-weight: 500; }
+fieldset { border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s3) var(--s4) var(--s4); min-width: 0; }
+legend { font: 650 var(--fs-sm) var(--font-ui); padding: 0 var(--s1); }
+
+/* ---------- 14. Small chrome ------------------------------------------- */
+
+.chip { display: inline-block; font: 600 var(--fs-xs)/1.6 var(--font-ui); padding: 0 0.55em; border-radius: var(--radius-pill); background: var(--sunken); color: var(--fg-muted); }
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; font: 500 var(--fs-sm) var(--font-ui); }
+.toolbar button, .btn { font: 600 var(--fs-sm) var(--font-ui); padding: 6px 12px; min-height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer; }
+.toolbar button:hover, .btn:hover { border-color: var(--accent); color: var(--accent); }
+.toolbar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.footnote, .sources { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); }
+.sources ol { padding-left: 1.4em; }
+sup.fn a { text-decoration: none; font-family: var(--font-ui); font-size: var(--fs-xs); }
+/* Controls that need script are hidden when it does not run. */
+.no-js .zoom-btn, .no-js [data-set-palette], .no-js [data-toggle-theme] { display: none; }
+
+/* ---------- 15. Motion and print --------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+:target { scroll-margin-top: var(--s6); }
+
+@media print {
+  /* :root[data-palette] outranks the palette blocks above. */
+  :root, :root[data-palette] { --p-bg: #FFFFFF; --p-surface: #FFFFFF; --p-sunken: #F3F3F1; --p-fg: #111111; --p-fg2: #3D3D3D; --p-fg3: #555555; --p-hairline: #CFCFCF; }
+  @page { margin: 16mm 14mm; }
+  :root, :root[data-theme] { color-scheme: light !important; }
+  html, body { background: #fff !important; }
+  body { font-size: 11pt; }
+  .toc, .zoom-btn, .toolbar, .no-print { display: none !important; }
+  .with-toc { display: block; }
+  .page { max-width: none; padding: 0; }
+  h2, h3, dt { break-after: avoid; }
+  figure, .card, .stat, .callout, .bluf, tr, .compare > .option, ol.steps > li, ol.timeline > li, details, dd { break-inside: avoid; }
+  .table-wrap.scroll-y { max-height: none; overflow: visible; }
+  /* Paper cannot scroll: wide figures shrink to the printed column. */
+  .figure-frame { overflow: visible; }
+  .figure-frame > svg { min-width: 0; max-width: min(100%, calc(var(--fig-min, 800px) * 1.25)); }
+  thead th { position: static; }
+  .tabs [role="tablist"] { display: none; }
+  .tabs [role="tabpanel"][hidden] { display: block; }
+  .tabs .tab-label { display: block; }
+  details { border: 0; background: none; } details > summary { padding: 0; border: 0 !important; font-size: var(--fs-base); } details > summary::before { content: none !important; } details > .body { display: block; padding: var(--s2) 0 0; }
+  /* Closed details print open even without script (Chrome 131+, Safari 18.4+). */
+  details::details-content { content-visibility: visible; display: block; }
+  a { color: inherit; text-decoration: none; }
+  .card, .stat { box-shadow: none; }
+  .term[data-def]::after { content: none !important; }
+}
+
+/* ---------- 16. Page patterns ------------------------------------------ */
+/* Components the six page patterns need (PATTERNS.md). The pattern names the
+   reader's job: <body class="doc|tool" data-pattern="decide|understand|
+   look-up|monitor|do|review">. Script for the filter, the step progress and
+   the print button is in the template's closing script. */
+
+/* Save as PDF: a button that calls window.print(). Hidden in print and with script off. */
+.print-btn { font: 600 var(--fs-sm) var(--font-ui); padding: 6px 12px; min-height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer; }
+.print-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Print-only lines: when a snapshot was taken, which filter a copy was printed with. */
+.print-only { display: none; }
+.snapshot-note { font: 500 var(--fs-sm)/1.45 var(--font-ui); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s2) var(--s3); margin-top: var(--s4); }
+
+/* Understand: one line at the end of a section that says what the reader now knows and what comes next. */
+.bridge { font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); border-top: 1px solid var(--hairline); padding-top: var(--s3); margin-top: var(--s5); }
+
+/* Label and value pairs: one shape for entries, findings and preconditions. */
+dl.fields { display: grid; grid-template-columns: minmax(5.5em, max-content) minmax(0, 1fr); gap: var(--s2) var(--s4); font: 400 var(--fs-sm)/1.45 var(--font-ui); margin-top: var(--s3); }
+dl.fields dt { font-weight: 650; color: var(--fg-muted); }
+dl.fields dd { margin: 0; min-width: 0; }
+dl.fields dd > :first-child { margin-top: 0; }
+@media (max-width: 520px) { dl.fields { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.fields dd + dt { margin-top: var(--s2); } }
+
+/* Filter bar: a search box and groups of chips. Its state lives in the URL
+   hash, so a link reproduces the view. Hidden with script off, when every
+   item shows anyway. */
+.filter { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: flex-end; margin-top: var(--s5); padding: var(--s3) var(--s4); border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); font-family: var(--font-ui); }
+.filter .field { margin-top: 0; flex: 1 1 240px; }
+.filter .chips { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.filter .chips > span { font-size: var(--fs-sm); font-weight: 600; margin-right: var(--s1); }
+.filter .chips button { font: 600 var(--fs-sm) var(--font-ui); min-height: 36px; padding: 4px 12px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); color: var(--fg-muted); cursor: pointer; }
+.filter .chips button:hover { color: var(--accent); border-color: var(--accent); }
+.filter .chips button[aria-pressed="true"] { color: var(--accent); background: var(--accent-bg); border-color: var(--accent); }
+/* The list says what it shows, in words: "5 of 140 services: expired, Payments". */
+.filter-sentence { font: 600 var(--fs-sm)/1.45 var(--font-ui); margin-top: var(--s3); }
+.filter-empty { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); }
+.entry[hidden], .finding[hidden], .filter-empty[hidden], .since[hidden] { display: none; }
+.no-js .filter, .no-js .print-btn, .no-js .progress { display: none; }
+/* Sortable columns: the header text is the button; the indicator is a shape
+   (up, down, or both when unsorted). With script off the text stays and the
+   button does nothing. */
+th > button.sort { display: flex; align-items: center; gap: 0.4em; width: 100%; min-height: 28px; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+th.num > button.sort { justify-content: flex-end; }
+th > button.sort::after { content: "\2195"; font-size: 0.85em; color: var(--fg-subtle); flex: none; }
+th[aria-sort="ascending"] > button.sort::after { content: "\25B2"; color: var(--accent); }
+th[aria-sort="descending"] > button.sort::after { content: "\25BC"; color: var(--accent); }
+th > button.sort:hover { color: var(--accent); }
+th > button.sort:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) { th > button.sort { min-height: 40px; } }
+.no-js th > button.sort { pointer-events: none; } .no-js th > button.sort::after { content: none; }
+
+/* A dataset inside a reading page: tool density for one section. Header strip
+   names what is interactive, the sentence says what the table shows, and the
+   table scrolls in a capped frame. See PATTERNS.md, "Mixed pages". */
+section.dataset { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: var(--lh-ui); margin-top: var(--s5); }
+.prose > section.dataset { max-width: none; }
+.dataset-head { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); justify-content: space-between; align-items: baseline; border-top: 2px solid var(--hairline); padding-top: var(--s3); }
+.dataset-head > * { margin: 0; }
+.dataset-title { font-weight: 650; font-size: var(--fs-base); }
+.dataset-how { color: var(--fg-muted); }
+section.dataset th, section.dataset td { padding: 6px var(--s3); }
+section.dataset .table-wrap.scroll-y { max-height: min(60vh, 520px); }
+.dataset-print-note { display: none; }
+
+/* Chart marks that filter the records under them: each row is a button. */
+svg .c-hit { fill: transparent; }
+svg [role="button"] { cursor: pointer; outline: none; }
+svg [role="button"]:hover .c-hit { fill: var(--accent-bg); }
+svg [role="button"]:focus-visible .c-hit { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 2; }
+svg [role="button"][aria-pressed="true"] .c-bar { fill: var(--accent); }
+svg [role="button"][aria-pressed="true"] .c-label { text-decoration: underline; }
+
+/* Monitor: what changed since the reader last looked. */
+.since { border: 1px solid var(--hairline); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); padding: var(--s3) var(--s4); margin-top: var(--s4); font: 400 var(--fs-sm)/1.45 var(--font-ui); }
+.since > :first-child { margin-top: 0; }
+.since ul { margin-top: var(--s2); }
+
+
+/* Phones: a cell never narrows below a short phrase, so a comparison of three
+   or four options scrolls in its frame instead of stacking single words. A
+   .long column (a sentence per row) keeps a readable width everywhere. */
+@media (max-width: 520px) { .table-wrap :is(th, td) { min-width: 7em; } .table-wrap :is(th, td).num { min-width: 0; } }
+.table-wrap :is(th, td).long { min-width: 16em; }
+
+/* Look up: an index of jump links, then entries that all have the same shape:
+   term, one-line answer, detail, related links. */
+nav.index { font: 500 var(--fs-sm)/1.45 var(--font-ui); margin-top: var(--s5); }
+nav.index .label { display: block; font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); }
+nav.index ul { list-style: none; padding: 0; margin: var(--s2) 0 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); }
+nav.index li + li { margin-top: 0; }
+nav.index ul + .label { margin-top: var(--s4); }
+.entry { border-top: 1px solid var(--hairline); padding-top: var(--s4); margin-top: var(--s4); scroll-margin-top: var(--s6); }
+.entry > :first-child { margin-top: 0; }
+.entry > *, .finding > * { max-width: var(--measure); }
+.prose > .filter, .prose > .finding, .prose > .preconditions, .prose > .progress { max-width: none; }
+.entry h3 { margin-top: 0; font: 650 var(--fs-base)/1.3 var(--font-ui); letter-spacing: 0; }
+.entry .answer { margin-top: var(--s1); }
+.entry .related { font: 400 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); margin-top: var(--s2); }
+.entry:is(:target, [data-at]) { box-shadow: inset 3px 0 0 var(--accent); padding-left: var(--s4); }
+.finding[data-at] { border-color: var(--accent); }
+
+/* Review: every finding has the same shape. Severity is a .status (a shape and a word). */
+.finding { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); padding: var(--s4) var(--s5); margin-top: var(--s5); scroll-margin-top: var(--s6); }
+.finding > :first-child { margin-top: 0; }
+.finding h3 { margin-top: 0; font: 650 var(--fs-base)/1.35 var(--font-ui); letter-spacing: 0; }
+.finding .finding-meta { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s3); align-items: center; margin-top: var(--s2); font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); }
+
+/* Do: who can run the procedure, what access, how long, what to have open. */
+.preconditions { border: 1px solid var(--hairline); border-left: 4px solid var(--accent-2); border-radius: var(--radius); background: var(--surface); padding: var(--s4) var(--s5); margin-top: var(--s5); }
+.preconditions > .label { font: 650 var(--fs-xs) var(--font-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
+
+/* Do: one action per step, a box to tick it off, the expected result after it.
+   Ticks are kept per page; they never hide a step. */
+ol.steps.do > li { scroll-margin-top: 4rem; }
+ol.steps.do .step-check { display: flex; align-items: flex-start; gap: var(--s2); font: 650 var(--fs-base)/1.35 var(--font-ui); cursor: pointer; }
+ol.steps.do .step-check input { margin-top: 0.15em; flex: none; }
+/* Commands wrap instead of hiding off the edge of a phone; copying still gets the original line. */
+ol.steps.do pre { margin-top: var(--s2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.expect { font: 400 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); border-left: 3px solid var(--ok); padding-left: var(--s3); margin-top: var(--s2); }
+.expect strong { color: var(--fg); }
+@media screen { ol.steps.do > li:has(> .step-check input:checked)::before { content: "\2713"; color: var(--ok); background: var(--ok-bg); } }
+/* The progress line stays in view while the steps scroll. Wrap it and its
+   steps in div.procedure so it stops following the reader when they end. */
+.progress { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s3); align-items: center; font: 500 var(--fs-sm)/1.45 var(--font-ui); padding: var(--s2) 0; margin-top: var(--s4); background: var(--bg); border-bottom: 1px solid var(--hairline); }
+.progress .spacer { flex: 1; }
+@media screen { .progress { position: sticky; top: 0; z-index: 5; } }
+
+@media print {
+  .print-only { display: block; }
+  .filter, nav.index, .print-btn, .progress { display: none !important; }
+  /* A Look up list prints in full whatever the filter: put .print-all on its container. */
+  .print-all [data-filter-item][hidden], .print-all [data-filter-group][hidden] { display: block !important; }
+  .entry, .finding, .preconditions { break-inside: avoid; }
+  /* Chrome splits a grid across pages even inside an unbreakable box, so the
+     label column is a float on paper. */
+  dl.fields { display: block; }
+  dl.fields dt { float: left; clear: left; width: 7em; }
+  dl.fields dd { margin: 0 0 4pt 7.5em; }
+  .entry:is(:target, [data-at]) { box-shadow: none; padding-left: 0; }
+  /* Paper is denser than a screen: tighter sections, rows and tiles. */
+  h2 { margin-top: 22pt; } th, td { padding: 3pt 6pt; } .stat { padding: 6pt 8pt; } .stats { gap: 8pt; }
+  /* Chrome leaves a button blank in a header row repeated on a new page; display: contents prints its text. */
+  th > button.sort { display: contents; } th > button.sort::after { content: none; }
+  /* A long table repeats its header row on each printed page. */
+  thead { display: table-header-group; }
+  .since, .dataset-how { display: none !important; }
+  section.dataset[data-print="summary"] :is(.table-wrap, .table-note, .filter-empty) { display: none; }
+  section.dataset[data-print="summary"] .dataset-print-note { display: block; }
+  section.dataset .table-wrap.scroll-y { max-height: none; overflow: visible; }
+  /* A printed Look up list is compact: one entry is a few lines. */
+  .entry { padding-top: 6pt; margin-top: 6pt; } .entry > * + * { margin-top: 2pt; }
+  /* Commands print in full. */
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
+  /* Paper cannot follow a link: external URLs print after the link text. Put
+     class="no-url" on a link whose text is already the URL. */
+  main a[href^="http"]:not(.no-url)::after { content: " (" attr(href) ")"; font-size: 0.85em; color: var(--fg-muted); overflow-wrap: anywhere; }
+  nav a[href^="http"]::after, figure a[href^="http"]::after { content: none; }
+  /* Do checklists print with empty boxes, unless the reader chose "Print with my progress". */
+  ol.steps.do input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 12pt; height: 12pt; border: 1pt solid var(--fg); border-radius: 2px; background: none; }
+  :root.print-progress ol.steps.do input[type="checkbox"]:checked { background: var(--fg); box-shadow: inset 0 0 0 2pt #FFFFFF; }
+}
+/* end of base.css */
+
+/* Sample page only. */
+@media screen {
+  /* Safe-area gutter for phones with notches. */
+  .page { padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--gutter), env(safe-area-inset-right, 0px)); }
+}
+.kitnote { font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); background: var(--sunken); border-radius: var(--radius); padding: var(--s3) var(--s4); margin: 0 0 var(--s5); }
+</style>
+<script>
+/* Before first paint: script is on, and the reader's saved theme for this page applies. */
+(() => { const r = document.documentElement, k = "hs:" + location.pathname + ":"; r.classList.remove("no-js");
+  try { const t = localStorage.getItem(k + "theme"), p = localStorage.getItem(k + "palette");
+    if (t && !r.hasAttribute("data-theme")) r.dataset.theme = t;
+    if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
+</script>
+</head>
+<body class="doc" data-pattern="review">
+<div class="page">
+
+  <p class="kitnote no-print">Example of a mixed page (a reading page with an explorable dataset) from the <a href="https://github.com/juliedavila/html-house-style">HTML house style kit</a>. Back to the <a href="index.html">examples</a> or the <a href="../index.html">sample page</a>. The content is invented.</p>
+
+  <header class="masthead">
+    <div class="toolbar no-print"><button type="button" class="print-btn">Save as PDF</button></div>
+    <div class="kicker">Audit · Northwind certificates</div>
+    <h1>Seventeen services need a new certificate within 30 days</h1>
+    <p class="dek">A scan of every service endpoint found nine expired certificates and eight more that expire within a month. Most of the risk sits where renewal is still done by hand.</p>
+    <div class="meta"><span>Version 1</span><span>Scanned 20 Oct 2026</span><span>140 services</span><span>6 min read</span></div>
+  </header>
+
+  <main>
+    <div class="with-toc">
+      <section class="bluf">
+        <span class="label">Verdict</span>
+        <p>Renew the nine expired certificates this week, then move the 30 services that renew by hand onto automatic renewal before December.</p>
+        <ul>
+          <li><strong>Counts:</strong> 17 of 140 services need action: 9 expired, 8 expire within 30 days. Three findings: one high, one medium, one low.</li>
+          <li><strong>Fix first:</strong> the expired certificates (finding 1); Platform has the most, with five to renew.</li>
+          <li><strong>Then:</strong> automatic renewal for the Data and Mobile teams, who renew 20 of the 30 manual certificates.</li>
+        </ul>
+      </section>
+
+      <nav class="toc" aria-label="Contents">
+        <details open>
+          <summary>Contents</summary>
+          <ol>
+            <li><a href="#summary">Seventeen of 140 services need action within a month</a></li>
+            <li><a href="#findings">Expiry comes from manual renewal and late alerts</a></li>
+            <li><a href="#data">The scan covers all 140 services, one row each</a></li>
+            <li><a href="#scope">The scan checked every endpoint once, from inside the network</a></li>
+            <li><a href="#not-checked">Three things this audit did not check</a></li>
+            <li class="annex-start"><a href="#sources">Sources</a></li>
+          </ol>
+        </details>
+      </nav>
+
+      <div class="prose">
+        <h2 id="summary">Seventeen of 140 services need action within a month</h2>
+        <p>Every service presents a Transport Layer Security (TLS) certificate that proves who it is to its callers. When one expires, callers that check it refuse to connect, and the service is down for them even though it is running. The scan on 20 October read the certificate of every service endpoint. 123 are valid for more than 30 days; the rest are below.</p>
+        <div class="stats">
+          <div class="stat"><div class="value">9</div><div class="what"><span class="status danger">Expired</span> callers that check will refuse them</div><div class="src">Certificate scan, 20 Oct 2026</div></div>
+          <div class="stat"><div class="value">8</div><div class="what"><span class="status warn">Under 30 days</span> expire before the next audit</div><div class="src">Certificate scan, 20 Oct 2026</div></div>
+          <div class="stat"><div class="value">30</div><div class="what">Services that renew by hand</div><div class="src">Certificate scan, 20 Oct 2026</div></div>
+        </div>
+        <p>The figures here are counts. Each service, with its team, status, days left and renewal method, is in <a href="#dataset">the dataset</a> below; filter it to see any team's list.</p>
+
+        <h2 id="findings">Expiry comes from manual renewal and late alerts</h2>
+        <p>Findings run from most to least severe.</p>
+        <article class="finding" id="finding-1">
+          <h3>1. Nine certificates have already expired</h3>
+          <div class="finding-meta"><span class="status danger">High</span><span class="chip">Fix this week</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd><code>mobile-web</code>, <code>mobile-worker</code>, <code>platform-admin-4</code>, <code>search-web-3</code>, <code>payments-web</code>, <code>platform-notify-4</code>, <code>accounts-reports</code>, <code>platform-cache</code>, <code>platform-search</code></dd>
+            <dt>Evidence</dt><dd>The scan read an expiry date before 22 October on each. The oldest expired 28 days ago.</dd>
+            <dt>Impact</dt><dd>Any caller that verifies the certificate fails to connect. Callers that skip verification still connect, which is why some of these went unnoticed.</dd>
+            <dt>Fix</dt><dd>Renew each one, then confirm with a second scan of those endpoints.</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-2">
+          <h3>2. Two teams renew most certificates by hand</h3>
+          <div class="finding-meta"><span class="status warn">Medium</span><span class="chip">Fix before December</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Data (9 of 19 services) and Mobile (11 of 24)</dd>
+            <dt>Evidence</dt><dd>20 of the 30 manual renewals belong to these two teams. Pick Data or Mobile in the dataset chart, then Manual, to see them.</dd>
+            <dt>Impact</dt><dd>A renewal that depends on a person's calendar fails when that person is away.</dd>
+            <dt>Fix</dt><dd>Move both teams to the automatic renewal the other four teams use.</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-3">
+          <h3>3. The only alert fires after a certificate expires</h3>
+          <div class="finding-meta"><span class="status idle">Low</span><span class="chip">Fix next quarter</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Monitoring rules for all services</dd>
+            <dt>Evidence</dt><dd>The certificate alert triggers on a failed handshake, which happens only once the certificate has expired.</dd>
+            <dt>Impact</dt><dd>Owners learn of an expiry from their callers.</dd>
+            <dt>Fix</dt><dd>Add a warning at 30 days and a page at 7 days.</dd>
+          </dl>
+        </article>
+
+        <h2 id="data">The scan covers all 140 services, one row each</h2>
+        <p>Start with the chart: each bar counts one team's services under the other filters, so it shows where the open work sits. Pick a bar, a status or a renewal method to narrow the table, and sort any column. The address keeps your view, so you can send it.</p>
+<section class="dataset" data-view data-noun="services" id="dataset">
+  <div class="dataset-head"><p class="dataset-title">Certificate scan, one row per service</p><p class="dataset-how">Filter, sort, or pick a bar to narrow the table.</p></div>
+  <div class="filter" role="search" aria-label="Filter services">
+    <div class="field"><label for="dataset-q">Search services</label><input id="dataset-q" type="search" data-key="q" autocomplete="off"></div>
+    <div class="chips" role="group" aria-labelledby="dataset-status"><span id="dataset-status">Status</span>
+      <button type="button" data-key="status" data-value="">All</button>
+      <button type="button" data-key="status" data-value="expired">Expired</button>
+      <button type="button" data-key="status" data-value="soon">Under 30 days</button>
+      <button type="button" data-key="status" data-value="ok">Valid</button>
+    </div>
+    <div class="chips" role="group" aria-labelledby="dataset-renewal"><span id="dataset-renewal">Renewal</span>
+      <button type="button" data-key="renewal" data-value="">All</button>
+      <button type="button" data-key="renewal" data-value="automatic">Automatic</button>
+      <button type="button" data-key="renewal" data-value="manual">Manual</button>
+    </div>
+  </div>
+  <p class="filter-sentence" aria-live="polite">All 140 services</p>
+<figure class="linked">
+  <button class="zoom-btn no-print" type="button">Enlarge</button>
+  <div class="figure-frame">
+    <!-- Scale: x = 89 + value * 4.746; axis 0 to 40 services, step 10. Made by tools/bars.mjs. -->
+    <svg viewBox="0 0 320 228" style="--fig-min: 320px" role="group" aria-labelledby="dataset-chart-t dataset-chart-d" xmlns="http://www.w3.org/2000/svg">
+      <title id="dataset-chart-t">Services by team</title>
+      <desc id="dataset-chart-d">Platform 31 services; Mobile 24 services; Payments 24 services; Accounts 22 services; Search 20 services; Data 19 services.</desc>
+      <text class="c-tick" x="89" y="222" text-anchor="middle">0</text>
+      <line class="c-grid" x1="136.5" y1="8" x2="136.5" y2="204"/>
+      <text class="c-tick" x="136.5" y="222" text-anchor="middle">10</text>
+      <line class="c-grid" x1="183.9" y1="8" x2="183.9" y2="204"/>
+      <text class="c-tick" x="183.9" y="222" text-anchor="middle">20</text>
+      <line class="c-grid" x1="231.4" y1="8" x2="231.4" y2="204"/>
+      <text class="c-tick" x="231.4" y="222" text-anchor="middle">30</text>
+      <line class="c-grid" x1="278.8" y1="8" x2="278.8" y2="204"/>
+      <text class="c-tick" x="278.8" y="222" text-anchor="middle">40</text>
+      <line class="c-axis" x1="89" y1="8" x2="89" y2="204"/>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="platform" data-label="Platform">
+        <rect class="c-hit" x="12" y="6" width="296" height="32"/>
+        <text class="c-label" x="81" y="27" text-anchor="end">Platform</text>
+        <rect class="c-bar" x="89" y="12" width="147.1" height="20" data-unit="4.746"/>
+        <text class="c-value" x="242.1" y="27" data-count>31</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="mobile" data-label="Mobile">
+        <rect class="c-hit" x="12" y="38" width="296" height="32"/>
+        <text class="c-label" x="81" y="59" text-anchor="end">Mobile</text>
+        <rect class="c-bar" x="89" y="44" width="113.9" height="20" data-unit="4.746"/>
+        <text class="c-value" x="208.9" y="59" data-count>24</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="payments" data-label="Payments">
+        <rect class="c-hit" x="12" y="70" width="296" height="32"/>
+        <text class="c-label" x="81" y="91" text-anchor="end">Payments</text>
+        <rect class="c-bar" x="89" y="76" width="113.9" height="20" data-unit="4.746"/>
+        <text class="c-value" x="208.9" y="91" data-count>24</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="accounts" data-label="Accounts">
+        <rect class="c-hit" x="12" y="102" width="296" height="32"/>
+        <text class="c-label" x="81" y="123" text-anchor="end">Accounts</text>
+        <rect class="c-bar" x="89" y="108" width="104.4" height="20" data-unit="4.746"/>
+        <text class="c-value" x="199.4" y="123" data-count>22</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="search" data-label="Search">
+        <rect class="c-hit" x="12" y="134" width="296" height="32"/>
+        <text class="c-label" x="81" y="155" text-anchor="end">Search</text>
+        <rect class="c-bar" x="89" y="140" width="94.9" height="20" data-unit="4.746"/>
+        <text class="c-value" x="189.9" y="155" data-count>20</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="data" data-label="Data">
+        <rect class="c-hit" x="12" y="166" width="296" height="32"/>
+        <text class="c-label" x="81" y="187" text-anchor="end">Data</text>
+        <rect class="c-bar" x="89" y="172" width="90.2" height="20" data-unit="4.746"/>
+        <text class="c-value" x="185.2" y="187" data-count>19</text>
+      </g>
+    </svg>
+  </div>
+  <figcaption><strong>Platform runs the most services, 31 of 140.</strong> Pick a bar to filter the table below; pick it again to clear. Each bar counts the rows under every other filter. Certificate scan, 20 Oct 2026.</figcaption>
+</figure>
+  <p class="filter-empty" hidden>No services match. Clear the filters to see all 140.</p>
+<div class="table-wrap scroll-y"><table id="dataset-table">
+    <thead><tr><th scope="col" data-col="service"><button type="button" class="sort">Service</button></th><th scope="col" data-col="team"><button type="button" class="sort">Team</button></th><th scope="col" data-col="status"><button type="button" class="sort">Status</button></th><th scope="col" class="num" data-col="days"><button type="button" class="sort">Days left</button></th><th scope="col" data-col="renewal"><button type="button" class="sort">Renewal</button></th><th scope="col" data-col="issued"><button type="button" class="sort">Issued</button></th></tr></thead>
+    <tbody>
+      <tr data-filter-item data-team="accounts" data-status="soon" data-renewal="automatic"><th scope="row">accounts-notify</th><td>Accounts</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="1">1</td><td>automatic</td><td data-sort="2025-09-21">21 Sep 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="expired" data-renewal="automatic"><th scope="row">mobile-web</th><td>Mobile</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-6">-6</td><td>automatic</td><td data-sort="2025-09-14">14 Sep 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-billing</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="130">130</td><td>automatic</td><td data-sort="2026-01-28">28 Jan 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-search-2</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="119">119</td><td>automatic</td><td data-sort="2026-01-17">17 Jan 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-media</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="178">178</td><td>automatic</td><td data-sort="2026-03-17">17 Mar 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-api</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="239">239</td><td>automatic</td><td data-sort="2026-05-17">17 May 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="manual"><th scope="row">search-admin-4</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="373">373</td><td>manual</td><td data-sort="2026-09-28">28 Sep 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-auth-2</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="383">383</td><td>automatic</td><td data-sort="2026-10-08">8 Oct 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="soon" data-renewal="automatic"><th scope="row">accounts-worker-4</th><td>Accounts</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="2">2</td><td>automatic</td><td data-sort="2025-09-22">22 Sep 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-notify</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="317">317</td><td>manual</td><td data-sort="2026-08-03">3 Aug 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="expired" data-renewal="manual"><th scope="row">mobile-worker</th><td>Mobile</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-21">-21</td><td>manual</td><td data-sort="2025-08-30">30 Aug 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-auth</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="337">337</td><td>automatic</td><td data-sort="2026-08-23">23 Aug 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-gateway-3</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="332">332</td><td>automatic</td><td data-sort="2026-08-18">18 Aug 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-reports</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="113">113</td><td>automatic</td><td data-sort="2026-01-11">11 Jan 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-gateway</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="229">229</td><td>manual</td><td data-sort="2026-05-07">7 May 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-events-1</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="247">247</td><td>manual</td><td data-sort="2026-05-25">25 May 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-export-1</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="193">193</td><td>automatic</td><td data-sort="2026-04-01">1 Apr 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-cache</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="32">32</td><td>automatic</td><td data-sort="2025-10-22">22 Oct 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-search</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="146">146</td><td>manual</td><td data-sort="2026-02-13">13 Feb 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-cache-2</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="281">281</td><td>manual</td><td data-sort="2026-06-28">28 Jun 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-export</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="154">154</td><td>manual</td><td data-sort="2026-02-21">21 Feb 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-admin-4</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="382">382</td><td>automatic</td><td data-sort="2026-10-07">7 Oct 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-api-2</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="214">214</td><td>automatic</td><td data-sort="2026-04-22">22 Apr 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-worker-1</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="286">286</td><td>automatic</td><td data-sort="2026-07-03">3 Jul 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-admin-2</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="330">330</td><td>manual</td><td data-sort="2026-08-16">16 Aug 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-sync-4</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="384">384</td><td>automatic</td><td data-sort="2026-10-09">9 Oct 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-gateway-1</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="198">198</td><td>automatic</td><td data-sort="2026-04-06">6 Apr 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-search</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="240">240</td><td>automatic</td><td data-sort="2026-05-18">18 May 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-gateway</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="318">318</td><td>manual</td><td data-sort="2026-08-04">4 Aug 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-media</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="82">82</td><td>automatic</td><td data-sort="2025-12-11">11 Dec 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-gateway</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="270">270</td><td>automatic</td><td data-sort="2026-06-17">17 Jun 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-sync-4</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="37">37</td><td>automatic</td><td data-sort="2025-10-27">27 Oct 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-auth-3</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="64">64</td><td>automatic</td><td data-sort="2025-11-23">23 Nov 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-api</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="272">272</td><td>manual</td><td data-sort="2026-06-19">19 Jun 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="manual"><th scope="row">search-cache-4</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="122">122</td><td>manual</td><td data-sort="2026-01-20">20 Jan 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-api-4</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="223">223</td><td>automatic</td><td data-sort="2026-05-01">1 May 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-gateway</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="182">182</td><td>automatic</td><td data-sort="2026-03-21">21 Mar 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-reports-2</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="282">282</td><td>automatic</td><td data-sort="2026-06-29">29 Jun 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-sync-2</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="122">122</td><td>automatic</td><td data-sort="2026-01-20">20 Jan 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-search-2</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="349">349</td><td>manual</td><td data-sort="2026-09-04">4 Sep 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-web-3</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="129">129</td><td>automatic</td><td data-sort="2026-01-27">27 Jan 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-admin-3</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="51">51</td><td>automatic</td><td data-sort="2025-11-10">10 Nov 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-reports</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="138">138</td><td>automatic</td><td data-sort="2026-02-05">5 Feb 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-admin</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="127">127</td><td>automatic</td><td data-sort="2026-01-25">25 Jan 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-admin</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="150">150</td><td>automatic</td><td data-sort="2026-02-17">17 Feb 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-cache</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="251">251</td><td>automatic</td><td data-sort="2026-05-29">29 May 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-events-3</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="277">277</td><td>automatic</td><td data-sort="2026-06-24">24 Jun 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-gateway-4</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="125">125</td><td>automatic</td><td data-sort="2026-01-23">23 Jan 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-events-2</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="207">207</td><td>automatic</td><td data-sort="2026-04-15">15 Apr 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-billing</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="99">99</td><td>automatic</td><td data-sort="2025-12-28">28 Dec 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-auth</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="332">332</td><td>automatic</td><td data-sort="2026-08-18">18 Aug 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="soon" data-renewal="automatic"><th scope="row">data-web-1</th><td>Data</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="18">18</td><td>automatic</td><td data-sort="2025-10-08">8 Oct 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-gateway-1</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="174">174</td><td>automatic</td><td data-sort="2026-03-13">13 Mar 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-events</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="248">248</td><td>automatic</td><td data-sort="2026-05-26">26 May 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-notify-1</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="96">96</td><td>automatic</td><td data-sort="2025-12-25">25 Dec 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-media-2</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="101">101</td><td>automatic</td><td data-sort="2025-12-30">30 Dec 2025</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-export-4</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="163">163</td><td>manual</td><td data-sort="2026-03-02">2 Mar 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-reports-4</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="191">191</td><td>manual</td><td data-sort="2026-03-30">30 Mar 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-events-4</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="319">319</td><td>automatic</td><td data-sort="2026-08-05">5 Aug 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-web</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="198">198</td><td>automatic</td><td data-sort="2026-04-06">6 Apr 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-search</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="157">157</td><td>automatic</td><td data-sort="2026-02-24">24 Feb 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-auth</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="375">375</td><td>automatic</td><td data-sort="2026-09-30">30 Sep 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-web</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="36">36</td><td>automatic</td><td data-sort="2025-10-26">26 Oct 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-search-3</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="375">375</td><td>automatic</td><td data-sort="2026-09-30">30 Sep 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="expired" data-renewal="automatic"><th scope="row">platform-admin-4</th><td>Platform</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-16">-16</td><td>automatic</td><td data-sort="2025-09-04">4 Sep 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-events-4</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="190">190</td><td>automatic</td><td data-sort="2026-03-29">29 Mar 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-admin-1</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="128">128</td><td>automatic</td><td data-sort="2026-01-26">26 Jan 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="expired" data-renewal="automatic"><th scope="row">search-web-3</th><td>Search</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-28">-28</td><td>automatic</td><td data-sort="2025-08-23">23 Aug 2025</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-cache-1</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="335">335</td><td>automatic</td><td data-sort="2026-08-21">21 Aug 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="manual"><th scope="row">data-export-1</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="190">190</td><td>manual</td><td data-sort="2026-03-29">29 Mar 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-auth</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="162">162</td><td>automatic</td><td data-sort="2026-03-01">1 Mar 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-cache-2</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="274">274</td><td>automatic</td><td data-sort="2026-06-21">21 Jun 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-sync-3</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="84">84</td><td>automatic</td><td data-sort="2025-12-13">13 Dec 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-billing-2</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="254">254</td><td>automatic</td><td data-sort="2026-06-01">1 Jun 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-export</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="226">226</td><td>automatic</td><td data-sort="2026-05-04">4 May 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-export-4</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="196">196</td><td>automatic</td><td data-sort="2026-04-04">4 Apr 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-sync-4</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="242">242</td><td>automatic</td><td data-sort="2026-05-20">20 May 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-cache-3</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="146">146</td><td>automatic</td><td data-sort="2026-02-13">13 Feb 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-worker</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="296">296</td><td>automatic</td><td data-sort="2026-07-13">13 Jul 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="soon" data-renewal="automatic"><th scope="row">search-api</th><td>Search</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="0">0</td><td>automatic</td><td data-sort="2025-09-20">20 Sep 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-billing</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="188">188</td><td>automatic</td><td data-sort="2026-03-27">27 Mar 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="expired" data-renewal="automatic"><th scope="row">payments-web</th><td>Payments</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-18">-18</td><td>automatic</td><td data-sort="2025-09-02">2 Sep 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-events</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="383">383</td><td>manual</td><td data-sort="2026-10-08">8 Oct 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-media-2</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="282">282</td><td>automatic</td><td data-sort="2026-06-29">29 Jun 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-notify</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="241">241</td><td>manual</td><td data-sort="2026-05-19">19 May 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="manual"><th scope="row">search-billing-3</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="322">322</td><td>manual</td><td data-sort="2026-08-08">8 Aug 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-gateway-3</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="174">174</td><td>automatic</td><td data-sort="2026-03-13">13 Mar 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-web-3</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="141">141</td><td>automatic</td><td data-sort="2026-02-08">8 Feb 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-media</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="360">360</td><td>automatic</td><td data-sort="2026-09-15">15 Sep 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-admin</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="204">204</td><td>automatic</td><td data-sort="2026-04-12">12 Apr 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-admin</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="129">129</td><td>automatic</td><td data-sort="2026-01-27">27 Jan 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-sync</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="321">321</td><td>automatic</td><td data-sort="2026-08-07">7 Aug 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-web-3</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="111">111</td><td>automatic</td><td data-sort="2026-01-09">9 Jan 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="manual"><th scope="row">accounts-events-4</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="254">254</td><td>manual</td><td data-sort="2026-06-01">1 Jun 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-events-4</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="387">387</td><td>automatic</td><td data-sort="2026-10-12">12 Oct 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-gateway-2</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="236">236</td><td>manual</td><td data-sort="2026-05-14">14 May 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-gateway-2</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="220">220</td><td>automatic</td><td data-sort="2026-04-28">28 Apr 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-auth-1</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="253">253</td><td>automatic</td><td data-sort="2026-05-31">31 May 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-admin</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="287">287</td><td>automatic</td><td data-sort="2026-07-04">4 Jul 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="expired" data-renewal="automatic"><th scope="row">platform-notify-4</th><td>Platform</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-1">-1</td><td>automatic</td><td data-sort="2025-09-19">19 Sep 2025</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="expired" data-renewal="automatic"><th scope="row">accounts-reports</th><td>Accounts</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-3">-3</td><td>automatic</td><td data-sort="2025-09-17">17 Sep 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-cache-1</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="321">321</td><td>automatic</td><td data-sort="2026-08-07">7 Aug 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="manual"><th scope="row">platform-web-2</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="154">154</td><td>manual</td><td data-sort="2026-02-21">21 Feb 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-search</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="279">279</td><td>automatic</td><td data-sort="2026-06-26">26 Jun 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-worker</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="313">313</td><td>automatic</td><td data-sort="2026-07-30">30 Jul 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-auth</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="371">371</td><td>automatic</td><td data-sort="2026-09-26">26 Sep 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-gateway-4</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="221">221</td><td>automatic</td><td data-sort="2026-04-29">29 Apr 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-worker-1</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="144">144</td><td>automatic</td><td data-sort="2026-02-11">11 Feb 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="manual"><th scope="row">accounts-cache-3</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="231">231</td><td>manual</td><td data-sort="2026-05-09">9 May 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="manual"><th scope="row">payments-sync</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="110">110</td><td>manual</td><td data-sort="2026-01-08">8 Jan 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-media-2</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="247">247</td><td>automatic</td><td data-sort="2026-05-25">25 May 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-media</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="203">203</td><td>automatic</td><td data-sort="2026-04-11">11 Apr 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-web</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="300">300</td><td>automatic</td><td data-sort="2026-07-17">17 Jul 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-export</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="364">364</td><td>automatic</td><td data-sort="2026-09-19">19 Sep 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-notify-1</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="387">387</td><td>automatic</td><td data-sort="2026-10-12">12 Oct 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-cache-3</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="269">269</td><td>automatic</td><td data-sort="2026-06-16">16 Jun 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-cache-1</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="49">49</td><td>automatic</td><td data-sort="2025-11-08">8 Nov 2025</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-export-4</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="41">41</td><td>automatic</td><td data-sort="2025-10-31">31 Oct 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-admin-1</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="94">94</td><td>automatic</td><td data-sort="2025-12-23">23 Dec 2025</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="manual"><th scope="row">search-billing-2</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="313">313</td><td>manual</td><td data-sort="2026-07-30">30 Jul 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="soon" data-renewal="automatic"><th scope="row">payments-notify-1</th><td>Payments</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="1">1</td><td>automatic</td><td data-sort="2025-09-21">21 Sep 2025</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-gateway</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="320">320</td><td>automatic</td><td data-sort="2026-08-06">6 Aug 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="soon" data-renewal="manual"><th scope="row">mobile-media-4</th><td>Mobile</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="24">24</td><td>manual</td><td data-sort="2025-10-14">14 Oct 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="expired" data-renewal="automatic"><th scope="row">platform-cache</th><td>Platform</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-17">-17</td><td>automatic</td><td data-sort="2025-09-03">3 Sep 2025</td></tr>
+      <tr data-filter-item data-team="platform" data-status="ok" data-renewal="automatic"><th scope="row">platform-auth-1</th><td>Platform</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="182">182</td><td>automatic</td><td data-sort="2026-03-21">21 Mar 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-admin-3</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="135">135</td><td>automatic</td><td data-sort="2026-02-02">2 Feb 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-notify-4</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="230">230</td><td>automatic</td><td data-sort="2026-05-08">8 May 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="automatic"><th scope="row">accounts-search-1</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="344">344</td><td>automatic</td><td data-sort="2026-08-30">30 Aug 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="expired" data-renewal="automatic"><th scope="row">platform-search</th><td>Platform</td><td data-sort="0"><span class="status danger">Expired</span></td><td class="num" data-sort="-10">-10</td><td>automatic</td><td data-sort="2025-09-10">10 Sep 2025</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-reports-2</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="354">354</td><td>automatic</td><td data-sort="2026-09-09">9 Sep 2026</td></tr>
+      <tr data-filter-item data-team="data" data-status="ok" data-renewal="automatic"><th scope="row">data-sync</th><td>Data</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="132">132</td><td>automatic</td><td data-sort="2026-01-30">30 Jan 2026</td></tr>
+      <tr data-filter-item data-team="platform" data-status="soon" data-renewal="automatic"><th scope="row">platform-export</th><td>Platform</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="24">24</td><td>automatic</td><td data-sort="2025-10-14">14 Oct 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-export-3</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="348">348</td><td>automatic</td><td data-sort="2026-09-03">3 Sep 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="automatic"><th scope="row">payments-worker-4</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="284">284</td><td>automatic</td><td data-sort="2026-07-01">1 Jul 2026</td></tr>
+      <tr data-filter-item data-team="search" data-status="ok" data-renewal="automatic"><th scope="row">search-cache-1</th><td>Search</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="233">233</td><td>automatic</td><td data-sort="2026-05-11">11 May 2026</td></tr>
+      <tr data-filter-item data-team="payments" data-status="ok" data-renewal="manual"><th scope="row">payments-export</th><td>Payments</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="342">342</td><td>manual</td><td data-sort="2026-08-28">28 Aug 2026</td></tr>
+      <tr data-filter-item data-team="accounts" data-status="ok" data-renewal="manual"><th scope="row">accounts-cache-4</th><td>Accounts</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="348">348</td><td>manual</td><td data-sort="2026-09-03">3 Sep 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="manual"><th scope="row">mobile-billing-1</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="214">214</td><td>manual</td><td data-sort="2026-04-22">22 Apr 2026</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="soon" data-renewal="manual"><th scope="row">mobile-media</th><td>Mobile</td><td data-sort="1"><span class="status warn">Under 30 days</span></td><td class="num" data-sort="18">18</td><td>manual</td><td data-sort="2025-10-08">8 Oct 2025</td></tr>
+      <tr data-filter-item data-team="mobile" data-status="ok" data-renewal="automatic"><th scope="row">mobile-search</th><td>Mobile</td><td data-sort="2"><span class="status ok">Valid</span></td><td class="num" data-sort="134">134</td><td>automatic</td><td data-sort="2026-02-01">1 Feb 2026</td></tr>
+    </tbody>
+  </table></div>
+<p class="table-note">Certificate scan, 20 Oct 2026. Days left are counted from 22 Oct 2026; a negative number is days since expiry.</p>
+  <p class="dataset-print-note">This printed copy shows the summary. The full table of 140 services is in the file.</p>
+</section>
+
+        <h2 id="scope">The scan checked every endpoint once, from inside the network</h2>
+        <p>Each service endpoint in the service catalogue was contacted once on 20 October 2026, from a host inside the network, and its certificate's expiry date, issuer and renewal setting were recorded. Days left are counted from 22 October. Services were matched to teams by the catalogue's owner field.</p>
+
+        <h2 id="not-checked">Three things this audit did not check</h2>
+        <ul>
+          <li>Certificates used between services inside a cluster, which the platform rotates on its own schedule.</li>
+          <li>Certificates on third-party services we call.</li>
+          <li>Whether each caller verifies certificates at all.</li>
+        </ul>
+
+        <h2 id="sources" class="annex">Sources</h2>
+        <div class="sources"><ol><li>Certificate scan of the service catalogue, 20 October 2026.</li><li>Monitoring alert rules, exported 21 October 2026.</li></ol></div>
+        <p class="footnote">An example page for the html-house-style kit: a reading page with an explorable dataset. Northwind, its services and every number on this page are invented, generated from a fixed seed.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog class="zoom" id="zoom" aria-label="Enlarged figure"><div class="zoom-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Fit to window">Fit</button><button type="button" data-z="1" aria-label="Zoom in">+</button><span id="zoom-level" class="muted">100%</span><span class="spacer"></span><button type="button" data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
+
+<script>
+(() => {
+  const root = document.documentElement, K = "hs:" + location.pathname + ":";
+  const store = { set: (k, v) => { try { v ? localStorage.setItem(K + k, v) : localStorage.removeItem(K + k); } catch {} } };
+
+  // Palette and theme. Remembered for this page only. Theme cycles auto, light, dark.
+  const palBtns = [...document.querySelectorAll("[data-set-palette]")], themeBtn = document.querySelector("[data-toggle-theme]");
+  const showPal = () => palBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === (root.dataset.palette || "paper")));
+  const showTheme = () => { if (themeBtn) themeBtn.textContent = "Theme: " + (root.dataset.theme || "auto"); };
+  palBtns.forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("palette", b.dataset.setPalette); showPal(); });
+  if (themeBtn) themeBtn.onclick = () => { const next = { auto: "light", light: "dark", dark: "" }[root.dataset.theme || "auto"];
+    if (next) root.dataset.theme = next; else delete root.dataset.theme; store.set("theme", next); showTheme(); };
+  showPal(); showTheme();
+
+  // Contents rail. The list is in the HTML; this marks the current section and
+  // fills the list only if it was left empty. Collapsed by default on narrow screens.
+  const toc = document.querySelector(".toc"), list = toc && toc.querySelector("ol");
+  const heads = [...document.querySelectorAll("main h2")];
+  if (toc && list) {
+    heads.forEach((h, i) => { if (!h.id) h.id = (h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section") + "-" + i; });
+    if (!list.children.length) heads.forEach(h => { const li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.append(a); list.append(li); });
+    if (!list.children.length) toc.hidden = true;
+    const box = toc.querySelector("details"), wide = matchMedia("(min-width: 1100px)");
+    if (box) { box.open = wide.matches; wide.addEventListener("change", e => { box.open = e.matches; }); }
+    const links = [...list.querySelectorAll("a")];
+    const mark = () => { let cur = heads[0]; for (const h of heads) if (h.getBoundingClientRect().top <= innerHeight * 0.3) cur = h;
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = heads[heads.length - 1];
+      links.forEach(a => a.getAttribute("href") === "#" + (cur && cur.id) ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")); };
+    let raf = 0; addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); }, { passive: true }); mark();
+  }
+
+  // Enlarge any figure: fit to the window on open, real zoom, real scroll.
+  const dlg = document.getElementById("zoom"), stage = document.getElementById("zoom-stage"), lvl = document.getElementById("zoom-level");
+  let z = 1, w = 0, h = 0;
+  const fit = () => { const s = getComputedStyle(stage);
+    return Math.min((stage.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)) / w, (stage.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom)) / h); };
+  const apply = () => { const el = stage.firstElementChild; if (!el) return; el.style.width = w * z + "px"; el.style.height = h * z + "px"; lvl.textContent = Math.round(z * 100) + "%"; };
+  document.querySelectorAll(".zoom-btn").forEach(b => b.onclick = () => {
+    const src = b.closest("figure") && b.closest("figure").querySelector(".figure-frame > svg, .figure-frame > img, .figure-frame > picture img");
+    if (!src || !dlg) return;
+    const vb = src.viewBox && src.viewBox.baseVal, r = src.getBoundingClientRect();
+    [w, h] = vb && vb.width ? [vb.width, vb.height] : src.naturalWidth ? [src.naturalWidth, src.naturalHeight] : [r.width, r.height];
+    if (!w || !h) return;
+    const c = src.cloneNode(true), name = src.querySelector("title");
+    c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    c.removeAttribute("aria-labelledby"); c.setAttribute("aria-label", name ? name.textContent : (src.alt || "Enlarged figure"));
+    stage.replaceChildren(c); dlg.showModal(); z = Math.min(fit(), 4); apply(); stage.scrollTo(0, 0);
+  });
+  if (dlg) {
+    dlg.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? fit() : Math.min(6, Math.max(0.25, z * (d > 0 ? 1.25 : 0.8))); apply(); });
+    dlg.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  }
+
+  // Tabs: one tab stop, arrow keys, Home and End. Panels are visible until this runs.
+  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')];
+    const sel = tab => tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
+      const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    tabs.forEach((tab, i) => { tab.onclick = () => sel(tab); tab.onkeydown = e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (e.key === "Home" || e.key === "End" || d) { e.preventDefault(); const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); } }; });
+    sel(tabs.find(x => x.getAttribute("aria-selected") === "true") || tabs[0]); });
+
+  // Page patterns (PATTERNS.md). Each block does nothing on a page without its markup.
+
+  // Page state: filters, sort and chart picks (PATTERNS.md section 9). The hash
+  // holds it as #key=value&key=value. A change pushes history, so Back undoes it.
+  // An in-page link keeps the state and adds at=<id>; a hash with no "=" is a
+  // plain anchor. A view is a [data-view] element, or the whole page.
+  const views = [...document.querySelectorAll("[data-view]")];
+  if (!views.length && document.querySelector(".filter, button.sort, [data-filter-item]")) views.push(document.body);
+  const viewOf = el => el.closest("[data-view]") || document.body;
+  const read = () => new URLSearchParams(location.hash.includes("=") ? location.hash.slice(1) : "");
+  const coll = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const num = x => { const t = x.replace(/[,\s%$]/g, ""); return t !== "" && isFinite(t) ? +t : NaN; }; // "4,210" and "61%" sort as numbers
+  const cmp = (a, b) => { const x = num(a), y = num(b); return isNaN(x) || isNaN(y) ? coll.compare(a, b) : x - y; };
+  const model = views.map(v => {
+    const mine = sel => [...v.querySelectorAll(sel)].filter(el => viewOf(el) === v);
+    const q = mine('input[type="search"]')[0], picks = mine("[data-key][data-value]");
+    return { v, q, qk: q ? q.dataset.key || "q" : "", picks, keys: [...new Set(picks.map(b => b.dataset.key))], items: mine("[data-filter-item]"),
+      groups: mine("[data-filter-group]"), tables: mine("table").filter(t => t.querySelector("th > button.sort")), said: mine(".filter-sentence"),
+      empty: mine(".filter-empty")[0], noun: v.dataset.noun || "items" };
+  });
+  const sortTable = (t, val) => {
+    const ths = [...t.tHead.rows[0].cells], body = t.tBodies[0], rows = [...body.rows];
+    ths.forEach((th, i) => { th.dataset.col = th.dataset.col || "c" + i; });
+    rows.forEach((r, i) => { if (!r.dataset.i) r.dataset.i = i; });
+    const [col, dir] = (val || "").split(/\.(?=[^.]*$)/), ix = ths.findIndex(th => th.dataset.col === col);
+    ths.forEach((th, i) => { if (th.querySelector("button.sort")) th.setAttribute("aria-sort", i === ix ? (dir === "desc" ? "descending" : "ascending") : "none"); });
+    const key = r => { const c = r.cells[ix]; return c ? (c.dataset.sort ?? c.textContent.trim()) : ""; };
+    rows.sort((a, b) => (ix < 0 ? 0 : cmp(key(a), key(b)) * (dir === "desc" ? -1 : 1)) || a.dataset.i - b.dataset.i);
+    body.append(...rows);
+  };
+  const render = () => { const p = read();
+    for (const m of model) {
+      const q = m.qk ? (p.get(m.qk) || "").trim().toLowerCase() : "";
+      if (m.q && document.activeElement !== m.q) m.q.value = p.get(m.qk) || "";
+      const ok = (el, skip) => (!q || el.textContent.toLowerCase().includes(q)) && m.keys.every(k => k === skip || !p.get(k) || el.dataset[k] === p.get(k));
+      let n = 0; m.items.forEach(el => { el.hidden = !ok(el); if (!el.hidden) n++; });
+      m.groups.forEach(g => { g.hidden = !g.querySelector("[data-filter-item]:not([hidden])"); });
+      m.picks.forEach(b => { b.setAttribute("aria-pressed", (p.get(b.dataset.key) || "") === b.dataset.value);
+        // A chart bar counts the records under every filter except its own, so the bars stay a way to switch.
+        const c = b.querySelector("[data-count]"), bar = b.querySelector("[data-unit]"); if (!c) return;
+        const k = m.items.filter(el => el.dataset[b.dataset.key] === b.dataset.value && ok(el, b.dataset.key)).length;
+        c.textContent = k; if (bar) { bar.setAttribute("width", k * bar.dataset.unit); c.setAttribute("x", +bar.getAttribute("x") + k * bar.dataset.unit + 6); } });
+      m.tables.forEach(t => sortTable(t, p.get(t.dataset.sortKey || "sort")));
+      if (m.empty) m.empty.hidden = n > 0 || !m.items.length;
+      const used = (q ? ['matching "' + q + '"'] : []).concat(m.keys.filter(k => p.get(k)).map(k => {
+        const b = m.picks.find(x => x.dataset.key === k && x.dataset.value === p.get(k)); return b ? b.dataset.say || b.dataset.label || b.textContent.trim() : p.get(k); }));
+      m.said.forEach(s => { s.textContent = used.length ? n + " of " + m.items.length + " " + m.noun + ": " + used.join(", ") : "All " + m.items.length + " " + m.noun; });
+    } };
+  const go = (p, push) => { p.delete("at"); const h = p.toString(); history[push ? "pushState" : "replaceState"](null, "", h ? "#" + h : location.pathname + location.search); render(); };
+  // A deep link to an item the filter hides clears that view's filter and shows it.
+  const reveal = () => { const h = location.hash.slice(1), id = h.includes("=") ? read().get("at") : decodeURIComponent(h), el = id && document.getElementById(id);
+    if (!el) return;
+    if (el.closest("[hidden]")) { const m = model.find(x => x.v === viewOf(el)) || model[0], p = read(); [m.qk, ...m.keys].forEach(k => p.delete(k));
+      p.set("at", id); history.replaceState(null, "", "#" + p); render(); }
+    document.querySelectorAll("[data-at]").forEach(x => x.removeAttribute("data-at")); el.setAttribute("data-at", "");
+    if (h.includes("=")) el.scrollIntoView({ block: "start" }); };
+  if (model.length) {
+    let typed = 0;
+    model.forEach(m => {
+      if (m.q) m.q.addEventListener("input", () => { const p = read(), v = m.q.value.trim(); if (v) p.set(m.qk, v); else p.delete(m.qk);
+        go(p, Date.now() - typed > 1000); typed = Date.now(); }); // one history entry per pause in typing, not per key
+      m.picks.forEach(b => { const pick = () => { const p = read(), on = (p.get(b.dataset.key) || "") === b.dataset.value;
+          if (b.dataset.value && !(on && b.closest("svg"))) p.set(b.dataset.key, b.dataset.value); else p.delete(b.dataset.key); go(p, true); };
+        b.addEventListener("click", pick);
+        if (b.closest("svg")) b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } }); });
+      m.tables.forEach(t => t.querySelectorAll("th > button.sort").forEach(btn => btn.addEventListener("click", () => {
+        const th = btn.parentElement, p = read(), k = t.dataset.sortKey || "sort";
+        p.set(k, th.dataset.col + (th.getAttribute("aria-sort") === "ascending" ? ".desc" : ".asc")); go(p, true); })));
+    });
+    // In-page links keep the state: #at=finding-3&sev=high.
+    document.addEventListener("click", e => { const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !location.hash.includes("=")) return;
+      const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!id || id.includes("=") || !document.getElementById(id)) return;
+      e.preventDefault(); const p = read(); p.set("at", id); history.pushState(null, "", "#" + p); render(); reveal(); }, true);
+    addEventListener("popstate", () => { render(); reveal(); }); addEventListener("hashchange", () => { render(); reveal(); });
+    render(); reveal();
+  }
+
+  // Step progress: ticks are kept in localStorage for this page, with the time
+  // the run started, until the reader resets them. A tick never hides a step.
+  const ticks = [...document.querySelectorAll("ol.steps.do > li > .step-check input")];
+  if (ticks.length) {
+    const key = K + "run", say = document.querySelector(".progress-text"), jump = document.querySelector(".progress-jump");
+    let run = {}; try { run = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+    const save = () => { try { run.started ? localStorage.setItem(key, JSON.stringify(run)) : localStorage.removeItem(key); } catch {} };
+    const update = () => { const next = ticks.find(t => !t.checked), n = ticks.filter(t => t.checked).length;
+      if (say) say.textContent = (next ? "Next: step " + (ticks.indexOf(next) + 1) + " of " + ticks.length : "All " + ticks.length + " steps ticked")
+        + (run.started ? ". " + n + " done in the run started " + new Date(run.started).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "." : ".");
+      if (jump) { jump.hidden = !next; if (next) jump.href = "#" + next.closest("li").id; } };
+    ticks.forEach(t => { t.checked = (run.done || []).includes(t.closest("li").id);
+      t.addEventListener("change", () => { if (!run.started) run.started = Date.now(); run.done = ticks.filter(x => x.checked).map(x => x.closest("li").id); save(); update(); }); });
+    const reset = document.querySelector("[data-reset-steps]");
+    if (reset) reset.addEventListener("click", () => { run = {}; save(); ticks.forEach(t => { t.checked = false; }); update(); });
+    update();
+  }
+
+  // Returning reader (Monitor): a digest of what the reader last saw is kept for
+  // this page. On return, a dismissible panel lists what changed. Silent when
+  // storage is unavailable.
+  const since = document.querySelector(".since");
+  if (since) {
+    const key = K + "seen", now = {};
+    document.querySelectorAll("[data-digest]").forEach(el => { const s = el.querySelector(".status"); now[el.dataset.digest] = s ? s.textContent.trim() : el.dataset.status || ""; });
+    let was = null; try { was = JSON.parse(localStorage.getItem(key)); } catch {}
+    const save = () => { try { localStorage.setItem(key, JSON.stringify(now)); } catch {} };
+    const ids = was ? [...new Set([...Object.keys(now), ...Object.keys(was)])].filter(id => was[id] !== now[id]) : [];
+    if (ids.length) {
+      since.querySelector(".since-count").textContent = "Changed since your last visit: " + ids.length + (ids.length === 1 ? " item" : " items");
+      const list = since.querySelector("ul");
+      ids.slice(0, 8).forEach(id => { const li = document.createElement("li"); li.textContent = id + ": " + (!(id in was) ? "new, " + now[id] : !(id in now) ? "removed" : "was " + was[id] + ", now " + now[id]); list.append(li); });
+      if (ids.length > 8) { const li = document.createElement("li"); li.textContent = "and " + (ids.length - 8) + " more"; list.append(li); }
+      since.hidden = false;
+    }
+    const dismiss = since.querySelector("[data-dismiss]");
+    if (dismiss) dismiss.addEventListener("click", () => { since.hidden = true; save(); });
+    addEventListener("pagehide", save);
+  }
+
+  // Save as PDF: the browser's own print. A button with data-progress keeps the
+  // ticks on paper; any other print shows empty boxes.
+  document.querySelectorAll(".print-btn").forEach(b => b.addEventListener("click", () => { root.classList.toggle("print-progress", "progress" in b.dataset); window.print(); }));
+  addEventListener("afterprint", () => root.classList.remove("print-progress"));
+
+  // Print everything: open collapsed sections first.
+  addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));
+  addEventListener("afterprint", () => document.querySelectorAll("details").forEach(d => { d.open = d.dataset.wasOpen === "true"; }));
+})();
+</script>
+</body>
+</html>

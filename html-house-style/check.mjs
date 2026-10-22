@@ -6,6 +6,8 @@
 //   node check.mjs page.html        (Node 18+)
 //   bun check.mjs page.html
 //   deno run --allow-read check.mjs page.html
+//   node check.mjs --fragment fig.html       a figure or table before it is spliced in
+//   node check.mjs new.html --was old.html   a page that replaces another: what was dropped
 //
 // It uses regular expressions, not a DOM, so it is a strong hint and not a
 // proof. Every rule here can also be done by hand; see CHECKLIST.md.
@@ -14,9 +16,13 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import process from "node:process";
 
-const file = process.argv[2];
-if (!file) { console.log("usage: node check.mjs page.html"); process.exit(2); }
+const args = process.argv.slice(2), wasFile = args.includes("--was") ? args[args.indexOf("--was") + 1] : "";
+const file = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--was");
+if (!file) { console.log("usage: node check.mjs page.html [--fragment] [--was old.html]"); process.exit(2); }
 const src = readFileSync(file, "utf8");
+// A fragment (no <html> or <body>) gets the figure, table, colour, id, interaction and
+// writing checks; document-level checks are skipped.
+const fragment = args.includes("--fragment") || !/<html\b|<body\b/i.test(src);
 
 // ---------- helpers ----------
 const out = [];
@@ -63,7 +69,9 @@ for (const s of styles) {
 }
 const inlined = styles.some(s => s.css.includes("House style: base stylesheet"));
 const link = src.match(/<link\b[^>]*rel\s*=\s*["']?stylesheet[^>]*>/i);
-if (inlined) add("PASS", "base-css", "base.css is inlined");
+if (fragment) { allCss += "\n" + readFileSync(new URL("base.css", import.meta.url), "utf8");
+  info("base-css", "fragment mode: page-level checks skipped; label sizes assume the standard content column"); }
+else if (inlined) add("PASS", "base-css", "base.css is inlined");
 else if (link && /href\s*=\s*["']?[^"'\s>]*base\.css/.test(link[0])) {
   warn("base-css", "base.css is linked, not inlined (fine for template.html; inline it in a page you hand over)", link.index);
   const p = join(dirname(file), attrs(link[0]).href); if (existsSync(p)) allCss += "\n" + readFileSync(p, "utf8");
@@ -80,6 +88,9 @@ const growMatch = allCss.match(/calc\(var\(--fig-min,\s*([\d.]+)px\)\s*\*\s*([\d
 const growFactor = growMatch ? parseFloat(growMatch[2]) : Infinity, growDefault = growMatch ? parseFloat(growMatch[1]) : 0;
 const hasRail = /<nav\b[^>]*class\s*=\s*["'][^"']*\btoc\b/.test(src);
 const COLS = [324, 622, hasRail ? 798 : 1082]; // phone 390, tablet 720, desktop content column inside a figure frame
+const PATTERNS = ["decide", "understand", "look-up", "monitor", "do", "review"]; // PATTERNS.md: the reader's job
+const pattern = attrs((noCode.match(/<body\b[^>]*>/i) || ["<body>"])[0])["data-pattern"];
+const railFree = ["look-up", "monitor", "do"].includes(pattern); // an index, filters or the progress line navigate instead
 
 // ---------- 3. figures and SVG geometry ----------
 const ids = new Map();
@@ -110,7 +121,7 @@ for (const s of svgs) {
   if (vb.length !== 4 || vb.some(isNaN)) { fail("svg", `${where} has no viewBox`, at); continue; }
   const [vx, vy, W, H] = vb;
   if (inFrame) {
-    if (a.role !== "img") fail("svg", `${where}: add role="img"`, at);
+    if (a.role !== "img" && a.role !== "group") fail("svg", `${where}: add role="img" (or role="group" when it holds controls)`, at);
     if (!/<title\b/.test(svg) || !/<desc\b/.test(svg)) fail("svg", `${where}: needs <title> and <desc>`, at);
     const lb = (a["aria-labelledby"] || "").split(/\s+/).filter(Boolean);
     if (!lb.length) fail("svg", `${where}: aria-labelledby should point at its title and desc ids`, at);
@@ -215,30 +226,32 @@ const h2s = [...noCode.matchAll(/<h2\b([^>]*)>([\s\S]*?)<\/h2>/gi)].map(m => ({ 
 const bodyText = text(blank(noCode, /<(nav|dialog)\b[\s\S]*?<\/\1>/gi).replace(/^[\s\S]*?<body\b[^>]*>/i, ""));
 const words = bodyText.split(/\s+/).filter(Boolean).length;
 let annexSeen = false, structIssues = 0;
+const blufs = [...noCode.matchAll(/class\s*=\s*["'][^"']*\bbluf\b/g)];
+if (!fragment) {
 for (const h of h2s) {
   const annex = /\bannex\b/.test(h.a.class || "");
   if (!h.a.id) { fail("structure", `h2 "${h.t}" has no id`, h.i); structIssues++; }
   if (annex) annexSeen = true;
   else if (annexSeen) { fail("structure", `argument heading "${h.t}" comes after an annex heading; annexes go last`, h.i); structIssues++; }
-  else if (h.t.split(/\s+/).length <= 3) { warn("writing", `h2 "${h.t}" looks like a topic label; state a claim, or mark a navigation section class="annex"`, h.i); }
+  else if (h.t.split(/\s+/).length <= 3 && !["look-up", "do"].includes(pattern)) { warn("writing", `h2 "${h.t}" looks like a topic label; state a claim, or mark a navigation section class="annex"`, h.i); }
   if (/\?\s*$/.test(h.t)) warn("writing", `h2 "${h.t}" is a question; state the answer`, h.i);
 }
 const toc = noCode.match(/<nav\b[^>]*class\s*=\s*["'][^"']*\btoc\b[\s\S]*?<\/nav>/i);
-const needRail = h2s.length >= 4 || words >= 1200;
+const needRail = (h2s.length >= 4 || words >= 1200) && !railFree;
 if (needRail && !toc) { fail("structure", `${h2s.length} h2s and about ${words} words: add the contents rail`); structIssues++; }
 if (toc) {
   const links = [...toc[0].matchAll(/href\s*=\s*["']#([^"']+)["']/g)].map(m => m[1]);
   if (!links.length) { fail("structure", "contents rail is empty in the HTML; write the list into the page so it works without script", toc.index); structIssues++; }
   for (const h of h2s) if (h.a.id && !links.includes(h.a.id)) { fail("structure", `contents rail has no link to #${h.a.id}`, toc.index); structIssues++; }
   for (const l of links) if (!ids.has(l)) { fail("structure", `contents rail links to missing #${l}`, toc.index); structIssues++; }
-  if (!needRail) warn("structure", `only ${h2s.length} h2s and about ${words} words; the rail is optional here`, toc.index);
+  if (!needRail && !railFree) warn("structure", `only ${h2s.length} h2s and about ${words} words; the rail is optional here`, toc.index);
 }
-const blufs = [...noCode.matchAll(/class\s*=\s*["'][^"']*\bbluf\b/g)];
 if (blufs.length > 1) { fail("structure", `${blufs.length} .bluf blocks; use one`, blufs[1].index); structIssues++; }
 if (!blufs.length && !/class\s*=\s*["'][^"']*\bpurpose\b/.test(noCode)) warn("structure", "no .bluf and no .purpose sentence; a page that argues opens with .bluf, a reference or tool page with one sentence of purpose");
 if (blufs.length && toc && blufs[0].index > toc.index) warn("structure", "the .bluf comes after the contents rail; on a phone the reader scrolls past the rail to reach it", blufs[0].index);
 let prev = 1; for (const m of noCode.matchAll(/<h([1-6])\b/gi)) { const lv = +m[1]; if (lv > prev + 1) warn("structure", `heading jumps from h${prev} to h${lv}`, m.index); prev = lv; }
 if (!structIssues) add("PASS", "structure", `${h2s.length} h2s with unique ids${toc ? ", rail lists them all" : ""}; ${blufs.length} .bluf; about ${words} words`);
+}
 
 // ---------- 8. self-contained ----------
 let ext = 0;
@@ -248,7 +261,7 @@ for (const [re, what] of [[/<script\b[^>]*\ssrc\s*=/gi, "external script"], [/@i
 for (const m of src.matchAll(/@font-face/g)) { warn("self-contained", "@font-face: only local() sources are allowed", m.index); ext++; }
 for (const m of noCode.matchAll(/\bfetch\(|XMLHttpRequest/g)) warn("self-contained", "network call in markup", m.index);
 const kb = new TextEncoder().encode(src).length / 1024;
-if (kb > 2048) warn("self-contained", `page is ${(kb / 1024).toFixed(1)}MB; keep it under 2MB`);
+if (kb > 2048 && !fragment) warn("self-contained", `page is ${(kb / 1024).toFixed(1)}MB; keep it under 2MB`);
 if (!ext) add("PASS", "self-contained", `no external scripts, styles, fonts or media; ${Math.round(kb)}KB`);
 
 // ---------- 9. scripts ----------
@@ -260,7 +273,7 @@ for (const m of src.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
 }
 for (const m of noCode.matchAll(/<[^>]*role\s*=\s*["']tab["'][^>]*>/g)) { const c = attrs(m[0])["aria-controls"]; if (!c || !ids.has(c)) fail("script", "tab without aria-controls pointing at its panel", m.index); }
 for (const m of noCode.matchAll(/<[^>]*role\s*=\s*["']tabpanel["'][^>]*>/g)) if (/\shidden\b/.test(m[0])) warn("script", "tab panel authored hidden; without script it is unreachable. Let the script hide it", m.index);
-if (/zoom-btn|data-toggle-theme/.test(noCode) && !/<html\b[^>]*class\s*=\s*["'][^"']*\bno-js\b/.test(src)) warn("script", "add class=\"no-js\" to <html> so script-only controls hide when script is off");
+if (!fragment && /zoom-btn|data-toggle-theme/.test(noCode) && !/<html\b[^>]*class\s*=\s*["'][^"']*\bno-js\b/.test(src)) warn("script", "add class=\"no-js\" to <html> so script-only controls hide when script is off");
 if (!out.some(o => o.id === "script")) add("PASS", "script", "inline scripts parse; storage guarded; tabs wired");
 
 // ---------- 10. writing ----------
@@ -276,13 +289,71 @@ const norm = s => text(s).toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/(es|
 const terms = [...noCode.matchAll(/<(\w+)\b[^>]*class\s*=\s*["'][^"']*\bterm\b[^>]*>([\s\S]*?)<\/\1>/g)].map(m => ({ n: norm(m[2]), t: text(m[2]), i: m.index }));
 const gl = noCode.match(/<dl\b[^>]*class\s*=\s*["'][^"']*\bglossary\b[\s\S]*?<\/dl>/i);
 const dts = gl ? [...gl[0].matchAll(/<dt\b[^>]*>([\s\S]*?)<\/dt>/gi)].map(m => ({ n: norm(m[1]), t: text(m[1]) })) : [];
-for (const t of terms) if (!dts.some(d => d.n === t.n)) { fail("glossary", `.term "${t.t}" is missing from dl.glossary`, t.i); wr++; }
-for (const d of dts) if (!terms.some(t => t.n === d.n)) { fail("glossary", `glossary entry "${d.t}" is never marked as a .term in the text`, gl.index); wr++; }
+if (!fragment) for (const t of terms) if (!dts.some(d => d.n === t.n)) { fail("glossary", `.term "${t.t}" is missing from dl.glossary`, t.i); wr++; }
+if (!fragment) for (const d of dts) if (!terms.some(t => t.n === d.n)) { fail("glossary", `glossary entry "${d.t}" is never marked as a .term in the text`, gl.index); wr++; }
 for (const m of noCode.matchAll(/<[^>]*class\s*=\s*["'][^"']*\bterm\b[^>]*>/g)) { const ta = attrs(m[0]); if (!ta["data-def"]) fail("glossary", ".term without data-def", m.index); if (ta.tabindex !== "0") warn("glossary", ".term without tabindex=\"0\" cannot be reached by keyboard or tap", m.index); }
 if (!wr) add("PASS", "writing", `no em or en dashes; acronyms spelled out; ${terms.length} terms all in the glossary`);
 
+// ---------- 11. page pattern (PATTERNS.md) ----------
+if (!fragment) {
+  const before = out.length, tagWith = c => new RegExp(`<(\\w+)\\b[^>]*class\\s*=\\s*["'](?:[^"']*\\s)?${c}(?:\\s[^"']*)?["'][^>]*>`, "g");
+  const block = c => [...noCode.matchAll(tagWith(c))].map(m => ({ tag: m[0], i: m.index, html: noCode.slice(m.index, noCode.indexOf(`</${m[1]}>`, m.index)) }));
+  const bluf = block("bluf")[0], blufList = bluf && /<(ul|ol)\b/i.test(bluf.html), purpose = block("purpose").length > 0;
+  if (!pattern) warn("pattern", "no data-pattern on <body>; declare the reader's job (see PATTERNS.md)");
+  else if (!PATTERNS.includes(pattern)) fail("pattern", `data-pattern="${pattern}" is not one of ${PATTERNS.join(", ")}`);
+  else {
+    const opening = { decide: "list", review: "list", monitor: "sentence" }[pattern];
+    if (opening === "list" && !blufList) fail("pattern", `a ${pattern} page opens with a .bluf that holds a list (the answer, why now, cost, stop conditions)`);
+    if (opening === "sentence" && (!bluf || blufList)) fail("pattern", "a monitor page opens with a .bluf holding one status sentence and no list");
+    if (!opening && (bluf || !purpose)) fail("pattern", `a ${pattern} page opens with a .purpose sentence and no .bluf`, bluf ? bluf.i : -1);
+    const top = noCode.slice(0, h2s.length ? h2s[0].i : noCode.length);
+    if (pattern === "monitor" && !/<time\b/i.test(top) && !/\bas of\b/i.test(text(top))) warn("pattern", "no \"as of\" time before the first h2; a reader cannot tell fresh data from stale");
+    if (pattern === "do") {
+      if (!/<ol\b[^>]*class\s*=\s*["'][^"']*\bsteps\b/.test(noCode)) fail("pattern", "a do page needs numbered steps (ol.steps)");
+      if (!/<h[2-4]\b[^>]*>[^<]*\b(roll ?back|undo)/i.test(noCode)) warn("pattern", "no rollback heading; say how to undo");
+      if (!/\bdone when\b/i.test(bodyText)) warn("pattern", "no \"done when\" line; say how the reader knows they have finished");
+    }
+    if (pattern === "look-up") { const e = block("entry"), n = e.filter(x => /\sid\s*=/.test(x.tag)).length;
+      if (n < e.length) warn("pattern", `${e.length - n} of ${e.length} .entry elements have no id; give each one so it can be linked`, e.find(x => !/\sid\s*=/.test(x.tag)).i); }
+    if (pattern === "review") for (const f of block("finding")) if (!/class\s*=\s*["'][^"']*\bstatus\b/.test(f.html)) warn("pattern", "a .finding has no .status severity", f.i);
+  }
+  if (out.length === before) add("PASS", "pattern", `data-pattern="${pattern}": the opening matches the reader's job`);
+}
+
+// ---------- 12. interactions: what the page offers, whether its script delivers it, what a replacement dropped ----------
+{
+  const before = out.length, cls = c => new RegExp(`class\\s*=\\s*["'](?:[^"']*\\s)?${c}(?:\\s[^"']*)?["']`, "i");
+  const scriptsOf = s => [...s.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m => !/type\s*=\s*["']text\/plain/i.test(m[1])).map(m => m[2]).join("\n");
+  const LIST = [ // name, markup that offers it, script that delivers it (null: needs no script)
+    ["sort", /<button\b[^>]*class\s*=\s*["'][^"']*\bsort\b|\saria-sort\s*=/i, /aria-sort/], ["filter", cls("filter"), /data-filter-item/],
+    ["linked chart", /<g\b[^>]*role\s*=\s*["']button["'][^>]*data-key/i, /data-count/], ["tabs", /role\s*=\s*["']tablist/i, /aria-selected/],
+    ["zoom", cls("zoom-btn"), /showModal/], ["rail", /<nav\b[^>]*class\s*=\s*["'][^"']*\btoc\b/i, null], ["details", /<details\b/i, null],
+    ["term", cls("term"), null], ["checklist progress", /<ol\b[^>]*class\s*=\s*["'][^"']*\bsteps do\b/i, /localStorage/],
+    ["since last visit", cls("since"), /data-digest/], ["print button", cls("print-btn"), /window\.print\s*\(/], ["theme", /data-toggle-theme|data-set-palette/i, /dataset\.theme/]];
+  const inventory = s => { const markup = blank(blank(s, /<script\b[\s\S]*?<\/script>/gi), /<style\b[\s\S]*?<\/style>/gi), js = scriptsOf(s);
+    return LIST.filter(([, m]) => m.test(markup)).map(([name, , d]) => ({ name, kept: !d || d.test(js) })); };
+  const rowsOf = s => [...blank(s, /<script\b[\s\S]*?<\/script>/gi).matchAll(/<tbody\b[\s\S]*?<\/tbody>/gi)].map(m => (m[0].match(/<tr\b/gi) || []).length);
+  const inv = inventory(src), js = scriptsOf(src);
+  info("interactions", "interactions: " + (inv.map(x => x.name).join(", ") || "none"));
+  for (const x of inv) if (!x.kept) { if (fragment) info("interactions", `${x.name}: markup only; the page it goes into needs the kit's closing script`); else fail("interactions", `the markup offers ${x.name}, but no script on the page delivers it`); }
+  for (const m of noCode.matchAll(/<button\b[^>]*class\s*=\s*["'][^"']*\bsort\b[^>]*>/gi)) if (!/<th\b[^>]*>\s*$/.test(noCode.slice(Math.max(0, m.index - 200), m.index))) fail("interactions", "button.sort must be the first thing inside its th", m.index);
+  for (const m of noCode.matchAll(/<g\b[^>]*role\s*=\s*["']button["'][^>]*>/gi)) { const a = attrs(m[0]);
+    if (a["data-key"] && !new RegExp(`data-filter-item[^>]*data-${a["data-key"]}\\s*=\\s*["']${a["data-value"]}["']`).test(noCode)) fail("interactions", `chart bar ${a["data-key"]}=${a["data-value"]} matches no data-filter-item row`, m.index); }
+  if (!fragment && inv.some(x => /filter|linked/.test(x.name)) && (hasRail || /href\s*=\s*["']#[^"'=]+["']/.test(noCode)) && !/a\[href\^="#"\]/.test(js))
+    warn("interactions", "filter and in-page links, but no handler that keeps the filter when a link is followed (PATTERNS.md section 9)");
+  if (wasFile) {
+    const old = readFileSync(wasFile, "utf8"), had = inventory(old).filter(x => x.kept).map(x => x.name), now = inv.map(x => x.name);
+    for (const n of had) if (!now.includes(n)) fail("compare", `${wasFile} offered ${n}; this page drops it. Keep it, or name it as dropped in the handover`);
+    info("compare", `kept: ${had.filter(n => now.includes(n)).join(", ") || "none"}; added: ${now.filter(n => !had.includes(n)).join(", ") || "none"}`);
+    const ro = rowsOf(old), rn = rowsOf(src), sum = a => a.reduce((x, y) => x + y, 0);
+    info("compare", `table rows: was ${ro.join(" + ") || "none"} = ${sum(ro)}, now ${rn.join(" + ") || "none"} = ${sum(rn)}`);
+    if (sum(rn) < sum(ro)) warn("compare", "fewer table rows than the page it replaces; check that no records were dropped");
+  }
+  if (!out.slice(before).some(o => o.lvl === "FAIL" || o.lvl === "WARN")) add("PASS", "interactions", "every interaction the markup offers has its script");
+}
+
 // ---------- report ----------
-const order = ["comments", "base-css", "ids", "figure", "svg", "label-size", "label-fit", "colour", "dark-print", "overflow", "structure", "self-contained", "script", "writing", "glossary"];
+const order = ["comments", "base-css", "ids", "figure", "svg", "label-size", "label-fit", "colour", "dark-print", "overflow", "structure", "pattern", "interactions", "compare", "self-contained", "script", "writing", "glossary"];
 out.sort((p, q) => order.indexOf(p.id) - order.indexOf(q.id));
 for (const o of out) console.log(`${o.lvl.padEnd(4)}  ${o.id.padEnd(14)} ${o.msg}`);
 const n = l => out.filter(o => o.lvl === l).length;

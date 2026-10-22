@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en" class="no-js" data-palette="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One-Week On-Call</title>
+<!-- In generated pages, replace this link with the full contents of base.css in a <style> tag. -->
+<link rel="stylesheet" href="../base.css">
+<script>
+/* Before first paint: script is on, and the reader's saved theme for this page applies. */
+(() => { const r = document.documentElement, k = "hs:" + location.pathname + ":"; r.classList.remove("no-js");
+  try { const t = localStorage.getItem(k + "theme"), p = localStorage.getItem(k + "palette");
+    if (t && !r.hasAttribute("data-theme")) r.dataset.theme = t;
+    if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
+</script>
+</head>
+<body class="doc" data-pattern="decide">
+<div class="page">
+
+  <header class="masthead">
+    <div class="toolbar no-print"><button type="button" class="print-btn">Save as PDF</button></div>
+    <div class="kicker">Decision memo · Northwind platform team</div>
+    <h1>Move the platform team to a one-week on-call rotation in January</h1>
+    <p class="dek">Response to pages slows by more than half in the second week of a two-week shift. Halving the shift keeps everyone in the fast first week, costs no new hire, and can be reversed at any handover.</p>
+    <div class="meta"><span>Version 2</span><span>22 Oct 2026</span><span>For approval by the platform lead</span><span>5 min read</span></div>
+  </header>
+
+  <main>
+    <div class="with-toc">
+      <section class="bluf">
+        <span class="label">Bottom line</span>
+        <p>Approve a one-week on-call shift for the six platform engineers, starting Monday 5 January, with a review on 30 March.</p>
+        <ul>
+          <li><strong>Why now:</strong> median time to acknowledge a page rises from 4.3 minutes in week one to 7.5 in week two, and two of six engineers have asked to leave the rotation.</li>
+          <li><strong>Cost:</strong> no new hire. Each engineer is on call the same number of days a year, in shorter stretches, with twice as many handovers (52 a year instead of 26).</li>
+          <li><strong>Stop if:</strong> any handover drops an open incident, or week-one response is no faster by the March review.</li>
+        </ul>
+      </section>
+
+      <nav class="toc" aria-label="Contents">
+        <details open>
+          <summary>Contents</summary>
+          <ol>
+            <li><a href="#situation">Six engineers share a two-week shift that pages about four times a night</a></li>
+            <li><a href="#model">Response time tracks days on shift, so a shorter shift is faster</a></li>
+            <li><a href="#options">A one-week shift beats both a new hire and doing nothing</a></li>
+            <li><a href="#plan">The switch takes three steps and ends with a review in March</a></li>
+            <li><a href="#risks">Two failures would send us back to two weeks</a></li>
+            <li class="annex-start"><a href="#detail">Detail</a></li>
+            <li><a href="#sources">Sources</a></li>
+          </ol>
+        </details>
+      </nav>
+
+      <div class="prose">
+        <h2 id="situation">Six engineers share a two-week shift that pages about four times a night</h2>
+        <p>Each engineer holds the pager for fourteen days, then hands over to the next. Pages arrive mostly at night, when batch jobs run. The figures come from the paging system export for July to September.</p>
+        <div class="stats">
+          <div class="stat"><div class="value">6</div><div class="what">Engineers on the rotation</div><div class="src">Team roster, Oct 2026</div></div>
+          <div class="stat"><div class="value">3.8</div><div class="what">Median pages per night</div><div class="src">Paging export, Jul to Sep 2026</div></div>
+          <div class="stat"><div class="value">14 days</div><div class="what">Length of one shift today</div><div class="src">Rotation schedule</div></div>
+          <div class="stat"><div class="value">2 of 6</div><div class="what">Engineers who asked to leave the rotation</div><div class="src">Team survey, Sep 2026</div></div>
+        </div>
+
+        <p>The rotation is now losing people. In the September survey, which all six answered, two engineers asked to come off the rotation and named the second week as the reason. If they leave it, the remaining four each hold the pager one week in four instead of one in six, which would push more people toward the same request. Hiring a seventh engineer takes about four months, based on the last two platform hires.</p>
+
+        <h2 id="model">Response time tracks days on shift, so a shorter shift is faster</h2>
+        <p>The paging export shows how long each page waited before someone acknowledged it. Grouped by the day of the shift, the wait is flat through week one and climbs every day of week two. A one-week shift removes the second week without changing how many days each person covers in a year.</p>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <!-- Scale: bar top y = 200 - minutes * 18; bar i at x = 60 + i * 40, width 28. -->
+            <svg viewBox="0 0 640 252" style="--fig-min: 640px" role="img" aria-labelledby="ack-t ack-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="ack-t">Median minutes to acknowledge a page, by day of shift</title>
+              <desc id="ack-d">Days 1 to 7: 4.1, 4.0, 4.3, 4.2, 4.6, 4.4 and 4.8 minutes. Days 8 to 14: 5.9, 6.4, 6.8, 7.5, 7.9, 8.6 and 9.2 minutes. Week one is flat; week two rises every day.</desc>
+              <line class="c-axis" x1="48" y1="200" x2="620" y2="200"/>
+              <rect class="c-bar" x="60" y="126.2" width="28" height="73.8"/>
+              <text class="c-value" x="74" y="120.2" text-anchor="middle">4.1</text>
+              <text class="c-tick" x="74" y="218" text-anchor="middle">1</text>
+              <rect class="c-bar" x="100" y="128" width="28" height="72"/>
+              <text class="c-value" x="114" y="122" text-anchor="middle">4.0</text>
+              <text class="c-tick" x="114" y="218" text-anchor="middle">2</text>
+              <rect class="c-bar" x="140" y="122.6" width="28" height="77.4"/>
+              <text class="c-value" x="154" y="116.6" text-anchor="middle">4.3</text>
+              <text class="c-tick" x="154" y="218" text-anchor="middle">3</text>
+              <rect class="c-bar" x="180" y="124.4" width="28" height="75.6"/>
+              <text class="c-value" x="194" y="118.4" text-anchor="middle">4.2</text>
+              <text class="c-tick" x="194" y="218" text-anchor="middle">4</text>
+              <rect class="c-bar" x="220" y="117.2" width="28" height="82.8"/>
+              <text class="c-value" x="234" y="111.2" text-anchor="middle">4.6</text>
+              <text class="c-tick" x="234" y="218" text-anchor="middle">5</text>
+              <rect class="c-bar" x="260" y="120.8" width="28" height="79.2"/>
+              <text class="c-value" x="274" y="114.8" text-anchor="middle">4.4</text>
+              <text class="c-tick" x="274" y="218" text-anchor="middle">6</text>
+              <rect class="c-bar" x="300" y="113.6" width="28" height="86.4"/>
+              <text class="c-value" x="314" y="107.6" text-anchor="middle">4.8</text>
+              <text class="c-tick" x="314" y="218" text-anchor="middle">7</text>
+              <rect class="c-bar focus" x="340" y="93.8" width="28" height="106.2"/>
+              <text class="c-value" x="354" y="87.8" text-anchor="middle">5.9</text>
+              <text class="c-tick" x="354" y="218" text-anchor="middle">8</text>
+              <rect class="c-bar focus" x="380" y="84.8" width="28" height="115.2"/>
+              <text class="c-value" x="394" y="78.8" text-anchor="middle">6.4</text>
+              <text class="c-tick" x="394" y="218" text-anchor="middle">9</text>
+              <rect class="c-bar focus" x="420" y="77.6" width="28" height="122.4"/>
+              <text class="c-value" x="434" y="71.6" text-anchor="middle">6.8</text>
+              <text class="c-tick" x="434" y="218" text-anchor="middle">10</text>
+              <rect class="c-bar focus" x="460" y="65" width="28" height="135"/>
+              <text class="c-value" x="474" y="59" text-anchor="middle">7.5</text>
+              <text class="c-tick" x="474" y="218" text-anchor="middle">11</text>
+              <rect class="c-bar focus" x="500" y="57.8" width="28" height="142.2"/>
+              <text class="c-value" x="514" y="51.8" text-anchor="middle">7.9</text>
+              <text class="c-tick" x="514" y="218" text-anchor="middle">12</text>
+              <rect class="c-bar focus" x="540" y="45.2" width="28" height="154.8"/>
+              <text class="c-value" x="554" y="39.2" text-anchor="middle">8.6</text>
+              <text class="c-tick" x="554" y="218" text-anchor="middle">13</text>
+              <rect class="c-bar focus" x="580" y="34.4" width="28" height="165.6"/>
+              <text class="c-value" x="594" y="28.4" text-anchor="middle">9.2</text>
+              <text class="c-tick" x="594" y="218" text-anchor="middle">14</text>
+              <text class="c-tick" x="194" y="242" text-anchor="middle">Week 1</text>
+              <text class="c-tick" x="474" y="242" text-anchor="middle">Week 2</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-1</span> <strong>Week one is flat at about four minutes; week two climbs every day.</strong> Median minutes from page to acknowledgement, by day of shift. <span class="key focus">Week two</span> Paging export, July to September 2026, 1,046 pages. The data table is under Detail.</figcaption>
+        </figure>
+
+        <h2 id="options">A one-week shift beats both a new hire and doing nothing</h2>
+        <div class="table-wrap"><table>
+          <caption>Options against what decides this</caption>
+          <thead><tr><th scope="col">Criterion</th><th scope="col" class="rec">A. One-week shift</th><th scope="col">B. Hire a seventh engineer</th><th scope="col">C. Keep two weeks</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Expected median response</th><td class="rec">About 4.5 minutes (estimate)</td><td>About 7 minutes until the hire starts (estimate)</td><td>5.4 minutes today</td></tr>
+            <tr><th scope="row">Days on call per engineer a year</th><td class="rec">About 61</td><td>About 52</td><td>About 61, rising to 91 if two leave</td></tr>
+            <tr><th scope="row">Cost</th><td class="rec">None beyond handovers</td><td>One salary, four months to hire</td><td>The cost of doing nothing: two engineers may leave the rotation</td></tr>
+            <tr><th scope="row">Reversible</th><td class="rec">At any handover</td><td>No</td><td>Not applicable</td></tr>
+          </tbody>
+        </table></div>
+        <p class="table-note">Response estimates use the week-one medians in FIG-1; today's figure is the median of all fourteen daily medians. Days on call assume 365 days shared by the engineers on the rotation. Hiring time is from the last two platform hires.</p>
+        <p>Hiring helps the load but not the second week, and it lands after the people asking to leave have decided. Doing nothing keeps response near five and a half minutes only while all six stay on the rotation.</p>
+
+        <h2 id="plan">The switch takes three steps and ends with a review in March</h2>
+        <ol class="steps">
+          <li><strong>Publish the new schedule (platform lead, by 1 December)</strong>One-week shifts from Monday 5 January, handover Mondays at 10:00, each engineer's weeks named a quarter ahead.</li>
+          <li><strong>Write the handover checklist (on-call owner, by 15 December)</strong>Open incidents, silenced alerts, risky changes planned for the week. The checklist is the handover; nothing is passed on by memory.</li>
+          <li><strong>Review the first twelve weeks (platform lead, 30 March)</strong>Compare response by day of shift with FIG-1, count dropped handovers, and ask the team again. Keep, adjust or revert using the stop conditions.</li>
+        </ol>
+
+        <h2 id="risks">Two failures would send us back to two weeks</h2>
+        <div class="callout stop"><span class="label">Stop conditions</span>Revert at the next handover if any handover drops an open incident, or if week-one median response is not below 5 minutes by the March review.</div>
+        <p>The written checklist guards against context lost at the extra handovers. The March review also tests the other explanation, harder incidents late in the month, by comparing day of shift with day of month.</p>
+
+        <h2 id="detail" class="annex">Detail</h2>
+        <details><summary>Data for FIG-1</summary><div class="body">
+          <div class="table-wrap"><table>
+            <thead><tr><th scope="col">Day of shift</th><th scope="col" class="num">Week one</th><th scope="col" class="num">Week two</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Day 1 and day 8</th><td class="num">4.1</td><td class="num">5.9</td></tr>
+              <tr><th scope="row">Day 2 and day 9</th><td class="num">4.0</td><td class="num">6.4</td></tr>
+              <tr><th scope="row">Day 3 and day 10</th><td class="num">4.3</td><td class="num">6.8</td></tr>
+              <tr><th scope="row">Day 4 and day 11</th><td class="num">4.2</td><td class="num">7.5</td></tr>
+              <tr><th scope="row">Day 5 and day 12</th><td class="num">4.6</td><td class="num">7.9</td></tr>
+              <tr><th scope="row">Day 6 and day 13</th><td class="num">4.4</td><td class="num">8.6</td></tr>
+              <tr><th scope="row">Day 7 and day 14</th><td class="num">4.8</td><td class="num">9.2</td></tr>
+            </tbody>
+          </table></div>
+          <p class="table-note">Median minutes to acknowledge, paging export, July to September 2026.</p>
+        </div></details>
+
+        <h2 id="sources" class="annex">Sources</h2>
+        <div class="sources"><ol><li>Paging system export, 1 July to 30 September 2026. Response time runs from the page opening to the first acknowledgement; the 31 of 1,077 pages acknowledged by someone other than the primary are left out.</li><li>Platform team survey, September 2026; team roster and rotation schedule, October 2026; recruiting records for the last two platform hires, 2025 and 2026.</li></ol></div>
+        <p class="footnote">An example page for the html-house-style kit, showing the Decide pattern. Northwind, its people and every number on this page are invented.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog class="zoom" id="zoom" aria-label="Enlarged figure"><div class="zoom-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Fit to window">Fit</button><button type="button" data-z="1" aria-label="Zoom in">+</button><span id="zoom-level" class="muted">100%</span><span class="spacer"></span><button type="button" data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
+
+<script>
+(() => {
+  const root = document.documentElement, K = "hs:" + location.pathname + ":";
+  const store = { set: (k, v) => { try { v ? localStorage.setItem(K + k, v) : localStorage.removeItem(K + k); } catch {} } };
+
+  // Palette and theme. Remembered for this page only. Theme cycles auto, light, dark.
+  const palBtns = [...document.querySelectorAll("[data-set-palette]")], themeBtn = document.querySelector("[data-toggle-theme]");
+  const showPal = () => palBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === (root.dataset.palette || "paper")));
+  const showTheme = () => { if (themeBtn) themeBtn.textContent = "Theme: " + (root.dataset.theme || "auto"); };
+  palBtns.forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("palette", b.dataset.setPalette); showPal(); });
+  if (themeBtn) themeBtn.onclick = () => { const next = { auto: "light", light: "dark", dark: "" }[root.dataset.theme || "auto"];
+    if (next) root.dataset.theme = next; else delete root.dataset.theme; store.set("theme", next); showTheme(); };
+  showPal(); showTheme();
+
+  // Contents rail. The list is in the HTML; this marks the current section and
+  // fills the list only if it was left empty. Collapsed by default on narrow screens.
+  const toc = document.querySelector(".toc"), list = toc && toc.querySelector("ol");
+  const heads = [...document.querySelectorAll("main h2")];
+  if (toc && list) {
+    heads.forEach((h, i) => { if (!h.id) h.id = (h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section") + "-" + i; });
+    if (!list.children.length) heads.forEach(h => { const li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.append(a); list.append(li); });
+    if (!list.children.length) toc.hidden = true;
+    const box = toc.querySelector("details"), wide = matchMedia("(min-width: 1100px)");
+    if (box) { box.open = wide.matches; wide.addEventListener("change", e => { box.open = e.matches; }); }
+    const links = [...list.querySelectorAll("a")];
+    const mark = () => { let cur = heads[0]; for (const h of heads) if (h.getBoundingClientRect().top <= innerHeight * 0.3) cur = h;
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = heads[heads.length - 1];
+      links.forEach(a => a.getAttribute("href") === "#" + (cur && cur.id) ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")); };
+    let raf = 0; addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); }, { passive: true }); mark();
+  }
+
+  // Enlarge any figure: fit to the window on open, real zoom, real scroll.
+  const dlg = document.getElementById("zoom"), stage = document.getElementById("zoom-stage"), lvl = document.getElementById("zoom-level");
+  let z = 1, w = 0, h = 0;
+  const fit = () => { const s = getComputedStyle(stage);
+    return Math.min((stage.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)) / w, (stage.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom)) / h); };
+  const apply = () => { const el = stage.firstElementChild; if (!el) return; el.style.width = w * z + "px"; el.style.height = h * z + "px"; lvl.textContent = Math.round(z * 100) + "%"; };
+  document.querySelectorAll(".zoom-btn").forEach(b => b.onclick = () => {
+    const src = b.closest("figure") && b.closest("figure").querySelector(".figure-frame > svg, .figure-frame > img, .figure-frame > picture img");
+    if (!src || !dlg) return;
+    const vb = src.viewBox && src.viewBox.baseVal, r = src.getBoundingClientRect();
+    [w, h] = vb && vb.width ? [vb.width, vb.height] : src.naturalWidth ? [src.naturalWidth, src.naturalHeight] : [r.width, r.height];
+    if (!w || !h) return;
+    const c = src.cloneNode(true), name = src.querySelector("title");
+    c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    c.removeAttribute("aria-labelledby"); c.setAttribute("aria-label", name ? name.textContent : (src.alt || "Enlarged figure"));
+    stage.replaceChildren(c); dlg.showModal(); z = Math.min(fit(), 4); apply(); stage.scrollTo(0, 0);
+  });
+  if (dlg) {
+    dlg.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? fit() : Math.min(6, Math.max(0.25, z * (d > 0 ? 1.25 : 0.8))); apply(); });
+    dlg.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  }
+
+  // Tabs: one tab stop, arrow keys, Home and End. Panels are visible until this runs.
+  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')];
+    const sel = tab => tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
+      const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    tabs.forEach((tab, i) => { tab.onclick = () => sel(tab); tab.onkeydown = e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (e.key === "Home" || e.key === "End" || d) { e.preventDefault(); const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); } }; });
+    sel(tabs.find(x => x.getAttribute("aria-selected") === "true") || tabs[0]); });
+
+  // Page patterns (PATTERNS.md). Each block does nothing on a page without its markup.
+
+  // Page state: filters, sort and chart picks (PATTERNS.md section 9). The hash
+  // holds it as #key=value&key=value. A change pushes history, so Back undoes it.
+  // An in-page link keeps the state and adds at=<id>; a hash with no "=" is a
+  // plain anchor. A view is a [data-view] element, or the whole page.
+  const views = [...document.querySelectorAll("[data-view]")];
+  if (!views.length && document.querySelector(".filter, button.sort, [data-filter-item]")) views.push(document.body);
+  const viewOf = el => el.closest("[data-view]") || document.body;
+  const read = () => new URLSearchParams(location.hash.includes("=") ? location.hash.slice(1) : "");
+  const coll = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const num = x => { const t = x.replace(/[,\s%$]/g, ""); return t !== "" && isFinite(t) ? +t : NaN; }; // "4,210" and "61%" sort as numbers
+  const cmp = (a, b) => { const x = num(a), y = num(b); return isNaN(x) || isNaN(y) ? coll.compare(a, b) : x - y; };
+  const model = views.map(v => {
+    const mine = sel => [...v.querySelectorAll(sel)].filter(el => viewOf(el) === v);
+    const q = mine('input[type="search"]')[0], picks = mine("[data-key][data-value]");
+    return { v, q, qk: q ? q.dataset.key || "q" : "", picks, keys: [...new Set(picks.map(b => b.dataset.key))], items: mine("[data-filter-item]"),
+      groups: mine("[data-filter-group]"), tables: mine("table").filter(t => t.querySelector("th > button.sort")), said: mine(".filter-sentence"),
+      empty: mine(".filter-empty")[0], noun: v.dataset.noun || "items" };
+  });
+  const sortTable = (t, val) => {
+    const ths = [...t.tHead.rows[0].cells], body = t.tBodies[0], rows = [...body.rows];
+    ths.forEach((th, i) => { th.dataset.col = th.dataset.col || "c" + i; });
+    rows.forEach((r, i) => { if (!r.dataset.i) r.dataset.i = i; });
+    const [col, dir] = (val || "").split(/\.(?=[^.]*$)/), ix = ths.findIndex(th => th.dataset.col === col);
+    ths.forEach((th, i) => { if (th.querySelector("button.sort")) th.setAttribute("aria-sort", i === ix ? (dir === "desc" ? "descending" : "ascending") : "none"); });
+    const key = r => { const c = r.cells[ix]; return c ? (c.dataset.sort ?? c.textContent.trim()) : ""; };
+    rows.sort((a, b) => (ix < 0 ? 0 : cmp(key(a), key(b)) * (dir === "desc" ? -1 : 1)) || a.dataset.i - b.dataset.i);
+    body.append(...rows);
+  };
+  const render = () => { const p = read();
+    for (const m of model) {
+      const q = m.qk ? (p.get(m.qk) || "").trim().toLowerCase() : "";
+      if (m.q && document.activeElement !== m.q) m.q.value = p.get(m.qk) || "";
+      const ok = (el, skip) => (!q || el.textContent.toLowerCase().includes(q)) && m.keys.every(k => k === skip || !p.get(k) || el.dataset[k] === p.get(k));
+      let n = 0; m.items.forEach(el => { el.hidden = !ok(el); if (!el.hidden) n++; });
+      m.groups.forEach(g => { g.hidden = !g.querySelector("[data-filter-item]:not([hidden])"); });
+      m.picks.forEach(b => { b.setAttribute("aria-pressed", (p.get(b.dataset.key) || "") === b.dataset.value);
+        // A chart bar counts the records under every filter except its own, so the bars stay a way to switch.
+        const c = b.querySelector("[data-count]"), bar = b.querySelector("[data-unit]"); if (!c) return;
+        const k = m.items.filter(el => el.dataset[b.dataset.key] === b.dataset.value && ok(el, b.dataset.key)).length;
+        c.textContent = k; if (bar) { bar.setAttribute("width", k * bar.dataset.unit); c.setAttribute("x", +bar.getAttribute("x") + k * bar.dataset.unit + 6); } });
+      m.tables.forEach(t => sortTable(t, p.get(t.dataset.sortKey || "sort")));
+      if (m.empty) m.empty.hidden = n > 0 || !m.items.length;
+      const used = (q ? ['matching "' + q + '"'] : []).concat(m.keys.filter(k => p.get(k)).map(k => {
+        const b = m.picks.find(x => x.dataset.key === k && x.dataset.value === p.get(k)); return b ? b.dataset.say || b.dataset.label || b.textContent.trim() : p.get(k); }));
+      m.said.forEach(s => { s.textContent = used.length ? n + " of " + m.items.length + " " + m.noun + ": " + used.join(", ") : "All " + m.items.length + " " + m.noun; });
+    } };
+  const go = (p, push) => { p.delete("at"); const h = p.toString(); history[push ? "pushState" : "replaceState"](null, "", h ? "#" + h : location.pathname + location.search); render(); };
+  // A deep link to an item the filter hides clears that view's filter and shows it.
+  const reveal = () => { const h = location.hash.slice(1), id = h.includes("=") ? read().get("at") : decodeURIComponent(h), el = id && document.getElementById(id);
+    if (!el) return;
+    if (el.closest("[hidden]")) { const m = model.find(x => x.v === viewOf(el)) || model[0], p = read(); [m.qk, ...m.keys].forEach(k => p.delete(k));
+      p.set("at", id); history.replaceState(null, "", "#" + p); render(); }
+    document.querySelectorAll("[data-at]").forEach(x => x.removeAttribute("data-at")); el.setAttribute("data-at", "");
+    if (h.includes("=")) el.scrollIntoView({ block: "start" }); };
+  if (model.length) {
+    let typed = 0;
+    model.forEach(m => {
+      if (m.q) m.q.addEventListener("input", () => { const p = read(), v = m.q.value.trim(); if (v) p.set(m.qk, v); else p.delete(m.qk);
+        go(p, Date.now() - typed > 1000); typed = Date.now(); }); // one history entry per pause in typing, not per key
+      m.picks.forEach(b => { const pick = () => { const p = read(), on = (p.get(b.dataset.key) || "") === b.dataset.value;
+          if (b.dataset.value && !(on && b.closest("svg"))) p.set(b.dataset.key, b.dataset.value); else p.delete(b.dataset.key); go(p, true); };
+        b.addEventListener("click", pick);
+        if (b.closest("svg")) b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } }); });
+      m.tables.forEach(t => t.querySelectorAll("th > button.sort").forEach(btn => btn.addEventListener("click", () => {
+        const th = btn.parentElement, p = read(), k = t.dataset.sortKey || "sort";
+        p.set(k, th.dataset.col + (th.getAttribute("aria-sort") === "ascending" ? ".desc" : ".asc")); go(p, true); })));
+    });
+    // In-page links keep the state: #at=finding-3&sev=high.
+    document.addEventListener("click", e => { const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !location.hash.includes("=")) return;
+      const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!id || id.includes("=") || !document.getElementById(id)) return;
+      e.preventDefault(); const p = read(); p.set("at", id); history.pushState(null, "", "#" + p); render(); reveal(); }, true);
+    addEventListener("popstate", () => { render(); reveal(); }); addEventListener("hashchange", () => { render(); reveal(); });
+    render(); reveal();
+  }
+
+  // Step progress: ticks are kept in localStorage for this page, with the time
+  // the run started, until the reader resets them. A tick never hides a step.
+  const ticks = [...document.querySelectorAll("ol.steps.do > li > .step-check input")];
+  if (ticks.length) {
+    const key = K + "run", say = document.querySelector(".progress-text"), jump = document.querySelector(".progress-jump");
+    let run = {}; try { run = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+    const save = () => { try { run.started ? localStorage.setItem(key, JSON.stringify(run)) : localStorage.removeItem(key); } catch {} };
+    const update = () => { const next = ticks.find(t => !t.checked), n = ticks.filter(t => t.checked).length;
+      if (say) say.textContent = (next ? "Next: step " + (ticks.indexOf(next) + 1) + " of " + ticks.length : "All " + ticks.length + " steps ticked")
+        + (run.started ? ". " + n + " done in the run started " + new Date(run.started).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "." : ".");
+      if (jump) { jump.hidden = !next; if (next) jump.href = "#" + next.closest("li").id; } };
+    ticks.forEach(t => { t.checked = (run.done || []).includes(t.closest("li").id);
+      t.addEventListener("change", () => { if (!run.started) run.started = Date.now(); run.done = ticks.filter(x => x.checked).map(x => x.closest("li").id); save(); update(); }); });
+    const reset = document.querySelector("[data-reset-steps]");
+    if (reset) reset.addEventListener("click", () => { run = {}; save(); ticks.forEach(t => { t.checked = false; }); update(); });
+    update();
+  }
+
+  // Returning reader (Monitor): a digest of what the reader last saw is kept for
+  // this page. On return, a dismissible panel lists what changed. Silent when
+  // storage is unavailable.
+  const since = document.querySelector(".since");
+  if (since) {
+    const key = K + "seen", now = {};
+    document.querySelectorAll("[data-digest]").forEach(el => { const s = el.querySelector(".status"); now[el.dataset.digest] = s ? s.textContent.trim() : el.dataset.status || ""; });
+    let was = null; try { was = JSON.parse(localStorage.getItem(key)); } catch {}
+    const save = () => { try { localStorage.setItem(key, JSON.stringify(now)); } catch {} };
+    const ids = was ? [...new Set([...Object.keys(now), ...Object.keys(was)])].filter(id => was[id] !== now[id]) : [];
+    if (ids.length) {
+      since.querySelector(".since-count").textContent = "Changed since your last visit: " + ids.length + (ids.length === 1 ? " item" : " items");
+      const list = since.querySelector("ul");
+      ids.slice(0, 8).forEach(id => { const li = document.createElement("li"); li.textContent = id + ": " + (!(id in was) ? "new, " + now[id] : !(id in now) ? "removed" : "was " + was[id] + ", now " + now[id]); list.append(li); });
+      if (ids.length > 8) { const li = document.createElement("li"); li.textContent = "and " + (ids.length - 8) + " more"; list.append(li); }
+      since.hidden = false;
+    }
+    const dismiss = since.querySelector("[data-dismiss]");
+    if (dismiss) dismiss.addEventListener("click", () => { since.hidden = true; save(); });
+    addEventListener("pagehide", save);
+  }
+
+  // Save as PDF: the browser's own print. A button with data-progress keeps the
+  // ticks on paper; any other print shows empty boxes.
+  document.querySelectorAll(".print-btn").forEach(b => b.addEventListener("click", () => { root.classList.toggle("print-progress", "progress" in b.dataset); window.print(); }));
+  addEventListener("afterprint", () => root.classList.remove("print-progress"));
+
+  // Print everything: open collapsed sections first.
+  addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));
+  addEventListener("afterprint", () => document.querySelectorAll("details").forEach(d => { d.open = d.dataset.wasOpen === "true"; }));
+})();
+</script>
+</body>
+</html>

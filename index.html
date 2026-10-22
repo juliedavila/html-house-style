@@ -6,7 +6,7 @@
 <title>House Style Sample</title>
 <style>
 /* ==========================================================================
-   House style: base stylesheet (v1.1)
+   House style: base stylesheet (v1.2)
    Inline this whole file into a <style> tag in every generated page.
    No external fonts, no CDNs, no frameworks. Everything is a token.
 
@@ -15,6 +15,8 @@
    Switch density:  <body class="doc">  long reading (default)
                     <body class="tool"> dashboards, trackers, dense UIs
    No-JS fallback:  <html class="no-js">; the page script removes the class.
+   Page pattern:    <body data-pattern="decide|understand|look-up|monitor|do|review">
+                    (the reader's job; see PATTERNS.md and section 16)
    ========================================================================== */
 
 /* ---------- 1. Tokens: raw palettes (never used directly by components) --- */
@@ -413,6 +415,7 @@ svg .c-line  { fill: none; stroke: var(--accent); stroke-width: 2; }
 svg .c-axis  { stroke: var(--border); stroke-width: 1; fill: none; }
 svg .c-grid  { stroke: var(--hairline); stroke-width: 1; fill: none; }
 svg .c-tick  { font: 400 12px var(--font-ui, system-ui, sans-serif); fill: var(--fg-muted); font-variant-numeric: tabular-nums; }
+svg .c-label { font: 500 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); }
 svg .c-value { font: 600 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); font-variant-numeric: tabular-nums; stroke: var(--surface); stroke-width: 4px; paint-order: stroke; stroke-linejoin: round; }
 /* HTML legend keys for category colours. */
 .key { display: inline-flex; align-items: center; gap: 0.4em; font: 500 var(--fs-sm) var(--font-ui); color: var(--fg-muted); margin-right: var(--s4); }
@@ -530,7 +533,8 @@ html { scroll-behavior: smooth; }
   .table-wrap.scroll-y { max-height: none; overflow: visible; }
   /* Paper cannot scroll: wide figures shrink to the printed column. */
   .figure-frame { overflow: visible; }
-  .figure-frame > svg { min-width: 0; max-width: 100%; }
+  .figure-frame > svg { min-width: 0; max-width: min(100%, calc(var(--fig-min, 800px) * 1.25)); }
+  thead th { position: static; }
   .tabs [role="tablist"] { display: none; }
   .tabs [role="tabpanel"][hidden] { display: block; }
   .tabs .tab-label { display: block; }
@@ -540,6 +544,169 @@ html { scroll-behavior: smooth; }
   a { color: inherit; text-decoration: none; }
   .card, .stat { box-shadow: none; }
   .term[data-def]::after { content: none !important; }
+}
+
+/* ---------- 16. Page patterns ------------------------------------------ */
+/* Components the six page patterns need (PATTERNS.md). The pattern names the
+   reader's job: <body class="doc|tool" data-pattern="decide|understand|
+   look-up|monitor|do|review">. Script for the filter, the step progress and
+   the print button is in the template's closing script. */
+
+/* Save as PDF: a button that calls window.print(). Hidden in print and with script off. */
+.print-btn { font: 600 var(--fs-sm) var(--font-ui); padding: 6px 12px; min-height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer; }
+.print-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Print-only lines: when a snapshot was taken, which filter a copy was printed with. */
+.print-only { display: none; }
+.snapshot-note { font: 500 var(--fs-sm)/1.45 var(--font-ui); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s2) var(--s3); margin-top: var(--s4); }
+
+/* Understand: one line at the end of a section that says what the reader now knows and what comes next. */
+.bridge { font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); border-top: 1px solid var(--hairline); padding-top: var(--s3); margin-top: var(--s5); }
+
+/* Label and value pairs: one shape for entries, findings and preconditions. */
+dl.fields { display: grid; grid-template-columns: minmax(5.5em, max-content) minmax(0, 1fr); gap: var(--s2) var(--s4); font: 400 var(--fs-sm)/1.45 var(--font-ui); margin-top: var(--s3); }
+dl.fields dt { font-weight: 650; color: var(--fg-muted); }
+dl.fields dd { margin: 0; min-width: 0; }
+dl.fields dd > :first-child { margin-top: 0; }
+@media (max-width: 520px) { dl.fields { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.fields dd + dt { margin-top: var(--s2); } }
+
+/* Filter bar: a search box and groups of chips. Its state lives in the URL
+   hash, so a link reproduces the view. Hidden with script off, when every
+   item shows anyway. */
+.filter { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: flex-end; margin-top: var(--s5); padding: var(--s3) var(--s4); border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); font-family: var(--font-ui); }
+.filter .field { margin-top: 0; flex: 1 1 240px; }
+.filter .chips { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.filter .chips > span { font-size: var(--fs-sm); font-weight: 600; margin-right: var(--s1); }
+.filter .chips button { font: 600 var(--fs-sm) var(--font-ui); min-height: 36px; padding: 4px 12px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); color: var(--fg-muted); cursor: pointer; }
+.filter .chips button:hover { color: var(--accent); border-color: var(--accent); }
+.filter .chips button[aria-pressed="true"] { color: var(--accent); background: var(--accent-bg); border-color: var(--accent); }
+/* The list says what it shows, in words: "5 of 140 services: expired, Payments". */
+.filter-sentence { font: 600 var(--fs-sm)/1.45 var(--font-ui); margin-top: var(--s3); }
+.filter-empty { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); }
+.entry[hidden], .finding[hidden], .filter-empty[hidden], .since[hidden] { display: none; }
+.no-js .filter, .no-js .print-btn, .no-js .progress { display: none; }
+/* Sortable columns: the header text is the button; the indicator is a shape
+   (up, down, or both when unsorted). With script off the text stays and the
+   button does nothing. */
+th > button.sort { display: flex; align-items: center; gap: 0.4em; width: 100%; min-height: 28px; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+th.num > button.sort { justify-content: flex-end; }
+th > button.sort::after { content: "\2195"; font-size: 0.85em; color: var(--fg-subtle); flex: none; }
+th[aria-sort="ascending"] > button.sort::after { content: "\25B2"; color: var(--accent); }
+th[aria-sort="descending"] > button.sort::after { content: "\25BC"; color: var(--accent); }
+th > button.sort:hover { color: var(--accent); }
+th > button.sort:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) { th > button.sort { min-height: 40px; } }
+.no-js th > button.sort { pointer-events: none; } .no-js th > button.sort::after { content: none; }
+
+/* A dataset inside a reading page: tool density for one section. Header strip
+   names what is interactive, the sentence says what the table shows, and the
+   table scrolls in a capped frame. See PATTERNS.md, "Mixed pages". */
+section.dataset { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: var(--lh-ui); margin-top: var(--s5); }
+.prose > section.dataset { max-width: none; }
+.dataset-head { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); justify-content: space-between; align-items: baseline; border-top: 2px solid var(--hairline); padding-top: var(--s3); }
+.dataset-head > * { margin: 0; }
+.dataset-title { font-weight: 650; font-size: var(--fs-base); }
+.dataset-how { color: var(--fg-muted); }
+section.dataset th, section.dataset td { padding: 6px var(--s3); }
+section.dataset .table-wrap.scroll-y { max-height: min(60vh, 520px); }
+.dataset-print-note { display: none; }
+
+/* Chart marks that filter the records under them: each row is a button. */
+svg .c-hit { fill: transparent; }
+svg [role="button"] { cursor: pointer; outline: none; }
+svg [role="button"]:hover .c-hit { fill: var(--accent-bg); }
+svg [role="button"]:focus-visible .c-hit { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 2; }
+svg [role="button"][aria-pressed="true"] .c-bar { fill: var(--accent); }
+svg [role="button"][aria-pressed="true"] .c-label { text-decoration: underline; }
+
+/* Monitor: what changed since the reader last looked. */
+.since { border: 1px solid var(--hairline); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); padding: var(--s3) var(--s4); margin-top: var(--s4); font: 400 var(--fs-sm)/1.45 var(--font-ui); }
+.since > :first-child { margin-top: 0; }
+.since ul { margin-top: var(--s2); }
+
+
+/* Phones: a cell never narrows below a short phrase, so a comparison of three
+   or four options scrolls in its frame instead of stacking single words. A
+   .long column (a sentence per row) keeps a readable width everywhere. */
+@media (max-width: 520px) { .table-wrap :is(th, td) { min-width: 7em; } .table-wrap :is(th, td).num { min-width: 0; } }
+.table-wrap :is(th, td).long { min-width: 16em; }
+
+/* Look up: an index of jump links, then entries that all have the same shape:
+   term, one-line answer, detail, related links. */
+nav.index { font: 500 var(--fs-sm)/1.45 var(--font-ui); margin-top: var(--s5); }
+nav.index .label { display: block; font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); }
+nav.index ul { list-style: none; padding: 0; margin: var(--s2) 0 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); }
+nav.index li + li { margin-top: 0; }
+nav.index ul + .label { margin-top: var(--s4); }
+.entry { border-top: 1px solid var(--hairline); padding-top: var(--s4); margin-top: var(--s4); scroll-margin-top: var(--s6); }
+.entry > :first-child { margin-top: 0; }
+.entry > *, .finding > * { max-width: var(--measure); }
+.prose > .filter, .prose > .finding, .prose > .preconditions, .prose > .progress { max-width: none; }
+.entry h3 { margin-top: 0; font: 650 var(--fs-base)/1.3 var(--font-ui); letter-spacing: 0; }
+.entry .answer { margin-top: var(--s1); }
+.entry .related { font: 400 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); margin-top: var(--s2); }
+.entry:is(:target, [data-at]) { box-shadow: inset 3px 0 0 var(--accent); padding-left: var(--s4); }
+.finding[data-at] { border-color: var(--accent); }
+
+/* Review: every finding has the same shape. Severity is a .status (a shape and a word). */
+.finding { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); padding: var(--s4) var(--s5); margin-top: var(--s5); scroll-margin-top: var(--s6); }
+.finding > :first-child { margin-top: 0; }
+.finding h3 { margin-top: 0; font: 650 var(--fs-base)/1.35 var(--font-ui); letter-spacing: 0; }
+.finding .finding-meta { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s3); align-items: center; margin-top: var(--s2); font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); }
+
+/* Do: who can run the procedure, what access, how long, what to have open. */
+.preconditions { border: 1px solid var(--hairline); border-left: 4px solid var(--accent-2); border-radius: var(--radius); background: var(--surface); padding: var(--s4) var(--s5); margin-top: var(--s5); }
+.preconditions > .label { font: 650 var(--fs-xs) var(--font-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
+
+/* Do: one action per step, a box to tick it off, the expected result after it.
+   Ticks are kept per page; they never hide a step. */
+ol.steps.do > li { scroll-margin-top: 4rem; }
+ol.steps.do .step-check { display: flex; align-items: flex-start; gap: var(--s2); font: 650 var(--fs-base)/1.35 var(--font-ui); cursor: pointer; }
+ol.steps.do .step-check input { margin-top: 0.15em; flex: none; }
+/* Commands wrap instead of hiding off the edge of a phone; copying still gets the original line. */
+ol.steps.do pre { margin-top: var(--s2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.expect { font: 400 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); border-left: 3px solid var(--ok); padding-left: var(--s3); margin-top: var(--s2); }
+.expect strong { color: var(--fg); }
+@media screen { ol.steps.do > li:has(> .step-check input:checked)::before { content: "\2713"; color: var(--ok); background: var(--ok-bg); } }
+/* The progress line stays in view while the steps scroll. Wrap it and its
+   steps in div.procedure so it stops following the reader when they end. */
+.progress { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s3); align-items: center; font: 500 var(--fs-sm)/1.45 var(--font-ui); padding: var(--s2) 0; margin-top: var(--s4); background: var(--bg); border-bottom: 1px solid var(--hairline); }
+.progress .spacer { flex: 1; }
+@media screen { .progress { position: sticky; top: 0; z-index: 5; } }
+
+@media print {
+  .print-only { display: block; }
+  .filter, nav.index, .print-btn, .progress { display: none !important; }
+  /* A Look up list prints in full whatever the filter: put .print-all on its container. */
+  .print-all [data-filter-item][hidden], .print-all [data-filter-group][hidden] { display: block !important; }
+  .entry, .finding, .preconditions { break-inside: avoid; }
+  /* Chrome splits a grid across pages even inside an unbreakable box, so the
+     label column is a float on paper. */
+  dl.fields { display: block; }
+  dl.fields dt { float: left; clear: left; width: 7em; }
+  dl.fields dd { margin: 0 0 4pt 7.5em; }
+  .entry:is(:target, [data-at]) { box-shadow: none; padding-left: 0; }
+  /* Paper is denser than a screen: tighter sections, rows and tiles. */
+  h2 { margin-top: 22pt; } th, td { padding: 3pt 6pt; } .stat { padding: 6pt 8pt; } .stats { gap: 8pt; }
+  /* Chrome leaves a button blank in a header row repeated on a new page; display: contents prints its text. */
+  th > button.sort { display: contents; } th > button.sort::after { content: none; }
+  /* A long table repeats its header row on each printed page. */
+  thead { display: table-header-group; }
+  .since, .dataset-how { display: none !important; }
+  section.dataset[data-print="summary"] :is(.table-wrap, .table-note, .filter-empty) { display: none; }
+  section.dataset[data-print="summary"] .dataset-print-note { display: block; }
+  section.dataset .table-wrap.scroll-y { max-height: none; overflow: visible; }
+  /* A printed Look up list is compact: one entry is a few lines. */
+  .entry { padding-top: 6pt; margin-top: 6pt; } .entry > * + * { margin-top: 2pt; }
+  /* Commands print in full. */
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
+  /* Paper cannot follow a link: external URLs print after the link text. Put
+     class="no-url" on a link whose text is already the URL. */
+  main a[href^="http"]:not(.no-url)::after { content: " (" attr(href) ")"; font-size: 0.85em; color: var(--fg-muted); overflow-wrap: anywhere; }
+  nav a[href^="http"]::after, figure a[href^="http"]::after { content: none; }
+  /* Do checklists print with empty boxes, unless the reader chose "Print with my progress". */
+  ol.steps.do input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 12pt; height: 12pt; border: 1pt solid var(--fg); border-radius: 2px; background: none; }
+  :root.print-progress ol.steps.do input[type="checkbox"]:checked { background: var(--fg); box-shadow: inset 0 0 0 2pt #FFFFFF; }
 }
 /* end of base.css */
 
@@ -558,18 +725,20 @@ html { scroll-behavior: smooth; }
     if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
 </script>
 </head>
-<body class="doc">
+<body class="doc" data-pattern="decide">
 <div class="page">
 
-  <p class="kitnote no-print">Sample page from the <a href="https://github.com/juliedavila/html-house-style">HTML house style kit</a>. Use the buttons to compare the Paper, Slate and Graphite palettes in light and dark, and scroll to the component gallery for every component. The content is invented.</p>
+  <p class="kitnote no-print">Sample page from the <a href="https://github.com/juliedavila/html-house-style">HTML house style kit</a>. Use the buttons to compare the Paper, Slate and Graphite palettes in light and dark, and scroll to the component gallery for every component. The <a href="examples/index.html">page pattern examples</a> show one page for each reader's job. The content is invented.</p>
 
   <header class="masthead">
-    <!-- Palette and theme switches: keep only for tools the reader will live in. -->
+    <!-- Palette and theme switches: keep only for tools the reader will live in. Keep the
+         Save as PDF button on Decide, Review and Do pages (PATTERNS.md, "Print and PDF"). -->
     <div class="toolbar no-print">
       <button type="button" data-set-palette="paper">Paper</button>
       <button type="button" data-set-palette="slate">Slate</button>
       <button type="button" data-set-palette="graphite">Graphite</button>
       <button type="button" data-toggle-theme>Theme: auto</button>
+      <button type="button" class="print-btn">Save as PDF</button>
     </div>
     <div class="kicker">Decision brief · Platform engineering</div>
     <h1>Move every team to one shared build cache this quarter</h1>
@@ -693,6 +862,90 @@ flowchart LR
         <h2 id="gallery" class="annex">Component gallery</h2>
         <p class="purpose">This section shows every component in <code>base.css</code> once, with sample content. Delete it from real pages.</p>
 
+        <h3>Page patterns start from the reader's job</h3>
+        <p>Before choosing components, name what the reader will do in the minute after they open the page. Each job has a pattern in <code>PATTERNS.md</code> and a working example. This brief is the Decide pattern. The <a href="examples/index.html">examples contents page</a> lists all six, and a mixed page with an explorable dataset.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th scope="col">Pattern</th><th scope="col">The reader is trying to</th><th scope="col">Opens with</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><a href="examples/decide.html">Decide</a></th><td>Approve, reject or choose</td><td><code>.bluf</code> with a list</td></tr>
+            <tr><th scope="row"><a href="examples/understand.html">Understand</a></th><td>Build a mental model they can explain</td><td><code>.purpose</code></td></tr>
+            <tr><th scope="row"><a href="examples/look-up.html">Look up</a></th><td>Find one fact fast and leave</td><td><code>.purpose</code> and a filter</td></tr>
+            <tr><th scope="row"><a href="examples/monitor.html">Monitor</a></th><td>See whether anything needs them</td><td><code>.bluf</code> with one status sentence</td></tr>
+            <tr><th scope="row"><a href="examples/do.html">Do</a></th><td>Carry out a procedure correctly</td><td><code>.purpose</code> and preconditions</td></tr>
+            <tr><th scope="row"><a href="examples/review.html">Review</a></th><td>Learn what was found and what to fix first</td><td><code>.bluf</code> with a list</td></tr>
+            <tr><th scope="row"><a href="examples/report-with-dataset.html">Mixed</a></th><td>Read the argument, then explore the records behind it (reading page with an explorable dataset)</td><td>The main pattern's opening, plus a <code>section.dataset</code></td></tr>
+          </tbody>
+        </table></div>
+        <p class="table-note">Declare the pattern on the body: <code>&lt;body class="doc" data-pattern="decide"&gt;</code>. <code>check.mjs</code> checks the opening against it.</p>
+
+        <h3>Pattern components keep one shape each</h3>
+        <p>A Save as PDF button (<code>.print-btn</code>) calls the browser's print. Decide, Review and Do pages carry one in the masthead toolbar, as this page does.</p>
+
+        <div data-view data-noun="entries">
+        <div class="filter" role="search" aria-label="Filter the sample entries">
+          <div class="field"><label for="gallery-q">Filter entries</label><input id="gallery-q" type="search" data-key="gq" placeholder="Type to filter" autocomplete="off"></div>
+          <div class="chips" role="group" aria-labelledby="gallery-area"><span id="gallery-area">Area</span>
+            <button type="button" data-key="area" data-value="">All</button>
+            <button type="button" data-key="area" data-value="cache">Cache</button>
+            <button type="button" data-key="area" data-value="runner">Runner</button>
+          </div>
+        </div>
+        <p class="filter-sentence" aria-live="polite">All 3 entries</p>
+        <p class="filter-empty" hidden>No entries match. Clear the filter to see all three.</p>
+        <div class="print-all">
+          <article class="entry" id="entry-hit" data-filter-item data-area="cache">
+            <h3>Cache hit</h3>
+            <p class="answer">The output came back from the cache; nothing was rebuilt.</p>
+            <p class="detail">A hit takes seconds. The hit rate is the share of steps served this way.</p>
+            <p class="related">Related: <a href="#entry-miss">Cache miss</a></p>
+          </article>
+          <article class="entry" id="entry-miss" data-filter-item data-area="cache">
+            <h3>Cache miss</h3>
+            <p class="answer">Nothing matched the key, so the step ran and wrote its output back.</p>
+            <p class="related">Related: <a href="#entry-hit">Cache hit</a></p>
+          </article>
+          <article class="entry" id="entry-cold" data-filter-item data-area="runner">
+            <h3>Cold runner</h3>
+            <p class="answer">A runner that starts with an empty local cache.</p>
+            <p class="related">Related: <a href="#situation">Why cold starts matter</a></p>
+          </article>
+        </div>
+        </div>
+        <p>The filter keeps its state in the address (try a chip, then copy the link, or press Back to undo it), and the sentence under it says what the list shows. An <code>.entry</code> is the Look up shape: term, one-line answer, detail, related links. Each has an <code>id</code>, so a link can point at one.</p>
+
+        <article class="finding" id="finding-sample">
+          <h3>Stale artifacts are served for up to an hour after a key change</h3>
+          <div class="finding-meta"><span class="status danger">High</span><span class="chip">Fix before rollout</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Cache service, key lookup</dd>
+            <dt>Evidence</dt><dd>Two of 40 test builds returned output from the previous toolchain.</dd>
+            <dt>Impact</dt><dd>A wrong binary could ship.</dd>
+            <dt>Fix</dt><dd>Include the toolchain hash in every key.</dd>
+          </dl>
+        </article>
+        <p>A <code>.finding</code> is the Review shape: a title that states the defect, severity as a <code>.status</code>, a disposition chip, then where, evidence, impact and fix in <code>dl.fields</code>.</p>
+
+        <div class="preconditions">
+          <span class="label">Before you start</span>
+          <dl class="fields">
+            <dt>Who</dt><dd>The platform on-call engineer</dd>
+            <dt>Access</dt><dd>Write access to the cache service configuration</dd>
+            <dt>Time</dt><dd>About 10 minutes</dd>
+          </dl>
+        </div>
+        <div class="procedure">
+        <div class="progress"><span class="progress-text" aria-live="polite">Step 1 of 2</span><a class="progress-jump" href="#gallery-step-1">Go to it</a><span class="spacer"></span><button type="button" class="btn" data-reset-steps>Reset progress</button></div>
+        <ol class="steps do">
+          <li id="gallery-step-1"><label class="step-check"><input type="checkbox"> Turn on read-only mode</label>
+            <pre><code>cachectl mode set read-only</code></pre>
+            <p class="expect"><strong>You should see:</strong> mode: read-only</p></li>
+          <li id="gallery-step-2"><label class="step-check"><input type="checkbox"> Confirm no writes for five minutes</label>
+            <p class="expect"><strong>You should see:</strong> the write counter stays at 0.</p></li>
+        </ol>
+        </div>
+        <p>Do pages open with <code>.preconditions</code>, keep a <code>.progress</code> line in view, and give each step a checkbox and an <code>.expect</code> line. Ticks are kept for this page until the reader resets them, and the printed copy has empty boxes. Understand pages end each section with a <code>.bridge</code> line. Monitor and Review pages state their filter and time in a <code>.print-only</code> line that appears only on paper.</p>
+        <p class="bridge">You now know the pattern components. Next: callouts.</p>
+
         <h3>Callouts hold one aside per section</h3>
         <div class="callout"><span class="label">Note</span>Plain callouts use the accent tint.</div>
         <div class="callout decision"><span class="label">Decision</span>Platform owns the cache service; teams own their cache keys.</div>
@@ -758,31 +1011,86 @@ flowchart LR
         </table></div>
         <p class="table-note">Costs from the cloud price sheet, Oct 2026. Hit rates are estimates from the September CI export; today's rate is measured.</p>
 
-        <p>Long tables scroll inside their frame and keep the header in view:</p>
-        <div class="table-wrap scroll-y"><table>
-          <thead><tr><th scope="col">Repository</th><th scope="col">Team</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Cold starts</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">web-app</th><td>Web</td><td class="num">4,210</td><td class="num">61%</td></tr>
-            <tr><th scope="row">data-pipeline</th><td>Data</td><td class="num">3,980</td><td class="num">72%</td></tr>
-            <tr><th scope="row">mobile-ios</th><td>Mobile</td><td class="num">2,870</td><td class="num">55%</td></tr>
-            <tr><th scope="row">mobile-android</th><td>Mobile</td><td class="num">2,640</td><td class="num">53%</td></tr>
-            <tr><th scope="row">payments</th><td>Web</td><td class="num">2,120</td><td class="num">49%</td></tr>
-            <tr><th scope="row">search</th><td>Data</td><td class="num">1,940</td><td class="num">58%</td></tr>
-            <tr><th scope="row">infra-modules</th><td>Infra</td><td class="num">1,610</td><td class="num">31%</td></tr>
-            <tr><th scope="row">design-system</th><td>Web</td><td class="num">1,480</td><td class="num">44%</td></tr>
-            <tr><th scope="row">notifications</th><td>Web</td><td class="num">1,220</td><td class="num">39%</td></tr>
-            <tr><th scope="row">billing</th><td>Web</td><td class="num">1,090</td><td class="num">47%</td></tr>
-            <tr><th scope="row">ml-features</th><td>Data</td><td class="num">980</td><td class="num">68%</td></tr>
-            <tr><th scope="row">auth</th><td>Infra</td><td class="num">910</td><td class="num">28%</td></tr>
-            <tr><th scope="row">reporting</th><td>Data</td><td class="num">870</td><td class="num">51%</td></tr>
-            <tr><th scope="row">docs-site</th><td>Web</td><td class="num">760</td><td class="num">22%</td></tr>
-            <tr><th scope="row">edge-proxy</th><td>Infra</td><td class="num">640</td><td class="num">35%</td></tr>
-            <tr><th scope="row">feature-flags</th><td>Infra</td><td class="num">520</td><td class="num">26%</td></tr>
-            <tr><th scope="row">admin-console</th><td>Web</td><td class="num">480</td><td class="num">41%</td></tr>
-            <tr><th scope="row">load-tests</th><td>Infra</td><td class="num">310</td><td class="num">64%</td></tr>
-          </tbody>
-        </table></div>
+        <p>A dataset inside a reading page (<code>section.dataset</code>, made by <code>tools/table.mjs</code>) switches one section to tool density. Its bar chart filters the table under it; each bar counts the rows under every other filter. Sortable columns put a <code>button.sort</code> in the header: one click sorts ascending, the next descending. The table scrolls in a capped frame and keeps its header in view, and the address keeps the whole view:</p>
+        <section class="dataset" data-view data-noun="repositories" id="repos">
+          <div class="dataset-head"><p class="dataset-title">Repositories by cold-start rate</p><p class="dataset-how">Filter, sort, or pick a bar to narrow the table.</p></div>
+          <div class="filter" role="search" aria-label="Filter repositories">
+            <div class="field"><label for="repos-q">Search repositories</label><input id="repos-q" type="search" data-key="rq" autocomplete="off"></div>
+        
+          </div>
+          <p class="filter-sentence" aria-live="polite">All 18 repositories</p>
+        <figure class="linked">
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <!-- Scale: x = 74 + value * 26.6775; axis 0 to 8 repositories, step 2. Made by tools/bars.mjs. -->
+            <svg viewBox="0 0 320 164" style="--fig-min: 320px" role="group" aria-labelledby="repos-chart-t repos-chart-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="repos-chart-t">Repositories by team</title>
+              <desc id="repos-chart-d">Web 7 repositories; Infra 5 repositories; Data 4 repositories; Mobile 2 repositories.</desc>
+              <text class="c-tick" x="74" y="158" text-anchor="middle">0</text>
+              <line class="c-grid" x1="127.4" y1="8" x2="127.4" y2="140"/>
+              <text class="c-tick" x="127.4" y="158" text-anchor="middle">2</text>
+              <line class="c-grid" x1="180.7" y1="8" x2="180.7" y2="140"/>
+              <text class="c-tick" x="180.7" y="158" text-anchor="middle">4</text>
+              <line class="c-grid" x1="234.1" y1="8" x2="234.1" y2="140"/>
+              <text class="c-tick" x="234.1" y="158" text-anchor="middle">6</text>
+              <line class="c-grid" x1="287.4" y1="8" x2="287.4" y2="140"/>
+              <text class="c-tick" x="287.4" y="158" text-anchor="middle">8</text>
+              <line class="c-axis" x1="74" y1="8" x2="74" y2="140"/>
+              <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="web" data-label="Web">
+                <rect class="c-hit" x="12" y="6" width="296" height="32"/>
+                <text class="c-label" x="66" y="27" text-anchor="end">Web</text>
+                <rect class="c-bar" x="74" y="12" width="186.7" height="20" data-unit="26.6775"/>
+                <text class="c-value" x="266.7" y="27" data-count>7</text>
+              </g>
+              <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="infra" data-label="Infra">
+                <rect class="c-hit" x="12" y="38" width="296" height="32"/>
+                <text class="c-label" x="66" y="59" text-anchor="end">Infra</text>
+                <rect class="c-bar" x="74" y="44" width="133.4" height="20" data-unit="26.6775"/>
+                <text class="c-value" x="213.4" y="59" data-count>5</text>
+              </g>
+              <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="data" data-label="Data">
+                <rect class="c-hit" x="12" y="70" width="296" height="32"/>
+                <text class="c-label" x="66" y="91" text-anchor="end">Data</text>
+                <rect class="c-bar" x="74" y="76" width="106.7" height="20" data-unit="26.6775"/>
+                <text class="c-value" x="186.7" y="91" data-count>4</text>
+              </g>
+              <g role="button" tabindex="0" aria-pressed="false" data-key="team" data-value="mobile" data-label="Mobile">
+                <rect class="c-hit" x="12" y="102" width="296" height="32"/>
+                <text class="c-label" x="66" y="123" text-anchor="end">Mobile</text>
+                <rect class="c-bar" x="74" y="108" width="53.4" height="20" data-unit="26.6775"/>
+                <text class="c-value" x="133.4" y="123" data-count>2</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption><strong>Web owns the most repositories.</strong> Pick a bar to filter the table below; pick it again to clear. Each bar counts the rows under every other filter. CI export, Sep 2026.</figcaption>
+        </figure>
+          <p class="filter-empty" hidden>No repositories match. Clear the filters to see all 18.</p>
+        <div class="table-wrap scroll-y"><table id="repos-table">
+            <thead><tr><th scope="col" data-col="repo"><button type="button" class="sort">Repository</button></th><th scope="col" data-col="team"><button type="button" class="sort">Team</button></th><th scope="col" class="num" data-col="runs"><button type="button" class="sort">Runs</button></th><th scope="col" class="num" data-col="cold"><button type="button" class="sort">Cold starts</button></th></tr></thead>
+            <tbody>
+              <tr data-filter-item data-team="web"><th scope="row">web-app</th><td>Web</td><td class="num" data-sort="4210">4,210</td><td class="num" data-sort="61">61%</td></tr>
+              <tr data-filter-item data-team="data"><th scope="row">data-pipeline</th><td>Data</td><td class="num" data-sort="3980">3,980</td><td class="num" data-sort="72">72%</td></tr>
+              <tr data-filter-item data-team="mobile"><th scope="row">mobile-ios</th><td>Mobile</td><td class="num" data-sort="2870">2,870</td><td class="num" data-sort="55">55%</td></tr>
+              <tr data-filter-item data-team="mobile"><th scope="row">mobile-android</th><td>Mobile</td><td class="num" data-sort="2640">2,640</td><td class="num" data-sort="53">53%</td></tr>
+              <tr data-filter-item data-team="web"><th scope="row">payments</th><td>Web</td><td class="num" data-sort="2120">2,120</td><td class="num" data-sort="49">49%</td></tr>
+              <tr data-filter-item data-team="data"><th scope="row">search</th><td>Data</td><td class="num" data-sort="1940">1,940</td><td class="num" data-sort="58">58%</td></tr>
+              <tr data-filter-item data-team="infra"><th scope="row">infra-modules</th><td>Infra</td><td class="num" data-sort="1610">1,610</td><td class="num" data-sort="31">31%</td></tr>
+              <tr data-filter-item data-team="web"><th scope="row">design-system</th><td>Web</td><td class="num" data-sort="1480">1,480</td><td class="num" data-sort="44">44%</td></tr>
+              <tr data-filter-item data-team="web"><th scope="row">notifications</th><td>Web</td><td class="num" data-sort="1220">1,220</td><td class="num" data-sort="39">39%</td></tr>
+              <tr data-filter-item data-team="web"><th scope="row">billing</th><td>Web</td><td class="num" data-sort="1090">1,090</td><td class="num" data-sort="47">47%</td></tr>
+              <tr data-filter-item data-team="data"><th scope="row">ml-features</th><td>Data</td><td class="num" data-sort="980">980</td><td class="num" data-sort="68">68%</td></tr>
+              <tr data-filter-item data-team="infra"><th scope="row">auth</th><td>Infra</td><td class="num" data-sort="910">910</td><td class="num" data-sort="28">28%</td></tr>
+              <tr data-filter-item data-team="data"><th scope="row">reporting</th><td>Data</td><td class="num" data-sort="870">870</td><td class="num" data-sort="51">51%</td></tr>
+              <tr data-filter-item data-team="web"><th scope="row">docs-site</th><td>Web</td><td class="num" data-sort="760">760</td><td class="num" data-sort="22">22%</td></tr>
+              <tr data-filter-item data-team="infra"><th scope="row">edge-proxy</th><td>Infra</td><td class="num" data-sort="640">640</td><td class="num" data-sort="35">35%</td></tr>
+              <tr data-filter-item data-team="infra"><th scope="row">feature-flags</th><td>Infra</td><td class="num" data-sort="520">520</td><td class="num" data-sort="26">26%</td></tr>
+              <tr data-filter-item data-team="web"><th scope="row">admin-console</th><td>Web</td><td class="num" data-sort="480">480</td><td class="num" data-sort="41">41%</td></tr>
+              <tr data-filter-item data-team="infra"><th scope="row">load-tests</th><td>Infra</td><td class="num" data-sort="310">310</td><td class="num" data-sort="64">64%</td></tr>
+            </tbody>
+          </table></div>
         <p class="table-note">CI export, September 2026. Runs are pipeline runs in the month.</p>
+          <p class="dataset-print-note">This printed copy shows the summary. The full table of 18 repositories is in the file.</p>
+        </section>
 
         <h3>Charts are hand-drawn SVG with direct labels</h3>
         <figure>
@@ -1018,6 +1326,129 @@ flowchart LR
     const hrs = (+f.runs.value * +f.mins.value * +f.rate.value) / 60 * (week ? 5 : 1);
     document.getElementById("calc-out").textContent = (Math.round(hrs * 10) / 10) + (week ? " hours a week" : " hours a day"); };
     calc.addEventListener("input", run); run(); }
+
+  // Page patterns (PATTERNS.md). Each block does nothing on a page without its markup.
+
+  // Page state: filters, sort and chart picks (PATTERNS.md section 9). The hash
+  // holds it as #key=value&key=value. A change pushes history, so Back undoes it.
+  // An in-page link keeps the state and adds at=<id>; a hash with no "=" is a
+  // plain anchor. A view is a [data-view] element, or the whole page.
+  const views = [...document.querySelectorAll("[data-view]")];
+  if (!views.length && document.querySelector(".filter, button.sort, [data-filter-item]")) views.push(document.body);
+  const viewOf = el => el.closest("[data-view]") || document.body;
+  const read = () => new URLSearchParams(location.hash.includes("=") ? location.hash.slice(1) : "");
+  const coll = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const num = x => { const t = x.replace(/[,\s%$]/g, ""); return t !== "" && isFinite(t) ? +t : NaN; }; // "4,210" and "61%" sort as numbers
+  const cmp = (a, b) => { const x = num(a), y = num(b); return isNaN(x) || isNaN(y) ? coll.compare(a, b) : x - y; };
+  const model = views.map(v => {
+    const mine = sel => [...v.querySelectorAll(sel)].filter(el => viewOf(el) === v);
+    const q = mine('input[type="search"]')[0], picks = mine("[data-key][data-value]");
+    return { v, q, qk: q ? q.dataset.key || "q" : "", picks, keys: [...new Set(picks.map(b => b.dataset.key))], items: mine("[data-filter-item]"),
+      groups: mine("[data-filter-group]"), tables: mine("table").filter(t => t.querySelector("th > button.sort")), said: mine(".filter-sentence"),
+      empty: mine(".filter-empty")[0], noun: v.dataset.noun || "items" };
+  });
+  const sortTable = (t, val) => {
+    const ths = [...t.tHead.rows[0].cells], body = t.tBodies[0], rows = [...body.rows];
+    ths.forEach((th, i) => { th.dataset.col = th.dataset.col || "c" + i; });
+    rows.forEach((r, i) => { if (!r.dataset.i) r.dataset.i = i; });
+    const [col, dir] = (val || "").split(/\.(?=[^.]*$)/), ix = ths.findIndex(th => th.dataset.col === col);
+    ths.forEach((th, i) => { if (th.querySelector("button.sort")) th.setAttribute("aria-sort", i === ix ? (dir === "desc" ? "descending" : "ascending") : "none"); });
+    const key = r => { const c = r.cells[ix]; return c ? (c.dataset.sort ?? c.textContent.trim()) : ""; };
+    rows.sort((a, b) => (ix < 0 ? 0 : cmp(key(a), key(b)) * (dir === "desc" ? -1 : 1)) || a.dataset.i - b.dataset.i);
+    body.append(...rows);
+  };
+  const render = () => { const p = read();
+    for (const m of model) {
+      const q = m.qk ? (p.get(m.qk) || "").trim().toLowerCase() : "";
+      if (m.q && document.activeElement !== m.q) m.q.value = p.get(m.qk) || "";
+      const ok = (el, skip) => (!q || el.textContent.toLowerCase().includes(q)) && m.keys.every(k => k === skip || !p.get(k) || el.dataset[k] === p.get(k));
+      let n = 0; m.items.forEach(el => { el.hidden = !ok(el); if (!el.hidden) n++; });
+      m.groups.forEach(g => { g.hidden = !g.querySelector("[data-filter-item]:not([hidden])"); });
+      m.picks.forEach(b => { b.setAttribute("aria-pressed", (p.get(b.dataset.key) || "") === b.dataset.value);
+        // A chart bar counts the records under every filter except its own, so the bars stay a way to switch.
+        const c = b.querySelector("[data-count]"), bar = b.querySelector("[data-unit]"); if (!c) return;
+        const k = m.items.filter(el => el.dataset[b.dataset.key] === b.dataset.value && ok(el, b.dataset.key)).length;
+        c.textContent = k; if (bar) { bar.setAttribute("width", k * bar.dataset.unit); c.setAttribute("x", +bar.getAttribute("x") + k * bar.dataset.unit + 6); } });
+      m.tables.forEach(t => sortTable(t, p.get(t.dataset.sortKey || "sort")));
+      if (m.empty) m.empty.hidden = n > 0 || !m.items.length;
+      const used = (q ? ['matching "' + q + '"'] : []).concat(m.keys.filter(k => p.get(k)).map(k => {
+        const b = m.picks.find(x => x.dataset.key === k && x.dataset.value === p.get(k)); return b ? b.dataset.say || b.dataset.label || b.textContent.trim() : p.get(k); }));
+      m.said.forEach(s => { s.textContent = used.length ? n + " of " + m.items.length + " " + m.noun + ": " + used.join(", ") : "All " + m.items.length + " " + m.noun; });
+    } };
+  const go = (p, push) => { p.delete("at"); const h = p.toString(); history[push ? "pushState" : "replaceState"](null, "", h ? "#" + h : location.pathname + location.search); render(); };
+  // A deep link to an item the filter hides clears that view's filter and shows it.
+  const reveal = () => { const h = location.hash.slice(1), id = h.includes("=") ? read().get("at") : decodeURIComponent(h), el = id && document.getElementById(id);
+    if (!el) return;
+    if (el.closest("[hidden]")) { const m = model.find(x => x.v === viewOf(el)) || model[0], p = read(); [m.qk, ...m.keys].forEach(k => p.delete(k));
+      p.set("at", id); history.replaceState(null, "", "#" + p); render(); }
+    document.querySelectorAll("[data-at]").forEach(x => x.removeAttribute("data-at")); el.setAttribute("data-at", "");
+    if (h.includes("=")) el.scrollIntoView({ block: "start" }); };
+  if (model.length) {
+    let typed = 0;
+    model.forEach(m => {
+      if (m.q) m.q.addEventListener("input", () => { const p = read(), v = m.q.value.trim(); if (v) p.set(m.qk, v); else p.delete(m.qk);
+        go(p, Date.now() - typed > 1000); typed = Date.now(); }); // one history entry per pause in typing, not per key
+      m.picks.forEach(b => { const pick = () => { const p = read(), on = (p.get(b.dataset.key) || "") === b.dataset.value;
+          if (b.dataset.value && !(on && b.closest("svg"))) p.set(b.dataset.key, b.dataset.value); else p.delete(b.dataset.key); go(p, true); };
+        b.addEventListener("click", pick);
+        if (b.closest("svg")) b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } }); });
+      m.tables.forEach(t => t.querySelectorAll("th > button.sort").forEach(btn => btn.addEventListener("click", () => {
+        const th = btn.parentElement, p = read(), k = t.dataset.sortKey || "sort";
+        p.set(k, th.dataset.col + (th.getAttribute("aria-sort") === "ascending" ? ".desc" : ".asc")); go(p, true); })));
+    });
+    // In-page links keep the state: #at=finding-3&sev=high.
+    document.addEventListener("click", e => { const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !location.hash.includes("=")) return;
+      const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!id || id.includes("=") || !document.getElementById(id)) return;
+      e.preventDefault(); const p = read(); p.set("at", id); history.pushState(null, "", "#" + p); render(); reveal(); }, true);
+    addEventListener("popstate", () => { render(); reveal(); }); addEventListener("hashchange", () => { render(); reveal(); });
+    render(); reveal();
+  }
+
+  // Step progress: ticks are kept in localStorage for this page, with the time
+  // the run started, until the reader resets them. A tick never hides a step.
+  const ticks = [...document.querySelectorAll("ol.steps.do > li > .step-check input")];
+  if (ticks.length) {
+    const key = K + "run", say = document.querySelector(".progress-text"), jump = document.querySelector(".progress-jump");
+    let run = {}; try { run = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+    const save = () => { try { run.started ? localStorage.setItem(key, JSON.stringify(run)) : localStorage.removeItem(key); } catch {} };
+    const update = () => { const next = ticks.find(t => !t.checked), n = ticks.filter(t => t.checked).length;
+      if (say) say.textContent = (next ? "Next: step " + (ticks.indexOf(next) + 1) + " of " + ticks.length : "All " + ticks.length + " steps ticked")
+        + (run.started ? ". " + n + " done in the run started " + new Date(run.started).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "." : ".");
+      if (jump) { jump.hidden = !next; if (next) jump.href = "#" + next.closest("li").id; } };
+    ticks.forEach(t => { t.checked = (run.done || []).includes(t.closest("li").id);
+      t.addEventListener("change", () => { if (!run.started) run.started = Date.now(); run.done = ticks.filter(x => x.checked).map(x => x.closest("li").id); save(); update(); }); });
+    const reset = document.querySelector("[data-reset-steps]");
+    if (reset) reset.addEventListener("click", () => { run = {}; save(); ticks.forEach(t => { t.checked = false; }); update(); });
+    update();
+  }
+
+  // Returning reader (Monitor): a digest of what the reader last saw is kept for
+  // this page. On return, a dismissible panel lists what changed. Silent when
+  // storage is unavailable.
+  const since = document.querySelector(".since");
+  if (since) {
+    const key = K + "seen", now = {};
+    document.querySelectorAll("[data-digest]").forEach(el => { const s = el.querySelector(".status"); now[el.dataset.digest] = s ? s.textContent.trim() : el.dataset.status || ""; });
+    let was = null; try { was = JSON.parse(localStorage.getItem(key)); } catch {}
+    const save = () => { try { localStorage.setItem(key, JSON.stringify(now)); } catch {} };
+    const ids = was ? [...new Set([...Object.keys(now), ...Object.keys(was)])].filter(id => was[id] !== now[id]) : [];
+    if (ids.length) {
+      since.querySelector(".since-count").textContent = "Changed since your last visit: " + ids.length + (ids.length === 1 ? " item" : " items");
+      const list = since.querySelector("ul");
+      ids.slice(0, 8).forEach(id => { const li = document.createElement("li"); li.textContent = id + ": " + (!(id in was) ? "new, " + now[id] : !(id in now) ? "removed" : "was " + was[id] + ", now " + now[id]); list.append(li); });
+      if (ids.length > 8) { const li = document.createElement("li"); li.textContent = "and " + (ids.length - 8) + " more"; list.append(li); }
+      since.hidden = false;
+    }
+    const dismiss = since.querySelector("[data-dismiss]");
+    if (dismiss) dismiss.addEventListener("click", () => { since.hidden = true; save(); });
+    addEventListener("pagehide", save);
+  }
+
+  // Save as PDF: the browser's own print. A button with data-progress keeps the
+  // ticks on paper; any other print shows empty boxes.
+  document.querySelectorAll(".print-btn").forEach(b => b.addEventListener("click", () => { root.classList.toggle("print-progress", "progress" in b.dataset); window.print(); }));
+  addEventListener("afterprint", () => root.classList.remove("print-progress"));
 
   // Print everything: open collapsed sections first.
   addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));

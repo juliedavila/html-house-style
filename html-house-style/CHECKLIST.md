@@ -8,6 +8,10 @@ If you have a shell, start with `node check.mjs page.html` (or `bun check.mjs pa
 
 ### Structure
 
+- [ ] The page declares one pattern (`<body data-pattern="...">`) and it matches what the reader will do first (PATTERNS.md section 1). (script: declared and known)
+- [ ] The opening matches the pattern: Decide and Review a `.bluf` with a list; Monitor a `.bluf` with one status sentence and an "as of" time; Understand, Look up and Do a `.purpose` sentence. (script)
+- [ ] The sections follow the pattern's skeleton. Every repeated object (entry, finding, step) has the same fields in the same order and its own `id`. (script: entry ids, finding severity)
+- [ ] A Do page has one action per step, an expected result after each, a rollback heading and a "done when" line. (script: steps, rollback, done when)
 - [ ] The masthead has the kicker, a title that states the main claim, the dek and the meta line.
 - [ ] A page that argues or reports opens with one `.bluf`; a reference or tool page opens with one `.purpose` sentence; a dashboard's `.bluf` is one status sentence. (script: count)
 - [ ] Every argument `h2` is a claim. Navigation sections (Glossary, Sources, Method, Appendix, Detail) are `h2.annex` and come last. (script: order, short-heading warning)
@@ -49,6 +53,13 @@ If you have a shell, start with `node check.mjs page.html` (or `bun check.mjs pa
 
 ### Technical
 
+- [ ] A view someone might share (filters, search, sort, chart picks) lives in the URL hash, pushes history so Back undoes it, and is rebuilt on load, `popstate` and `hashchange`. In-page links keep the filter; a deep link to a hidden item shows it. Only personal progress, the returning-reader digest and preferences use `localStorage`. (script: anchor handler warning)
+- [ ] Every interaction the markup offers has its script: sort buttons, filters, chart bars, print buttons. (script: fails if not)
+- [ ] A filtered list says what it shows in a sentence ("5 of 140 services: expired"), on screen and in print.
+- [ ] More than about 25 records in a reading page are a `section.dataset` (chart that filters a sortable, capped table), never prose and never one long static table.
+- [ ] **Replacing or restyling an existing page:** `node check.mjs new.html --was old.html`, or list the old page's interactions by reading it. The handover names every interaction kept and every one dropped. (script: compare mode)
+- [ ] Generated figures and tables checked on their own first: `node check.mjs --fragment piece.html`. (script)
+- [ ] Print behaviour matches the pattern: Decide, Review and Do pages have a Save as PDF button that calls `window.print()`; Monitor and Review state their filter in a print-only line; Look up prints the full list; Do prints empty boxes. (script: button wired)
 - [ ] Single file. No external scripts, styles, fonts or media. Under 2MB. (script)
 - [ ] `localStorage` calls are inside `try`/`catch`; the inline script parses. (script)
 - [ ] `html` has `class="no-js"`; tab panels are not authored `hidden`; the page reads with JavaScript off. (script)
@@ -58,7 +69,8 @@ If you have a shell, start with `node check.mjs page.html` (or `bun check.mjs pa
 - [ ] Desktop render (1280 to 1440px) checked region by region at full size.
 - [ ] True phone viewport (390px, via DevTools device metrics) checked; `scrollWidth <= innerWidth`, also with a `.term` focused.
 - [ ] Dark mode checked.
-- [ ] Print preview checked: light colours, collapsed sections open, nothing split badly.
+- [ ] Print preview checked: light colours, collapsed sections open, nothing split badly, and the pattern's print behaviour (filter stated, empty boxes, link addresses).
+- [ ] Filters exercised: set one, reload, and the same view comes back from the address.
 - [ ] Every figure opened in the Enlarge dialog and read at zoom.
 - [ ] Contents rail, tabs, collapsibles and enlarge buttons clicked.
 - [ ] No heading leaves a single word alone on its last line; nothing sits flush against the block above it.

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en" class="no-js" data-palette="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout Accessibility Review</title>
+<!-- In generated pages, replace this link with the full contents of base.css in a <style> tag. -->
+<link rel="stylesheet" href="../base.css">
+<script>
+/* Before first paint: script is on, and the reader's saved theme for this page applies. */
+(() => { const r = document.documentElement, k = "hs:" + location.pathname + ":"; r.classList.remove("no-js");
+  try { const t = localStorage.getItem(k + "theme"), p = localStorage.getItem(k + "palette");
+    if (t && !r.hasAttribute("data-theme")) r.dataset.theme = t;
+    if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
+</script>
+</head>
+<body class="doc" data-pattern="review">
+<div class="page">
+
+  <header class="masthead">
+    <div class="toolbar no-print"><button type="button" class="print-btn">Save as PDF</button></div>
+    <div class="kicker">Accessibility review · Northwind shop</div>
+    <h1>The checkout is not ready to launch: three findings stop customers paying</h1>
+    <p class="dek">A review of the three checkout steps against the Web Content Accessibility Guidelines (WCAG) 2.2, with a keyboard and two screen readers.</p>
+    <div class="meta"><span>Version 1</span><span>Reviewed 20 and 21 Oct 2026</span><span>8 findings</span><span>5 min read</span></div>
+  </header>
+
+  <main data-view data-noun="findings">
+    <div class="with-toc">
+      <section class="bluf">
+        <span class="label">Verdict</span>
+        <p>Do not launch the new checkout until the three high-severity findings are fixed; all three are small changes.</p>
+        <ul>
+          <li><strong>Counts:</strong> 3 high, 3 medium and 2 low, out of 8 findings.</li>
+          <li><strong>Fix first:</strong> the Place order button, which no keyboard can reach (finding 1). It is a one-line change and unblocks every keyboard user.</li>
+          <li><strong>Then:</strong> retest the three steps, about half a day, before the launch date of 3 November.</li>
+        </ul>
+      </section>
+
+      <nav class="toc" aria-label="Contents">
+        <details open>
+          <summary>Contents</summary>
+          <ol>
+            <li><a href="#summary">Three of eight findings block checkout for some customers</a></li>
+            <li><a href="#findings">Keyboard and screen reader users cannot finish a payment</a></li>
+            <li><a href="#scope">The review covered three steps on two browsers</a></li>
+            <li><a href="#not-checked">Four things this review did not check</a></li>
+            <li class="annex-start"><a href="#sources">Sources</a></li>
+          </ol>
+        </details>
+      </nav>
+
+      <div class="prose">
+        <h2 id="summary">Three of eight findings block checkout for some customers</h2>
+        <p>High means a customer cannot finish a task. Medium means the task is much harder. Low means it is slower or clumsier than it should be.</p>
+        <div class="stats">
+          <div class="stat"><div class="value">3</div><div class="what"><span class="status danger">High</span> blocks a task</div><div class="src">This review, Oct 2026</div></div>
+          <div class="stat"><div class="value">3</div><div class="what"><span class="status warn">Medium</span> makes it much harder</div><div class="src">This review, Oct 2026</div></div>
+          <div class="stat"><div class="value">2</div><div class="what"><span class="status idle">Low</span> slows it down</div><div class="src">This review, Oct 2026</div></div>
+          <div class="stat"><div class="value">4</div><div class="what">To fix before launch</div><div class="src">Agreed with the checkout team, 21 Oct 2026</div></div>
+        </div>
+        <div data-view>
+<div class="table-wrap"><table data-sort-key="gsort">
+    <thead><tr><th scope="col" class="num" data-col="n"><button type="button" class="sort">No.</button></th><th scope="col" class="long" data-col="title"><button type="button" class="sort">Finding</button></th><th scope="col" data-col="sev"><button type="button" class="sort">Severity</button></th><th scope="col" data-col="disp"><button type="button" class="sort">Decision</button></th></tr></thead>
+    <tbody>
+      <tr><td class="num" data-sort="1">1</td><td class="long"><a href="#finding-1">The Place order button cannot be reached with a keyboard</a></td><td data-sort="0"><span class="status danger">High</span></td><td>Fix before launch</td></tr>
+      <tr><td class="num" data-sort="2">2</td><td class="long"><a href="#finding-2">The card number field has no label a screen reader can announce</a></td><td data-sort="0"><span class="status danger">High</span></td><td>Fix before launch</td></tr>
+      <tr><td class="num" data-sort="3">3</td><td class="long"><a href="#finding-3">Payment errors are shown only in red and are never announced</a></td><td data-sort="0"><span class="status danger">High</span></td><td>Fix before launch</td></tr>
+      <tr><td class="num" data-sort="4">4</td><td class="long"><a href="#finding-4">Focus outlines are removed across the whole checkout</a></td><td data-sort="1"><span class="status warn">Medium</span></td><td>Fix before launch</td></tr>
+      <tr><td class="num" data-sort="5">5</td><td class="long"><a href="#finding-5">Hint text under the fields fails contrast at 2.8 to 1</a></td><td data-sort="1"><span class="status warn">Medium</span></td><td>Fix next sprint</td></tr>
+      <tr><td class="num" data-sort="6">6</td><td class="long"><a href="#finding-6">The session ends after ten minutes with no warning</a></td><td data-sort="1"><span class="status warn">Medium</span></td><td>Fix next sprint</td></tr>
+      <tr><td class="num" data-sort="7">7</td><td class="long"><a href="#finding-7">The order summary table has no header cells</a></td><td data-sort="2"><span class="status idle">Low</span></td><td>Fix next sprint</td></tr>
+      <tr><td class="num" data-sort="8">8</td><td class="long"><a href="#finding-8">Address fields do not declare their purpose for autofill</a></td><td data-sort="2"><span class="status idle">Low</span></td><td>Accepted</td></tr>
+    </tbody>
+  </table></div>
+<p class="table-note">This review, 20 and 21 Oct 2026. Sort by any column; each title links to its finding.</p>
+        </div>
+
+        <h2 id="findings">Keyboard and screen reader users cannot finish a payment</h2>
+        <p>Findings run from most to least severe. Each one says where it is, what was seen, who it affects and the fix.</p>
+        <div class="filter" role="search" aria-label="Filter findings">
+          <div class="chips" role="group" aria-labelledby="f-sev"><span id="f-sev">Severity</span>
+            <button type="button" data-key="sev" data-value="">All</button>
+            <button type="button" data-key="sev" data-value="high" data-say="high severity">High</button>
+            <button type="button" data-key="sev" data-value="medium" data-say="medium severity">Medium</button>
+            <button type="button" data-key="sev" data-value="low" data-say="low severity">Low</button>
+          </div>
+          <div class="chips" role="group" aria-labelledby="f-disp"><span id="f-disp">Decision</span>
+            <button type="button" data-key="disp" data-value="">All</button>
+            <button type="button" data-key="disp" data-value="launch" data-say="fix before launch">Fix before launch</button>
+            <button type="button" data-key="disp" data-value="sprint" data-say="fix next sprint">Fix next sprint</button>
+            <button type="button" data-key="disp" data-value="accepted" data-say="accepted">Accepted</button>
+          </div>
+        </div>
+        <p class="filter-sentence" aria-live="polite">All 8 findings</p>
+        <p class="filter-empty" hidden>No findings match this filter. Choose All to see every finding.</p>
+        <article class="finding" id="finding-1" data-filter-item data-sev="high" data-disp="launch">
+          <h3>1. The Place order button cannot be reached with a keyboard</h3>
+          <div class="finding-meta"><span class="status danger">High</span><span class="chip">Fix before launch</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Step 3, Review and pay: the Place order button</dd>
+            <dt>Evidence</dt><dd>The button is a <code>div</code> with a click handler. Pressing Tab moves from the promo code field straight to the footer links.</dd>
+            <dt>Impact</dt><dd>Anyone who uses a keyboard or a switch device cannot place any order.</dd>
+            <dt>Fix</dt><dd>Make it a <code>button type="submit"</code>. No visual change.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 2.1.1 Keyboard</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-2" data-filter-item data-sev="high" data-disp="launch">
+          <h3>2. The card number field has no label a screen reader can announce</h3>
+          <div class="finding-meta"><span class="status danger">High</span><span class="chip">Fix before launch</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Step 2, Payment: card number</dd>
+            <dt>Evidence</dt><dd>The field has only placeholder text. Both screen readers tested announce it as "edit text", and the placeholder disappears once typing starts.</dd>
+            <dt>Impact</dt><dd>Screen reader users cannot tell which field takes the card number.</dd>
+            <dt>Fix</dt><dd>Add a visible <code>label</code> tied to the field with <code>for</code>.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 1.3.1 Info and Relationships; 4.1.2 Name, Role, Value</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-3" data-filter-item data-sev="high" data-disp="launch">
+          <h3>3. Payment errors are shown only in red and are never announced</h3>
+          <div class="finding-meta"><span class="status danger">High</span><span class="chip">Fix before launch</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Step 3, Review and pay: the declined-card message</dd>
+            <dt>Evidence</dt><dd>A declined card turns the card field border red and shows red text at the top of the page. Focus stays on the button, and neither screen reader says anything.</dd>
+            <dt>Impact</dt><dd>Blind customers do not learn that payment failed; some colour-blind customers cannot tell which field is wrong.</dd>
+            <dt>Fix</dt><dd>Put the error text beside its field, link it with <code>aria-describedby</code>, and move focus to an error summary at the top.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 1.4.1 Use of Color; 3.3.1 Error Identification; 4.1.3 Status Messages</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-4" data-filter-item data-sev="medium" data-disp="launch">
+          <h3>4. Focus outlines are removed across the whole checkout</h3>
+          <div class="finding-meta"><span class="status warn">Medium</span><span class="chip">Fix before launch</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>All three steps</dd>
+            <dt>Evidence</dt><dd>The checkout stylesheet sets <code>outline: none</code> on every element, and nothing replaces it.</dd>
+            <dt>Impact</dt><dd>Keyboard users cannot see where they are on the page.</dd>
+            <dt>Fix</dt><dd>Delete the rule and add a visible focus style that meets 3 to 1 contrast.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 2.4.7 Focus Visible</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-5" data-filter-item data-sev="medium" data-disp="sprint">
+          <h3>5. Hint text under the fields fails contrast at 2.8 to 1</h3>
+          <div class="finding-meta"><span class="status warn">Medium</span><span class="chip">Fix next sprint</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Steps 1 and 2: the hint lines under each field</dd>
+            <dt>Evidence</dt><dd>Grey <code>#9A9A9A</code> on white measures 2.8 to 1 with a contrast checker. The target for text this size is 4.5 to 1.</dd>
+            <dt>Impact</dt><dd>Customers with low vision, or on a phone outdoors, cannot read the format hints.</dd>
+            <dt>Fix</dt><dd>Darken the hint colour to at least <code>#6B6B6B</code> (5.3 to 1).</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 1.4.3 Contrast (Minimum)</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-6" data-filter-item data-sev="medium" data-disp="sprint">
+          <h3>6. The session ends after ten minutes with no warning</h3>
+          <div class="finding-meta"><span class="status warn">Medium</span><span class="chip">Fix next sprint</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>All three steps</dd>
+            <dt>Evidence</dt><dd>Leaving the payment step open for ten minutes returns to an empty cart with no message.</dd>
+            <dt>Impact</dt><dd>Customers who need more time, including many who use assistive technology, lose their order and start again.</dd>
+            <dt>Fix</dt><dd>Warn at eight minutes and let the customer extend the session with one button.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 2.2.1 Timing Adjustable</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-7" data-filter-item data-sev="low" data-disp="sprint">
+          <h3>7. The order summary table has no header cells</h3>
+          <div class="finding-meta"><span class="status idle">Low</span><span class="chip">Fix next sprint</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Step 3, Review and pay: order summary</dd>
+            <dt>Evidence</dt><dd>Item, quantity and price are plain cells. A screen reader reads the numbers with no column names.</dd>
+            <dt>Impact</dt><dd>Screen reader users hear a list of numbers they have to work out.</dd>
+            <dt>Fix</dt><dd>Use <code>th</code> for the column headers.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 1.3.1 Info and Relationships</dd>
+          </dl>
+        </article>
+        <article class="finding" id="finding-8" data-filter-item data-sev="low" data-disp="accepted">
+          <h3>8. Address fields do not declare their purpose for autofill</h3>
+          <div class="finding-meta"><span class="status idle">Low</span><span class="chip">Accepted</span></div>
+          <dl class="fields">
+            <dt>Where</dt><dd>Step 1, Delivery: address fields</dd>
+            <dt>Evidence</dt><dd>The fields have no <code>autocomplete</code> values, so browsers cannot fill them in.</dd>
+            <dt>Impact</dt><dd>Customers with motor or memory impairments type the whole address by hand.</dd>
+            <dt>Fix</dt><dd>Accepted for now: the new address form ships in December with these values set.</dd>
+            <dt>Standard</dt><dd>WCAG 2.2, 1.3.5 Identify Input Purpose</dd>
+          </dl>
+        </article>
+
+        <h2 id="scope">The review covered three steps on two browsers</h2>
+        <p>The three checkout steps (delivery, payment, review and pay) on the staging site, build of 19 October. Each step was completed with a keyboard only, with two screen readers on a laptop and a phone, and at 200% zoom. Contrast was measured with a contrast checker; markup was read in the browser's developer tools. Each finding was reproduced twice before it was written down.</p>
+
+        <h2 id="not-checked">Four things this review did not check</h2>
+        <ul>
+          <li>The payment provider's card form inside its frame, which the provider tests.</li>
+          <li>Voice control software.</li>
+          <li>Pages before the basket, such as search and product pages.</li>
+          <li>The emails sent after an order.</li>
+        </ul>
+
+        <h2 id="sources" class="annex">Sources</h2>
+        <div class="sources"><ol><li><a href="https://www.w3.org/TR/WCAG22/">Web Content Accessibility Guidelines 2.2</a>, World Wide Web Consortium, 2023.</li><li>Review notes and screen recordings, 20 and 21 October 2026.</li></ol></div>
+        <p class="footnote">An example page for the html-house-style kit, showing the Review pattern. Northwind, its checkout and its findings are invented.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog class="zoom" id="zoom" aria-label="Enlarged figure"><div class="zoom-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Fit to window">Fit</button><button type="button" data-z="1" aria-label="Zoom in">+</button><span id="zoom-level" class="muted">100%</span><span class="spacer"></span><button type="button" data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
+
+<script>
+(() => {
+  const root = document.documentElement, K = "hs:" + location.pathname + ":";
+  const store = { set: (k, v) => { try { v ? localStorage.setItem(K + k, v) : localStorage.removeItem(K + k); } catch {} } };
+
+  // Palette and theme. Remembered for this page only. Theme cycles auto, light, dark.
+  const palBtns = [...document.querySelectorAll("[data-set-palette]")], themeBtn = document.querySelector("[data-toggle-theme]");
+  const showPal = () => palBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === (root.dataset.palette || "paper")));
+  const showTheme = () => { if (themeBtn) themeBtn.textContent = "Theme: " + (root.dataset.theme || "auto"); };
+  palBtns.forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("palette", b.dataset.setPalette); showPal(); });
+  if (themeBtn) themeBtn.onclick = () => { const next = { auto: "light", light: "dark", dark: "" }[root.dataset.theme || "auto"];
+    if (next) root.dataset.theme = next; else delete root.dataset.theme; store.set("theme", next); showTheme(); };
+  showPal(); showTheme();
+
+  // Contents rail. The list is in the HTML; this marks the current section and
+  // fills the list only if it was left empty. Collapsed by default on narrow screens.
+  const toc = document.querySelector(".toc"), list = toc && toc.querySelector("ol");
+  const heads = [...document.querySelectorAll("main h2")];
+  if (toc && list) {
+    heads.forEach((h, i) => { if (!h.id) h.id = (h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section") + "-" + i; });
+    if (!list.children.length) heads.forEach(h => { const li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.append(a); list.append(li); });
+    if (!list.children.length) toc.hidden = true;
+    const box = toc.querySelector("details"), wide = matchMedia("(min-width: 1100px)");
+    if (box) { box.open = wide.matches; wide.addEventListener("change", e => { box.open = e.matches; }); }
+    const links = [...list.querySelectorAll("a")];
+    const mark = () => { let cur = heads[0]; for (const h of heads) if (h.getBoundingClientRect().top <= innerHeight * 0.3) cur = h;
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = heads[heads.length - 1];
+      links.forEach(a => a.getAttribute("href") === "#" + (cur && cur.id) ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")); };
+    let raf = 0; addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); }, { passive: true }); mark();
+  }
+
+  // Enlarge any figure: fit to the window on open, real zoom, real scroll.
+  const dlg = document.getElementById("zoom"), stage = document.getElementById("zoom-stage"), lvl = document.getElementById("zoom-level");
+  let z = 1, w = 0, h = 0;
+  const fit = () => { const s = getComputedStyle(stage);
+    return Math.min((stage.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)) / w, (stage.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom)) / h); };
+  const apply = () => { const el = stage.firstElementChild; if (!el) return; el.style.width = w * z + "px"; el.style.height = h * z + "px"; lvl.textContent = Math.round(z * 100) + "%"; };
+  document.querySelectorAll(".zoom-btn").forEach(b => b.onclick = () => {
+    const src = b.closest("figure") && b.closest("figure").querySelector(".figure-frame > svg, .figure-frame > img, .figure-frame > picture img");
+    if (!src || !dlg) return;
+    const vb = src.viewBox && src.viewBox.baseVal, r = src.getBoundingClientRect();
+    [w, h] = vb && vb.width ? [vb.width, vb.height] : src.naturalWidth ? [src.naturalWidth, src.naturalHeight] : [r.width, r.height];
+    if (!w || !h) return;
+    const c = src.cloneNode(true), name = src.querySelector("title");
+    c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    c.removeAttribute("aria-labelledby"); c.setAttribute("aria-label", name ? name.textContent : (src.alt || "Enlarged figure"));
+    stage.replaceChildren(c); dlg.showModal(); z = Math.min(fit(), 4); apply(); stage.scrollTo(0, 0);
+  });
+  if (dlg) {
+    dlg.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? fit() : Math.min(6, Math.max(0.25, z * (d > 0 ? 1.25 : 0.8))); apply(); });
+    dlg.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  }
+
+  // Tabs: one tab stop, arrow keys, Home and End. Panels are visible until this runs.
+  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')];
+    const sel = tab => tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
+      const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    tabs.forEach((tab, i) => { tab.onclick = () => sel(tab); tab.onkeydown = e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (e.key === "Home" || e.key === "End" || d) { e.preventDefault(); const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); } }; });
+    sel(tabs.find(x => x.getAttribute("aria-selected") === "true") || tabs[0]); });
+
+  // Page patterns (PATTERNS.md). Each block does nothing on a page without its markup.
+
+  // Page state: filters, sort and chart picks (PATTERNS.md section 9). The hash
+  // holds it as #key=value&key=value. A change pushes history, so Back undoes it.
+  // An in-page link keeps the state and adds at=<id>; a hash with no "=" is a
+  // plain anchor. A view is a [data-view] element, or the whole page.
+  const views = [...document.querySelectorAll("[data-view]")];
+  if (!views.length && document.querySelector(".filter, button.sort, [data-filter-item]")) views.push(document.body);
+  const viewOf = el => el.closest("[data-view]") || document.body;
+  const read = () => new URLSearchParams(location.hash.includes("=") ? location.hash.slice(1) : "");
+  const coll = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const num = x => { const t = x.replace(/[,\s%$]/g, ""); return t !== "" && isFinite(t) ? +t : NaN; }; // "4,210" and "61%" sort as numbers
+  const cmp = (a, b) => { const x = num(a), y = num(b); return isNaN(x) || isNaN(y) ? coll.compare(a, b) : x - y; };
+  const model = views.map(v => {
+    const mine = sel => [...v.querySelectorAll(sel)].filter(el => viewOf(el) === v);
+    const q = mine('input[type="search"]')[0], picks = mine("[data-key][data-value]");
+    return { v, q, qk: q ? q.dataset.key || "q" : "", picks, keys: [...new Set(picks.map(b => b.dataset.key))], items: mine("[data-filter-item]"),
+      groups: mine("[data-filter-group]"), tables: mine("table").filter(t => t.querySelector("th > button.sort")), said: mine(".filter-sentence"),
+      empty: mine(".filter-empty")[0], noun: v.dataset.noun || "items" };
+  });
+  const sortTable = (t, val) => {
+    const ths = [...t.tHead.rows[0].cells], body = t.tBodies[0], rows = [...body.rows];
+    ths.forEach((th, i) => { th.dataset.col = th.dataset.col || "c" + i; });
+    rows.forEach((r, i) => { if (!r.dataset.i) r.dataset.i = i; });
+    const [col, dir] = (val || "").split(/\.(?=[^.]*$)/), ix = ths.findIndex(th => th.dataset.col === col);
+    ths.forEach((th, i) => { if (th.querySelector("button.sort")) th.setAttribute("aria-sort", i === ix ? (dir === "desc" ? "descending" : "ascending") : "none"); });
+    const key = r => { const c = r.cells[ix]; return c ? (c.dataset.sort ?? c.textContent.trim()) : ""; };
+    rows.sort((a, b) => (ix < 0 ? 0 : cmp(key(a), key(b)) * (dir === "desc" ? -1 : 1)) || a.dataset.i - b.dataset.i);
+    body.append(...rows);
+  };
+  const render = () => { const p = read();
+    for (const m of model) {
+      const q = m.qk ? (p.get(m.qk) || "").trim().toLowerCase() : "";
+      if (m.q && document.activeElement !== m.q) m.q.value = p.get(m.qk) || "";
+      const ok = (el, skip) => (!q || el.textContent.toLowerCase().includes(q)) && m.keys.every(k => k === skip || !p.get(k) || el.dataset[k] === p.get(k));
+      let n = 0; m.items.forEach(el => { el.hidden = !ok(el); if (!el.hidden) n++; });
+      m.groups.forEach(g => { g.hidden = !g.querySelector("[data-filter-item]:not([hidden])"); });
+      m.picks.forEach(b => { b.setAttribute("aria-pressed", (p.get(b.dataset.key) || "") === b.dataset.value);
+        // A chart bar counts the records under every filter except its own, so the bars stay a way to switch.
+        const c = b.querySelector("[data-count]"), bar = b.querySelector("[data-unit]"); if (!c) return;
+        const k = m.items.filter(el => el.dataset[b.dataset.key] === b.dataset.value && ok(el, b.dataset.key)).length;
+        c.textContent = k; if (bar) { bar.setAttribute("width", k * bar.dataset.unit); c.setAttribute("x", +bar.getAttribute("x") + k * bar.dataset.unit + 6); } });
+      m.tables.forEach(t => sortTable(t, p.get(t.dataset.sortKey || "sort")));
+      if (m.empty) m.empty.hidden = n > 0 || !m.items.length;
+      const used = (q ? ['matching "' + q + '"'] : []).concat(m.keys.filter(k => p.get(k)).map(k => {
+        const b = m.picks.find(x => x.dataset.key === k && x.dataset.value === p.get(k)); return b ? b.dataset.say || b.dataset.label || b.textContent.trim() : p.get(k); }));
+      m.said.forEach(s => { s.textContent = used.length ? n + " of " + m.items.length + " " + m.noun + ": " + used.join(", ") : "All " + m.items.length + " " + m.noun; });
+    } };
+  const go = (p, push) => { p.delete("at"); const h = p.toString(); history[push ? "pushState" : "replaceState"](null, "", h ? "#" + h : location.pathname + location.search); render(); };
+  // A deep link to an item the filter hides clears that view's filter and shows it.
+  const reveal = () => { const h = location.hash.slice(1), id = h.includes("=") ? read().get("at") : decodeURIComponent(h), el = id && document.getElementById(id);
+    if (!el) return;
+    if (el.closest("[hidden]")) { const m = model.find(x => x.v === viewOf(el)) || model[0], p = read(); [m.qk, ...m.keys].forEach(k => p.delete(k));
+      p.set("at", id); history.replaceState(null, "", "#" + p); render(); }
+    document.querySelectorAll("[data-at]").forEach(x => x.removeAttribute("data-at")); el.setAttribute("data-at", "");
+    if (h.includes("=")) el.scrollIntoView({ block: "start" }); };
+  if (model.length) {
+    let typed = 0;
+    model.forEach(m => {
+      if (m.q) m.q.addEventListener("input", () => { const p = read(), v = m.q.value.trim(); if (v) p.set(m.qk, v); else p.delete(m.qk);
+        go(p, Date.now() - typed > 1000); typed = Date.now(); }); // one history entry per pause in typing, not per key
+      m.picks.forEach(b => { const pick = () => { const p = read(), on = (p.get(b.dataset.key) || "") === b.dataset.value;
+          if (b.dataset.value && !(on && b.closest("svg"))) p.set(b.dataset.key, b.dataset.value); else p.delete(b.dataset.key); go(p, true); };
+        b.addEventListener("click", pick);
+        if (b.closest("svg")) b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } }); });
+      m.tables.forEach(t => t.querySelectorAll("th > button.sort").forEach(btn => btn.addEventListener("click", () => {
+        const th = btn.parentElement, p = read(), k = t.dataset.sortKey || "sort";
+        p.set(k, th.dataset.col + (th.getAttribute("aria-sort") === "ascending" ? ".desc" : ".asc")); go(p, true); })));
+    });
+    // In-page links keep the state: #at=finding-3&sev=high.
+    document.addEventListener("click", e => { const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !location.hash.includes("=")) return;
+      const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!id || id.includes("=") || !document.getElementById(id)) return;
+      e.preventDefault(); const p = read(); p.set("at", id); history.pushState(null, "", "#" + p); render(); reveal(); }, true);
+    addEventListener("popstate", () => { render(); reveal(); }); addEventListener("hashchange", () => { render(); reveal(); });
+    render(); reveal();
+  }
+
+  // Step progress: ticks are kept in localStorage for this page, with the time
+  // the run started, until the reader resets them. A tick never hides a step.
+  const ticks = [...document.querySelectorAll("ol.steps.do > li > .step-check input")];
+  if (ticks.length) {
+    const key = K + "run", say = document.querySelector(".progress-text"), jump = document.querySelector(".progress-jump");
+    let run = {}; try { run = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+    const save = () => { try { run.started ? localStorage.setItem(key, JSON.stringify(run)) : localStorage.removeItem(key); } catch {} };
+    const update = () => { const next = ticks.find(t => !t.checked), n = ticks.filter(t => t.checked).length;
+      if (say) say.textContent = (next ? "Next: step " + (ticks.indexOf(next) + 1) + " of " + ticks.length : "All " + ticks.length + " steps ticked")
+        + (run.started ? ". " + n + " done in the run started " + new Date(run.started).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "." : ".");
+      if (jump) { jump.hidden = !next; if (next) jump.href = "#" + next.closest("li").id; } };
+    ticks.forEach(t => { t.checked = (run.done || []).includes(t.closest("li").id);
+      t.addEventListener("change", () => { if (!run.started) run.started = Date.now(); run.done = ticks.filter(x => x.checked).map(x => x.closest("li").id); save(); update(); }); });
+    const reset = document.querySelector("[data-reset-steps]");
+    if (reset) reset.addEventListener("click", () => { run = {}; save(); ticks.forEach(t => { t.checked = false; }); update(); });
+    update();
+  }
+
+  // Returning reader (Monitor): a digest of what the reader last saw is kept for
+  // this page. On return, a dismissible panel lists what changed. Silent when
+  // storage is unavailable.
+  const since = document.querySelector(".since");
+  if (since) {
+    const key = K + "seen", now = {};
+    document.querySelectorAll("[data-digest]").forEach(el => { const s = el.querySelector(".status"); now[el.dataset.digest] = s ? s.textContent.trim() : el.dataset.status || ""; });
+    let was = null; try { was = JSON.parse(localStorage.getItem(key)); } catch {}
+    const save = () => { try { localStorage.setItem(key, JSON.stringify(now)); } catch {} };
+    const ids = was ? [...new Set([...Object.keys(now), ...Object.keys(was)])].filter(id => was[id] !== now[id]) : [];
+    if (ids.length) {
+      since.querySelector(".since-count").textContent = "Changed since your last visit: " + ids.length + (ids.length === 1 ? " item" : " items");
+      const list = since.querySelector("ul");
+      ids.slice(0, 8).forEach(id => { const li = document.createElement("li"); li.textContent = id + ": " + (!(id in was) ? "new, " + now[id] : !(id in now) ? "removed" : "was " + was[id] + ", now " + now[id]); list.append(li); });
+      if (ids.length > 8) { const li = document.createElement("li"); li.textContent = "and " + (ids.length - 8) + " more"; list.append(li); }
+      since.hidden = false;
+    }
+    const dismiss = since.querySelector("[data-dismiss]");
+    if (dismiss) dismiss.addEventListener("click", () => { since.hidden = true; save(); });
+    addEventListener("pagehide", save);
+  }
+
+  // Save as PDF: the browser's own print. A button with data-progress keeps the
+  // ticks on paper; any other print shows empty boxes.
+  document.querySelectorAll(".print-btn").forEach(b => b.addEventListener("click", () => { root.classList.toggle("print-progress", "progress" in b.dataset); window.print(); }));
+  addEventListener("afterprint", () => root.classList.remove("print-progress"));
+
+  // Print everything: open collapsed sections first.
+  addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));
+  addEventListener("afterprint", () => document.querySelectorAll("details").forEach(d => { d.open = d.dataset.wasOpen === "true"; }));
+})();
+</script>
+</body>
+</html>

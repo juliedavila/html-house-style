@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en" class="no-js" data-palette="graphite">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cluster Migration Status</title>
+<!-- In generated pages, replace this link with the full contents of base.css in a <style> tag. -->
+<link rel="stylesheet" href="../base.css">
+<script>
+/* Before first paint: script is on, and the reader's saved theme for this page applies. */
+(() => { const r = document.documentElement, k = "hs:" + location.pathname + ":"; r.classList.remove("no-js");
+  try { const t = localStorage.getItem(k + "theme"), p = localStorage.getItem(k + "palette");
+    if (t && !r.hasAttribute("data-theme")) r.dataset.theme = t;
+    if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
+</script>
+</head>
+<body class="tool" data-pattern="monitor">
+<div class="page">
+
+  <header class="masthead">
+    <div class="kicker">Status · Northwind cluster migration</div>
+    <h1>Service migration to the new cluster</h1>
+    <div class="meta"><span>As of <time datetime="2026-10-22T09:00Z">22 Oct 2026, 09:00 UTC</time></span><span>Updated each weekday from the deploy log</span><span>Cutover 14 Nov 2026</span></div>
+  </header>
+
+  <main>
+    <section class="bluf">
+      <span class="label">Status</span>
+      <p><span class="status warn">At risk</span> 17 of 24 services have moved, just behind pace. Two are blocked on other teams and two are at risk; the 14 November cutover holds only if both blocks clear by Friday 24 October.</p>
+    </section>
+    <p class="snapshot-note print-only">Snapshot as of 22 Oct 2026, 09:00 UTC. The filter in use is stated above the table.</p>
+    <section class="since" hidden><p><strong class="since-count">Changed since your last visit</strong></p><ul></ul><button type="button" class="btn" data-dismiss>Dismiss</button></section>
+
+    <div class="stats">
+      <div class="stat"><div class="value">17 of 24</div><div class="what">Are we on pace? Moved so far; the pace line is at 17.5 today.</div><div class="src">Deploy log, 22 Oct 2026</div></div>
+      <div class="stat"><div class="value">2</div><div class="what">Is anything stuck? Services blocked on another team.</div><div class="src">Migration tracker, 22 Oct 2026</div></div>
+      <div class="stat"><div class="value">23 days</div><div class="what">How long is left? Until cutover on 14 November.</div><div class="src">Migration plan</div></div>
+      <div class="stat"><div class="value"><span class="status ok">Healthy</span></div><div class="what">Is the new cluster sound? Error rate 0.3% over seven days, under the 1% limit.</div><div class="src">Cluster metrics, 15 to 22 Oct 2026</div></div>
+    </div>
+
+    <h2 id="attention">Four services need someone this week</h2>
+    <ol>
+        <li><span class="status danger">Blocked</span> <strong>card-vault</strong> (Payments): Waiting on a network policy review by the security team, asked 9 Oct.</li>
+        <li><span class="status danger">Blocked</span> <strong>crawler</strong> (Search): Needs a larger disk class; quota request open since 14 Oct.</li>
+        <li><span class="status warn">At risk</span> <strong>ledger</strong> (Payments): Fails its health check on the new cluster since 20 Oct.</li>
+        <li><span class="status warn">At risk</span> <strong>preferences</strong> (Accounts): Two weeks behind its plan; owner back 27 Oct.</li>
+    </ol>
+
+    <h2 id="services">Seventeen of 24 services run on the new cluster</h2>
+<section class="dataset" data-view data-noun="services" id="services-data">
+  <div class="dataset-head"><p class="dataset-title">All 24 services</p><p class="dataset-how">Filter, sort, or pick an owner to narrow the table.</p></div>
+  <div class="filter" role="search" aria-label="Filter services">
+    <div class="field"><label for="services-data-q">Search services</label><input id="services-data-q" type="search" data-key="q" autocomplete="off"></div>
+    <div class="chips" role="group" aria-labelledby="services-data-status"><span id="services-data-status">Status</span>
+      <button type="button" data-key="status" data-value="">All</button>
+      <button type="button" data-key="status" data-value="blocked">Blocked</button>
+      <button type="button" data-key="status" data-value="risk">At risk</button>
+      <button type="button" data-key="status" data-value="idle">Not started</button>
+      <button type="button" data-key="status" data-value="moved">Moved</button>
+    </div>
+  </div>
+  <p class="filter-sentence" aria-live="polite">All 24 services</p>
+<figure class="linked">
+  <button class="zoom-btn no-print" type="button">Enlarge</button>
+  <div class="figure-frame">
+    <!-- Scale: x = 89 + value * 33.07; axis 0 to 6 services, step 2. Made by tools/bars.mjs. -->
+    <svg viewBox="0 0 320 164" style="--fig-min: 320px" role="group" aria-labelledby="services-data-chart-t services-data-chart-d" xmlns="http://www.w3.org/2000/svg">
+      <title id="services-data-chart-t">Services by owner</title>
+      <desc id="services-data-chart-d">Payments 6 services; Search 6 services; Accounts 6 services; Platform 6 services.</desc>
+      <text class="c-tick" x="89" y="158" text-anchor="middle">0</text>
+      <line class="c-grid" x1="155.1" y1="8" x2="155.1" y2="140"/>
+      <text class="c-tick" x="155.1" y="158" text-anchor="middle">2</text>
+      <line class="c-grid" x1="221.3" y1="8" x2="221.3" y2="140"/>
+      <text class="c-tick" x="221.3" y="158" text-anchor="middle">4</text>
+      <line class="c-grid" x1="287.4" y1="8" x2="287.4" y2="140"/>
+      <text class="c-tick" x="287.4" y="158" text-anchor="middle">6</text>
+      <line class="c-axis" x1="89" y1="8" x2="89" y2="140"/>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="owner" data-value="payments" data-label="Payments">
+        <rect class="c-hit" x="12" y="6" width="296" height="32"/>
+        <text class="c-label" x="81" y="27" text-anchor="end">Payments</text>
+        <rect class="c-bar" x="89" y="12" width="198.4" height="20" data-unit="33.07"/>
+        <text class="c-value" x="293.4" y="27" data-count>6</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="owner" data-value="search" data-label="Search">
+        <rect class="c-hit" x="12" y="38" width="296" height="32"/>
+        <text class="c-label" x="81" y="59" text-anchor="end">Search</text>
+        <rect class="c-bar" x="89" y="44" width="198.4" height="20" data-unit="33.07"/>
+        <text class="c-value" x="293.4" y="59" data-count>6</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="owner" data-value="accounts" data-label="Accounts">
+        <rect class="c-hit" x="12" y="70" width="296" height="32"/>
+        <text class="c-label" x="81" y="91" text-anchor="end">Accounts</text>
+        <rect class="c-bar" x="89" y="76" width="198.4" height="20" data-unit="33.07"/>
+        <text class="c-value" x="293.4" y="91" data-count>6</text>
+      </g>
+      <g role="button" tabindex="0" aria-pressed="false" data-key="owner" data-value="platform" data-label="Platform">
+        <rect class="c-hit" x="12" y="102" width="296" height="32"/>
+        <text class="c-label" x="81" y="123" text-anchor="end">Platform</text>
+        <rect class="c-bar" x="89" y="108" width="198.4" height="20" data-unit="33.07"/>
+        <text class="c-value" x="293.4" y="123" data-count>6</text>
+      </g>
+    </svg>
+  </div>
+  <figcaption><strong>Each owner has six services; pick one to see its list.</strong> Pick a bar to filter the table below; pick it again to clear. Each bar counts the rows under every other filter. Migration tracker, 22 Oct 2026.</figcaption>
+</figure>
+  <p class="filter-empty" hidden>No services match. Clear the filters to see all 24.</p>
+<div class="table-wrap scroll-y"><table id="services-data-table">
+    <thead><tr><th scope="col" data-col="service"><button type="button" class="sort">Service</button></th><th scope="col" data-col="owner"><button type="button" class="sort">Owner</button></th><th scope="col" data-col="status"><button type="button" class="sort">Status</button></th><th scope="col" class="long" data-col="next">Moved on, or what is next</th></tr></thead>
+    <tbody>
+      <tr data-filter-item data-owner="payments" data-status="blocked" data-digest="card-vault"><th scope="row">card-vault</th><td>Payments</td><td data-sort="0"><span class="status danger">Blocked</span></td><td class="long">Waiting on a network policy review by the security team, asked 9 Oct</td></tr>
+      <tr data-filter-item data-owner="search" data-status="blocked" data-digest="crawler"><th scope="row">crawler</th><td>Search</td><td data-sort="0"><span class="status danger">Blocked</span></td><td class="long">Needs a larger disk class; quota request open since 14 Oct</td></tr>
+      <tr data-filter-item data-owner="payments" data-status="risk" data-digest="ledger"><th scope="row">ledger</th><td>Payments</td><td data-sort="1"><span class="status warn">At risk</span></td><td class="long">Fails its health check on the new cluster since 20 Oct</td></tr>
+      <tr data-filter-item data-owner="accounts" data-status="risk" data-digest="preferences"><th scope="row">preferences</th><td>Accounts</td><td data-sort="1"><span class="status warn">At risk</span></td><td class="long">Two weeks behind its plan; owner back 27 Oct</td></tr>
+      <tr data-filter-item data-owner="payments" data-status="idle" data-digest="payouts"><th scope="row">payouts</th><td>Payments</td><td data-sort="2"><span class="status idle">Not started</span></td><td class="long">Scheduled 3 Nov</td></tr>
+      <tr data-filter-item data-owner="accounts" data-status="idle" data-digest="audit-log"><th scope="row">audit-log</th><td>Accounts</td><td data-sort="2"><span class="status idle">Not started</span></td><td class="long">Scheduled 5 Nov</td></tr>
+      <tr data-filter-item data-owner="platform" data-status="idle" data-digest="secrets-sync"><th scope="row">secrets-sync</th><td>Platform</td><td data-sort="2"><span class="status idle">Not started</span></td><td class="long">Scheduled 10 Nov</td></tr>
+      <tr data-filter-item data-owner="search" data-status="moved" data-digest="synonyms"><th scope="row">synonyms</th><td>Search</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 21 Oct</td></tr>
+      <tr data-filter-item data-owner="accounts" data-status="moved" data-digest="notifications"><th scope="row">notifications</th><td>Accounts</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 20 Oct</td></tr>
+      <tr data-filter-item data-owner="platform" data-status="moved" data-digest="scheduler"><th scope="row">scheduler</th><td>Platform</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 20 Oct</td></tr>
+      <tr data-filter-item data-owner="payments" data-status="moved" data-digest="refunds"><th scope="row">refunds</th><td>Payments</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 13 Oct</td></tr>
+      <tr data-filter-item data-owner="search" data-status="moved" data-digest="ranking"><th scope="row">ranking</th><td>Search</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 13 Oct</td></tr>
+      <tr data-filter-item data-owner="payments" data-status="moved" data-digest="checkout-api"><th scope="row">checkout-api</th><td>Payments</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 6 Oct</td></tr>
+      <tr data-filter-item data-owner="platform" data-status="moved" data-digest="feature-flags"><th scope="row">feature-flags</th><td>Platform</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 6 Oct</td></tr>
+      <tr data-filter-item data-owner="payments" data-status="moved" data-digest="invoices"><th scope="row">invoices</th><td>Payments</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 29 Sep</td></tr>
+      <tr data-filter-item data-owner="accounts" data-status="moved" data-digest="profile"><th scope="row">profile</th><td>Accounts</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 29 Sep</td></tr>
+      <tr data-filter-item data-owner="platform" data-status="moved" data-digest="metrics"><th scope="row">metrics</th><td>Platform</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 29 Sep</td></tr>
+      <tr data-filter-item data-owner="search" data-status="moved" data-digest="indexer"><th scope="row">indexer</th><td>Search</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 22 Sep</td></tr>
+      <tr data-filter-item data-owner="search" data-status="moved" data-digest="suggest"><th scope="row">suggest</th><td>Search</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 22 Sep</td></tr>
+      <tr data-filter-item data-owner="search" data-status="moved" data-digest="search-api"><th scope="row">search-api</th><td>Search</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 15 Sep</td></tr>
+      <tr data-filter-item data-owner="accounts" data-status="moved" data-digest="sessions"><th scope="row">sessions</th><td>Accounts</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 15 Sep</td></tr>
+      <tr data-filter-item data-owner="platform" data-status="moved" data-digest="config"><th scope="row">config</th><td>Platform</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 15 Sep</td></tr>
+      <tr data-filter-item data-owner="accounts" data-status="moved" data-digest="accounts-api"><th scope="row">accounts-api</th><td>Accounts</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 8 Sep</td></tr>
+      <tr data-filter-item data-owner="platform" data-status="moved" data-digest="gateway"><th scope="row">gateway</th><td>Platform</td><td data-sort="3"><span class="status ok">Moved</span></td><td class="long">Moved 8 Sep</td></tr>
+    </tbody>
+  </table></div>
+<p class="table-note">Migration tracker and deploy log, 22 Oct 2026. Sorted by what needs attention, then by move date, newest first.</p>
+  <p class="dataset-print-note">This printed copy shows the summary. The full table of 24 services is in the file.</p>
+</section>
+
+    <h2 id="trend">Moves have held to the pace line, with no slack left</h2>
+    <figure>
+      <button class="zoom-btn no-print" type="button">Enlarge</button>
+      <div class="figure-frame">
+        <!-- Scale: x = 36 + weeks since 1 Sep * 26; y = 150 - services * 5. Pace: 24 services by 10 Nov (week 10). -->
+        <svg class="small-ok" viewBox="0 0 320 184" style="--fig-min: 320px" role="img" aria-labelledby="pace-t pace-d" xmlns="http://www.w3.org/2000/svg">
+          <title id="pace-t">Services moved since 1 September against the pace line</title>
+          <desc id="pace-d">Cumulative services moved at each Monday from 1 September: 0, 2, 5, 7, 10, 12, 14, 16, and 17 on 22 October. The pace line runs from 0 on 1 September to 24 on 10 November, which is 17.5 by 22 October.</desc>
+          <line class="c-grid" x1="36" y1="90" x2="300" y2="90"/>
+          <line class="c-grid" x1="36" y1="30" x2="300" y2="30"/>
+          <line class="c-axis" x1="36" y1="150" x2="300" y2="150"/>
+          <line class="c-axis" x1="36" y1="26" x2="36" y2="150"/>
+          <text class="c-tick" x="28" y="154" text-anchor="end">0</text>
+          <text class="c-tick" x="28" y="94" text-anchor="end">12</text>
+          <text class="c-tick" x="28" y="34" text-anchor="end">24</text>
+          <path class="d-edge control" d="M36 150 L296 30"/>
+          <text class="c-tick" x="296" y="20" text-anchor="end">Pace for 10 Nov</text>
+          <path class="c-line" d="M36 150 L62 140 L88 125 L114 115 L140 100 L166 90 L192 80 L218 70 L225.4 65"/>
+          <circle class="c-bar focus" cx="225.4" cy="65" r="4"/>
+          <text class="c-value" x="233" y="84">17 moved</text>
+          <text class="c-tick" x="36" y="170" text-anchor="middle">1 Sep</text>
+          <text class="c-tick" x="140" y="170" text-anchor="middle">29 Sep</text>
+          <text class="c-tick" x="244" y="170" text-anchor="middle">27 Oct</text>
+          <text class="c-tick" x="296" y="170" text-anchor="middle">10 Nov</text>
+        </svg>
+      </div>
+      <figcaption><span class="fig-id">FIG-1</span> <strong>Moves have tracked the pace line since September and are now just behind it.</strong> Solid: services moved. Dashed: the even pace that finishes on 10 November, four days before cutover. Deploy log, 1 Sep to 22 Oct 2026.</figcaption>
+    </figure>
+
+    <h2 id="sources" class="annex">Sources</h2>
+    <div class="sources"><ol><li>Deploy log, 1 September to 22 October 2026.</li><li>Migration tracker, 22 October 2026.</li><li>Cluster metrics, 15 to 22 October 2026.</li></ol></div>
+    <p class="footnote">An example page for the html-house-style kit, showing the Monitor pattern. Northwind, its services and every number on this page are invented.</p>
+  </main>
+</div>
+
+<dialog class="zoom" id="zoom" aria-label="Enlarged figure"><div class="zoom-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Fit to window">Fit</button><button type="button" data-z="1" aria-label="Zoom in">+</button><span id="zoom-level" class="muted">100%</span><span class="spacer"></span><button type="button" data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
+
+<script>
+(() => {
+  const root = document.documentElement, K = "hs:" + location.pathname + ":";
+  const store = { set: (k, v) => { try { v ? localStorage.setItem(K + k, v) : localStorage.removeItem(K + k); } catch {} } };
+
+  // Palette and theme. Remembered for this page only. Theme cycles auto, light, dark.
+  const palBtns = [...document.querySelectorAll("[data-set-palette]")], themeBtn = document.querySelector("[data-toggle-theme]");
+  const showPal = () => palBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === (root.dataset.palette || "paper")));
+  const showTheme = () => { if (themeBtn) themeBtn.textContent = "Theme: " + (root.dataset.theme || "auto"); };
+  palBtns.forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("palette", b.dataset.setPalette); showPal(); });
+  if (themeBtn) themeBtn.onclick = () => { const next = { auto: "light", light: "dark", dark: "" }[root.dataset.theme || "auto"];
+    if (next) root.dataset.theme = next; else delete root.dataset.theme; store.set("theme", next); showTheme(); };
+  showPal(); showTheme();
+
+  // Contents rail. The list is in the HTML; this marks the current section and
+  // fills the list only if it was left empty. Collapsed by default on narrow screens.
+  const toc = document.querySelector(".toc"), list = toc && toc.querySelector("ol");
+  const heads = [...document.querySelectorAll("main h2")];
+  if (toc && list) {
+    heads.forEach((h, i) => { if (!h.id) h.id = (h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section") + "-" + i; });
+    if (!list.children.length) heads.forEach(h => { const li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.append(a); list.append(li); });
+    if (!list.children.length) toc.hidden = true;
+    const box = toc.querySelector("details"), wide = matchMedia("(min-width: 1100px)");
+    if (box) { box.open = wide.matches; wide.addEventListener("change", e => { box.open = e.matches; }); }
+    const links = [...list.querySelectorAll("a")];
+    const mark = () => { let cur = heads[0]; for (const h of heads) if (h.getBoundingClientRect().top <= innerHeight * 0.3) cur = h;
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = heads[heads.length - 1];
+      links.forEach(a => a.getAttribute("href") === "#" + (cur && cur.id) ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")); };
+    let raf = 0; addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); }, { passive: true }); mark();
+  }
+
+  // Enlarge any figure: fit to the window on open, real zoom, real scroll.
+  const dlg = document.getElementById("zoom"), stage = document.getElementById("zoom-stage"), lvl = document.getElementById("zoom-level");
+  let z = 1, w = 0, h = 0;
+  const fit = () => { const s = getComputedStyle(stage);
+    return Math.min((stage.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)) / w, (stage.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom)) / h); };
+  const apply = () => { const el = stage.firstElementChild; if (!el) return; el.style.width = w * z + "px"; el.style.height = h * z + "px"; lvl.textContent = Math.round(z * 100) + "%"; };
+  document.querySelectorAll(".zoom-btn").forEach(b => b.onclick = () => {
+    const src = b.closest("figure") && b.closest("figure").querySelector(".figure-frame > svg, .figure-frame > img, .figure-frame > picture img");
+    if (!src || !dlg) return;
+    const vb = src.viewBox && src.viewBox.baseVal, r = src.getBoundingClientRect();
+    [w, h] = vb && vb.width ? [vb.width, vb.height] : src.naturalWidth ? [src.naturalWidth, src.naturalHeight] : [r.width, r.height];
+    if (!w || !h) return;
+    const c = src.cloneNode(true), name = src.querySelector("title");
+    c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    c.removeAttribute("aria-labelledby"); c.setAttribute("aria-label", name ? name.textContent : (src.alt || "Enlarged figure"));
+    stage.replaceChildren(c); dlg.showModal(); z = Math.min(fit(), 4); apply(); stage.scrollTo(0, 0);
+  });
+  if (dlg) {
+    dlg.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? fit() : Math.min(6, Math.max(0.25, z * (d > 0 ? 1.25 : 0.8))); apply(); });
+    dlg.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  }
+
+  // Tabs: one tab stop, arrow keys, Home and End. Panels are visible until this runs.
+  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')];
+    const sel = tab => tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
+      const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    tabs.forEach((tab, i) => { tab.onclick = () => sel(tab); tab.onkeydown = e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (e.key === "Home" || e.key === "End" || d) { e.preventDefault(); const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); } }; });
+    sel(tabs.find(x => x.getAttribute("aria-selected") === "true") || tabs[0]); });
+
+  // Page patterns (PATTERNS.md). Each block does nothing on a page without its markup.
+
+  // Page state: filters, sort and chart picks (PATTERNS.md section 9). The hash
+  // holds it as #key=value&key=value. A change pushes history, so Back undoes it.
+  // An in-page link keeps the state and adds at=<id>; a hash with no "=" is a
+  // plain anchor. A view is a [data-view] element, or the whole page.
+  const views = [...document.querySelectorAll("[data-view]")];
+  if (!views.length && document.querySelector(".filter, button.sort, [data-filter-item]")) views.push(document.body);
+  const viewOf = el => el.closest("[data-view]") || document.body;
+  const read = () => new URLSearchParams(location.hash.includes("=") ? location.hash.slice(1) : "");
+  const coll = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const num = x => { const t = x.replace(/[,\s%$]/g, ""); return t !== "" && isFinite(t) ? +t : NaN; }; // "4,210" and "61%" sort as numbers
+  const cmp = (a, b) => { const x = num(a), y = num(b); return isNaN(x) || isNaN(y) ? coll.compare(a, b) : x - y; };
+  const model = views.map(v => {
+    const mine = sel => [...v.querySelectorAll(sel)].filter(el => viewOf(el) === v);
+    const q = mine('input[type="search"]')[0], picks = mine("[data-key][data-value]");
+    return { v, q, qk: q ? q.dataset.key || "q" : "", picks, keys: [...new Set(picks.map(b => b.dataset.key))], items: mine("[data-filter-item]"),
+      groups: mine("[data-filter-group]"), tables: mine("table").filter(t => t.querySelector("th > button.sort")), said: mine(".filter-sentence"),
+      empty: mine(".filter-empty")[0], noun: v.dataset.noun || "items" };
+  });
+  const sortTable = (t, val) => {
+    const ths = [...t.tHead.rows[0].cells], body = t.tBodies[0], rows = [...body.rows];
+    ths.forEach((th, i) => { th.dataset.col = th.dataset.col || "c" + i; });
+    rows.forEach((r, i) => { if (!r.dataset.i) r.dataset.i = i; });
+    const [col, dir] = (val || "").split(/\.(?=[^.]*$)/), ix = ths.findIndex(th => th.dataset.col === col);
+    ths.forEach((th, i) => { if (th.querySelector("button.sort")) th.setAttribute("aria-sort", i === ix ? (dir === "desc" ? "descending" : "ascending") : "none"); });
+    const key = r => { const c = r.cells[ix]; return c ? (c.dataset.sort ?? c.textContent.trim()) : ""; };
+    rows.sort((a, b) => (ix < 0 ? 0 : cmp(key(a), key(b)) * (dir === "desc" ? -1 : 1)) || a.dataset.i - b.dataset.i);
+    body.append(...rows);
+  };
+  const render = () => { const p = read();
+    for (const m of model) {
+      const q = m.qk ? (p.get(m.qk) || "").trim().toLowerCase() : "";
+      if (m.q && document.activeElement !== m.q) m.q.value = p.get(m.qk) || "";
+      const ok = (el, skip) => (!q || el.textContent.toLowerCase().includes(q)) && m.keys.every(k => k === skip || !p.get(k) || el.dataset[k] === p.get(k));
+      let n = 0; m.items.forEach(el => { el.hidden = !ok(el); if (!el.hidden) n++; });
+      m.groups.forEach(g => { g.hidden = !g.querySelector("[data-filter-item]:not([hidden])"); });
+      m.picks.forEach(b => { b.setAttribute("aria-pressed", (p.get(b.dataset.key) || "") === b.dataset.value);
+        // A chart bar counts the records under every filter except its own, so the bars stay a way to switch.
+        const c = b.querySelector("[data-count]"), bar = b.querySelector("[data-unit]"); if (!c) return;
+        const k = m.items.filter(el => el.dataset[b.dataset.key] === b.dataset.value && ok(el, b.dataset.key)).length;
+        c.textContent = k; if (bar) { bar.setAttribute("width", k * bar.dataset.unit); c.setAttribute("x", +bar.getAttribute("x") + k * bar.dataset.unit + 6); } });
+      m.tables.forEach(t => sortTable(t, p.get(t.dataset.sortKey || "sort")));
+      if (m.empty) m.empty.hidden = n > 0 || !m.items.length;
+      const used = (q ? ['matching "' + q + '"'] : []).concat(m.keys.filter(k => p.get(k)).map(k => {
+        const b = m.picks.find(x => x.dataset.key === k && x.dataset.value === p.get(k)); return b ? b.dataset.say || b.dataset.label || b.textContent.trim() : p.get(k); }));
+      m.said.forEach(s => { s.textContent = used.length ? n + " of " + m.items.length + " " + m.noun + ": " + used.join(", ") : "All " + m.items.length + " " + m.noun; });
+    } };
+  const go = (p, push) => { p.delete("at"); const h = p.toString(); history[push ? "pushState" : "replaceState"](null, "", h ? "#" + h : location.pathname + location.search); render(); };
+  // A deep link to an item the filter hides clears that view's filter and shows it.
+  const reveal = () => { const h = location.hash.slice(1), id = h.includes("=") ? read().get("at") : decodeURIComponent(h), el = id && document.getElementById(id);
+    if (!el) return;
+    if (el.closest("[hidden]")) { const m = model.find(x => x.v === viewOf(el)) || model[0], p = read(); [m.qk, ...m.keys].forEach(k => p.delete(k));
+      p.set("at", id); history.replaceState(null, "", "#" + p); render(); }
+    document.querySelectorAll("[data-at]").forEach(x => x.removeAttribute("data-at")); el.setAttribute("data-at", "");
+    if (h.includes("=")) el.scrollIntoView({ block: "start" }); };
+  if (model.length) {
+    let typed = 0;
+    model.forEach(m => {
+      if (m.q) m.q.addEventListener("input", () => { const p = read(), v = m.q.value.trim(); if (v) p.set(m.qk, v); else p.delete(m.qk);
+        go(p, Date.now() - typed > 1000); typed = Date.now(); }); // one history entry per pause in typing, not per key
+      m.picks.forEach(b => { const pick = () => { const p = read(), on = (p.get(b.dataset.key) || "") === b.dataset.value;
+          if (b.dataset.value && !(on && b.closest("svg"))) p.set(b.dataset.key, b.dataset.value); else p.delete(b.dataset.key); go(p, true); };
+        b.addEventListener("click", pick);
+        if (b.closest("svg")) b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } }); });
+      m.tables.forEach(t => t.querySelectorAll("th > button.sort").forEach(btn => btn.addEventListener("click", () => {
+        const th = btn.parentElement, p = read(), k = t.dataset.sortKey || "sort";
+        p.set(k, th.dataset.col + (th.getAttribute("aria-sort") === "ascending" ? ".desc" : ".asc")); go(p, true); })));
+    });
+    // In-page links keep the state: #at=finding-3&sev=high.
+    document.addEventListener("click", e => { const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !location.hash.includes("=")) return;
+      const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!id || id.includes("=") || !document.getElementById(id)) return;
+      e.preventDefault(); const p = read(); p.set("at", id); history.pushState(null, "", "#" + p); render(); reveal(); }, true);
+    addEventListener("popstate", () => { render(); reveal(); }); addEventListener("hashchange", () => { render(); reveal(); });
+    render(); reveal();
+  }
+
+  // Step progress: ticks are kept in localStorage for this page, with the time
+  // the run started, until the reader resets them. A tick never hides a step.
+  const ticks = [...document.querySelectorAll("ol.steps.do > li > .step-check input")];
+  if (ticks.length) {
+    const key = K + "run", say = document.querySelector(".progress-text"), jump = document.querySelector(".progress-jump");
+    let run = {}; try { run = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+    const save = () => { try { run.started ? localStorage.setItem(key, JSON.stringify(run)) : localStorage.removeItem(key); } catch {} };
+    const update = () => { const next = ticks.find(t => !t.checked), n = ticks.filter(t => t.checked).length;
+      if (say) say.textContent = (next ? "Next: step " + (ticks.indexOf(next) + 1) + " of " + ticks.length : "All " + ticks.length + " steps ticked")
+        + (run.started ? ". " + n + " done in the run started " + new Date(run.started).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "." : ".");
+      if (jump) { jump.hidden = !next; if (next) jump.href = "#" + next.closest("li").id; } };
+    ticks.forEach(t => { t.checked = (run.done || []).includes(t.closest("li").id);
+      t.addEventListener("change", () => { if (!run.started) run.started = Date.now(); run.done = ticks.filter(x => x.checked).map(x => x.closest("li").id); save(); update(); }); });
+    const reset = document.querySelector("[data-reset-steps]");
+    if (reset) reset.addEventListener("click", () => { run = {}; save(); ticks.forEach(t => { t.checked = false; }); update(); });
+    update();
+  }
+
+  // Returning reader (Monitor): a digest of what the reader last saw is kept for
+  // this page. On return, a dismissible panel lists what changed. Silent when
+  // storage is unavailable.
+  const since = document.querySelector(".since");
+  if (since) {
+    const key = K + "seen", now = {};
+    document.querySelectorAll("[data-digest]").forEach(el => { const s = el.querySelector(".status"); now[el.dataset.digest] = s ? s.textContent.trim() : el.dataset.status || ""; });
+    let was = null; try { was = JSON.parse(localStorage.getItem(key)); } catch {}
+    const save = () => { try { localStorage.setItem(key, JSON.stringify(now)); } catch {} };
+    const ids = was ? [...new Set([...Object.keys(now), ...Object.keys(was)])].filter(id => was[id] !== now[id]) : [];
+    if (ids.length) {
+      since.querySelector(".since-count").textContent = "Changed since your last visit: " + ids.length + (ids.length === 1 ? " item" : " items");
+      const list = since.querySelector("ul");
+      ids.slice(0, 8).forEach(id => { const li = document.createElement("li"); li.textContent = id + ": " + (!(id in was) ? "new, " + now[id] : !(id in now) ? "removed" : "was " + was[id] + ", now " + now[id]); list.append(li); });
+      if (ids.length > 8) { const li = document.createElement("li"); li.textContent = "and " + (ids.length - 8) + " more"; list.append(li); }
+      since.hidden = false;
+    }
+    const dismiss = since.querySelector("[data-dismiss]");
+    if (dismiss) dismiss.addEventListener("click", () => { since.hidden = true; save(); });
+    addEventListener("pagehide", save);
+  }
+
+  // Save as PDF: the browser's own print. A button with data-progress keeps the
+  // ticks on paper; any other print shows empty boxes.
+  document.querySelectorAll(".print-btn").forEach(b => b.addEventListener("click", () => { root.classList.toggle("print-progress", "progress" in b.dataset); window.print(); }));
+  addEventListener("afterprint", () => root.classList.remove("print-progress"));
+
+  // Print everything: open collapsed sections first.
+  addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));
+  addEventListener("afterprint", () => document.querySelectorAll("details").forEach(d => { d.open = d.dataset.wasOpen === "true"; }));
+})();
+</script>
+</body>
+</html>
