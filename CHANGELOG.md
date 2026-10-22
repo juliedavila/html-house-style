@@ -2,6 +2,23 @@
 
 All notable changes to this kit. Versions follow semantic versioning.
 
+## 1.3.0 (2026-10-22)
+
+### Speed
+
+Measured on three tasks (a report with a 126-row dataset, a decision brief, a runbook), each run by a fresh session with only the skill and no browser. Over the three tasks, Sonnet went from 354 seconds to between 217 and 268 (four runs across the two rounds of changes below), and Haiku from 302 to between 216 and 234, with every page at 0 FAIL and the same honesty about the data. Most of the gain came from the first round (page.mjs, SNIPPETS.md, the fast path); the second round (--rules, --snippet, includes) cut what a session reads without a measurable change in time. Before these changes a session spent most of its time assembling the page by hand, grepping the template for component markup, and reading for orientation. These close each gap without changing how a page looks or behaves.
+
+- New `tools/page.mjs`: `--skeleton PATTERN` prints a pattern example's body with its meta, and `page.mjs body.html page.html --check` wraps an edited body into the complete page (`base.css` inlined, the template's head script, zoom dialog and closing script) and runs `check.mjs`, printing only FAIL and WARN lines. It rebuilds every example byte for byte.
+- New `SNIPPETS.md`: the shortest correct markup for every component in `base.css`, each with its rule, taken from the template and the examples.
+- `SKILL.md` opens with a fast path: the patterns in one table, the command sequence and the handover line, and what to read only when the page needs it.
+- `tools/table.mjs --help` and `tools/bars.mjs --help` list every option. The table command line gains `--statuses`, `--filters`, `--digest`, the dataset's `--title`, `--how`, `--chart-title` and `--takeaway`, and reads `{ "rows", "columns", "statuses" }` files; `bars.mjs --small` is a bare flag.
+- `check.mjs` fails a page whose `.with-toc` holds anything besides the opening, `nav.toc` and one `.prose`. A page that put its body straight into `.with-toc` passed with 0 FAIL, while on a wide screen nine of its blocks sat in the rail column. The message says to wrap the body in `<div class="prose">`.
+- `base.css`: on wide screens every child of `.with-toc` other than the rail and the bottom line goes in the content column, so a page that misses the wrapper still lays out. Correct pages are unchanged: the template and every example render with identical element boxes and identical screenshots.
+- `page.mjs --rules PATTERN` prints only that pattern's section of `PATTERNS.md`, plus "State and the URL" for the patterns that keep state (Look up, Monitor, Review, a dataset page). `--snippet NAME` prints one component from `SNIPPETS.md`; `--snippet list` prints every name with its rule. `SKILL.md` lists the names, so a session asks for exactly the markup it needs.
+- Include markers: a line `<!-- include: table.html -->` in the body is replaced by that file when `page.mjs` assembles the page, so generated tables and charts go in without a splice script. A missing file stops the build.
+- `--skeleton` adds a second line listing the skeleton's sections with their line numbers; `page.mjs` drops it when it assembles. A clean `--check` prints one line, `0 FAIL 0 WARN: page.html`.
+- `tools/selftest.mjs` also builds a page from every snippet and one page per pattern, requires 0 FAIL from each, and proves `page.mjs` rebuilds every example exactly.
+
 ## 1.2.0 (2026-10-22)
 
 A layer above the style guide: page patterns. Version 1.1 said how a page looks and was tuned for one reader job, deciding, so a runbook or a dashboard got bent into the shape of a brief. Version 1.2 adds the step that comes first: name what the reader is doing with the page, and let that job choose the structure, navigation, interaction, state and print behaviour.

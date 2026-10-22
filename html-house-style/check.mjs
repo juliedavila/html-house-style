@@ -246,6 +246,20 @@ if (toc) {
   for (const l of links) if (!ids.has(l)) { fail("structure", `contents rail links to missing #${l}`, toc.index); structIssues++; }
   if (!needRail && !railFree) warn("structure", `only ${h2s.length} h2s and about ${words} words; the rail is optional here`, toc.index);
 }
+// .with-toc holds only the opening (.bluf or .purpose), nav.toc and one .prose; anything
+// else lands in the rail column on wide screens, over the contents list.
+const VOID = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+for (const w of noCode.matchAll(/<(\w+)\b[^>]*class\s*=\s*["'][^"']*\bwith-toc\b[^>]*>/gi)) {
+  let depth = 0, proses = 0; const stray = [];
+  for (const m of noCode.slice(w.index + w[0].length).matchAll(/<(\/?)([a-z][a-z0-9-]*)\b[^>]*?(\/?)>/gi)) {
+    if (VOID.test(m[2]) || m[3]) continue;
+    if (m[1]) { if (--depth < 0) break; continue; }
+    if (depth++ > 0) continue;
+    const c = attrs(m[0]).class || "", ok = /\b(bluf|purpose)\b/.test(c) || (/^nav$/i.test(m[2]) && /\btoc\b/.test(c)) || (/\bprose\b/.test(c) && !proses++);
+    if (!ok) stray.push({ tag: m[2] + (c.trim() ? "." + c.trim().split(/\s+/).join(".") : ""), at: w.index + w[0].length + m.index });
+  }
+  if (stray.length) { fail("with-toc", `${stray.length} element(s) sit directly in .with-toc (${stray.slice(0, 4).map(x => x.tag).join(", ")}${stray.length > 4 ? ", ..." : ""}), so on a wide screen they land in the rail column over the contents; wrap everything after nav.toc in <div class="prose">`, stray[0].at); structIssues++; }
+}
 if (blufs.length > 1) { fail("structure", `${blufs.length} .bluf blocks; use one`, blufs[1].index); structIssues++; }
 if (!blufs.length && !/class\s*=\s*["'][^"']*\bpurpose\b/.test(noCode)) warn("structure", "no .bluf and no .purpose sentence; a page that argues opens with .bluf, a reference or tool page with one sentence of purpose");
 if (blufs.length && toc && blufs[0].index > toc.index) warn("structure", "the .bluf comes after the contents rail; on a phone the reader scrolls past the rail to reach it", blufs[0].index);
@@ -353,7 +367,7 @@ if (!fragment) {
 }
 
 // ---------- report ----------
-const order = ["comments", "base-css", "ids", "figure", "svg", "label-size", "label-fit", "colour", "dark-print", "overflow", "structure", "pattern", "interactions", "compare", "self-contained", "script", "writing", "glossary"];
+const order = ["comments", "base-css", "ids", "figure", "svg", "label-size", "label-fit", "colour", "dark-print", "overflow", "structure", "with-toc", "pattern", "interactions", "compare", "self-contained", "script", "writing", "glossary"];
 out.sort((p, q) => order.indexOf(p.id) - order.indexOf(q.id));
 for (const o of out) console.log(`${o.lvl.padEnd(4)}  ${o.id.padEnd(14)} ${o.msg}`);
 const n = l => out.filter(o => o.lvl === l).length;

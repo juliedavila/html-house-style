@@ -16,7 +16,7 @@ If you have a shell, start with `node check.mjs page.html` (or `bun check.mjs pa
 - [ ] A page that argues or reports opens with one `.bluf`; a reference or tool page opens with one `.purpose` sentence; a dashboard's `.bluf` is one status sentence. (script: count)
 - [ ] Every argument `h2` is a claim. Navigation sections (Glossary, Sources, Method, Appendix, Detail) are `h2.annex` and come last. (script: order, short-heading warning)
 - [ ] Every `h2` has a unique `id`. (script)
-- [ ] Pages with four or more `h2`s or about 1,200 words have the contents rail, with its list written in the HTML, and the `.bluf` comes before `nav.toc`. (script)
+- [ ] Pages with four or more `h2`s or about 1,200 words have the contents rail, with its list written in the HTML, and the `.bluf` comes before `nav.toc`. Inside `.with-toc` sit only the opening, `nav.toc` and one `div.prose` that holds everything else. (script)
 - [ ] Plans and processes are numbered steps; dated events are a timeline.
 
 ### Writing

@@ -29,10 +29,11 @@ html-house-style/          the skill: this inner folder is what you install
   STYLE-GUIDE.md           the full guide, with the reason behind each rule
   base.css                 the stylesheet every page inlines
   template.html            a sample decision brief, then a gallery of every component
+  SNIPPETS.md              the shortest correct markup for every component
   CHECKLIST.md             the pre-handover check, split into reading and looking
   check.mjs                static checker: node, bun or deno, no dependencies
   examples/                one working page per pattern, a mixed page and a contents page
-  tools/                   bars.mjs, table.mjs and selftest.mjs: figures and tables from data
+  tools/                   page.mjs (skeleton and assembly), bars.mjs, table.mjs, selftest.mjs
 index.html                 the sample page, built from template.html and base.css
 examples/                  the pattern examples with base.css inlined, for the Pages site
 build-index.mjs            rebuilds index.html and examples/
@@ -75,7 +76,15 @@ node html-house-style/check.mjs --fragment fig.html        # a figure or table b
 node html-house-style/check.mjs new.html --was old.html    # a page that replaces another: what was dropped
 ```
 
-Every run also prints the page's interactions (sort, filter, linked chart, tabs, zoom and so on) and fails when the markup offers one that no script delivers. Run `node html-house-style/tools/selftest.mjs` to check the helpers. It prints PASS, FAIL, WARN and INFO lines with line numbers, writes out the label-size arithmetic for each figure, and exits 1 on any FAIL. It reads the file with regular expressions and does not render it, so it catches mechanical defects (labels too small, a table that will push a phone sideways, a hard-coded colour, a Mermaid comment leaking into the page) and leaves judgement to you.
+To build and check a page in one step, start from a pattern's skeleton and let `tools/page.mjs` inline `base.css` and the scripts:
+
+```sh
+node html-house-style/tools/page.mjs --rules review                 # the pattern's rules
+node html-house-style/tools/page.mjs --skeleton review > body.html   # edit body.html
+node html-house-style/tools/page.mjs body.html page.html --check     # FAIL and WARN lines only
+```
+
+Every run also prints the page's interactions (sort, filter, linked chart, tabs, zoom and so on) and fails when the markup offers one that no script delivers. Run `node html-house-style/tools/selftest.mjs` to check the helpers, `SNIPPETS.md` and `page.mjs`. The checker prints PASS, FAIL, WARN and INFO lines with line numbers, writes out the label-size arithmetic for each figure, and exits 1 on any FAIL. It reads the file with regular expressions and does not render it, so it catches mechanical defects (labels too small, a table that will push a phone sideways, a hard-coded colour, a Mermaid comment leaking into the page) and leaves judgement to you.
 
 ## Make it yours
 

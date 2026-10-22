@@ -78,13 +78,32 @@ export function bars(items, o = {}) {
 </figure>`;
 }
 
-// CLI: node tools/bars.mjs data.json [--title ... --unit ... --source ... --takeaway ... --id ... --width 640 --sort desc --linked key]
+// CLI. --help prints the options.
+const HELP = `usage: node tools/bars.mjs data.json [options] > fig.html
+  data.json   [{ "label", "value", "cat": 1-6, "focus": true, "key" }], or { "items": [...], "options": {...} }
+  Prints a complete <figure>: Enlarge button, .figure-frame, SVG with --fig-min, caption.
+    --title T          SVG title (also the caption when there is no takeaway)
+    --takeaway K       the caption's bold first sentence: what the chart shows
+    --source S         source and date, after the takeaway
+    --unit U           unit after each value in the description ("services")
+    --id ID            figure id prefix (default fig-<title>)
+    --width N          viewBox width; 640 default, 320 fits a phone
+    --small            never grow past its width (charts up to about 400 wide)
+    --sort desc|asc|none   bar order; desc default
+    --max N            axis maximum, instead of a round number above the data
+    --linked KEY       each bar becomes a button that filters rows carrying data-KEY
+                       (needs the kit's closing script and matching data-filter-item rows)
+  Labels are 13 units and ticks 12, so with --fig-min they never draw under 13px and 12px.
+  Write to a file, then include it: a line <!-- include: fig.html --> in body.html is
+  replaced by the file when page.mjs assembles the page, and --check checks it there.`;
+
 const isMain = typeof process !== "undefined" && process.argv[1] && import.meta.url.endsWith(process.argv[1].split(/[\\/]/).pop());
 if (isMain) {
   const { readFileSync } = await import("node:fs");
   const args = process.argv.slice(2), opts = {}; let file;
-  for (let i = 0; i < args.length; i++) if (args[i].startsWith("--")) opts[args[i].slice(2)] = args[++i]; else file = args[i];
-  if (!file) { console.error("usage: node tools/bars.mjs data.json [--title T --unit U --source S --takeaway K --id ID --width N --sort desc|asc|none --linked KEY]"); process.exit(2); }
+  for (let i = 0; i < args.length; i++) if (["--help", "-h", "--small"].includes(args[i])) opts[args[i].replace(/^-+/, "")] = true; else if (args[i].startsWith("--")) opts[args[i].slice(2)] = args[++i]; else file = args[i];
+  if (opts.help || opts.h) { console.log(HELP); process.exit(0); }
+  if (!file) { console.error(HELP); process.exit(2); }
   const data = JSON.parse(readFileSync(file, "utf8")), items = Array.isArray(data) ? data : data.items;
   if (opts.width) opts.width = +opts.width; if (opts.max) opts.max = +opts.max; if (opts.linked) opts.linked = { key: opts.linked };
   console.log(bars(items, { ...(data.options || {}), ...opts }));

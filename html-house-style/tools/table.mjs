@@ -107,15 +107,43 @@ ${table(rows, { ...o, dataset: undefined, id: id + "-table", filters, scrollY: t
 </section>`;
 }
 
-// CLI: node tools/table.mjs rows.json [--columns cols.json] [--caption C] [--source S] [--id ID] [--dataset FACET --noun N --chips a,b]
+// CLI. --help prints the options.
+const HELP = `usage: node tools/table.mjs rows.json [options] > table.html
+  rows.json   an array of records, or { "rows": [...], "columns": [...], "statuses": {...} }
+  A table (.table-wrap, sortable headers, .table-note):
+    --caption C        table caption
+    --source S         the source line, as .table-note under the table
+    --id ID            table id, or the dataset section's id (never its h2's id)
+    --columns F.json   [{ "key", "label", "type": "text|num|date|status", "rowHeader": true,
+                       "wide": true (a sentence per row), "align": "right", "sortable": false }]
+                       inferred from the first rows when left out
+    --statuses F.json  { "value": ["ok|warn|danger|idle", "Word"] }; order sets sort rank
+    --filters a,b      put data-filter-item and data-<key> on each row (keys: lowercase letters)
+    --digest KEY       data-digest on each row, for the returning-reader panel
+  A whole section.dataset (search, chips, linked bar chart, scrolling table):
+    --dataset FACET    the key the bar chart counts and filters by
+    --noun N           what the records are ("services"); used in the filter sentence
+    --chips a,b        keys that get a chip group
+    --title T          dataset title       --how H   the line under it
+    --chart-title T    chart title         --takeaway K   the caption's bold first sentence
+  Over 25 rows the table scrolls in a capped frame. Write to a file, then include it:
+  a line <!-- include: table.html --> in body.html is replaced by the file when
+  page.mjs assembles the page, and --check checks it there.`;
+
 const isMain = typeof process !== "undefined" && process.argv[1] && import.meta.url.endsWith(process.argv[1].split(/[\\/]/).pop());
 if (isMain) {
   const { readFileSync } = await import("node:fs");
   const args = process.argv.slice(2), opts = {}; let file;
-  for (let i = 0; i < args.length; i++) if (args[i].startsWith("--")) opts[args[i].slice(2)] = args[++i]; else file = args[i];
-  if (!file) { console.error("usage: node tools/table.mjs rows.json [--columns cols.json] [--caption C] [--source S] [--id ID] [--dataset FACET --noun N --chips a,b]"); process.exit(2); }
-  const rows = JSON.parse(readFileSync(file, "utf8"));
-  if (opts.columns) opts.columns = JSON.parse(readFileSync(opts.columns, "utf8"));
-  if (opts.dataset) opts.dataset = { facet: opts.dataset, noun: opts.noun, chips: opts.chips ? opts.chips.split(",") : [] };
-  console.log(table(rows, opts));
+  for (let i = 0; i < args.length; i++) if (args[i] === "--help" || args[i] === "-h") opts.help = true; else if (args[i].startsWith("--")) opts[args[i].slice(2)] = args[++i]; else file = args[i];
+  if (opts.help) { console.log(HELP); process.exit(0); }
+  if (!file) { console.error(HELP); process.exit(2); }
+  const json = f => JSON.parse(readFileSync(f, "utf8")), data = json(file);
+  const rows = Array.isArray(data) ? data : data.rows, o = Array.isArray(data) ? {} : { columns: data.columns, statuses: data.statuses };
+  for (const k of ["caption", "source", "id", "digest"]) if (opts[k]) o[k] = opts[k];
+  if (opts.columns) o.columns = json(opts.columns);
+  if (opts.statuses) o.statuses = json(opts.statuses);
+  if (opts.filters) o.filters = opts.filters.split(",");
+  if (opts.dataset) o.dataset = { facet: opts.dataset, noun: opts.noun, chips: opts.chips ? opts.chips.split(",") : [], title: opts.title, how: opts.how,
+    chart: { ...(opts["chart-title"] ? { title: opts["chart-title"] } : {}), ...(opts.takeaway ? { takeaway: opts.takeaway } : {}) } };
+  console.log(table(rows, o));
 }

@@ -213,7 +213,8 @@ body.tool .page { max-width: 1440px; padding-top: var(--s5); }
   .with-toc { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: var(--s8); }
   .with-toc > .toc { grid-column: 1; grid-row: 1 / span 2; }
   .with-toc > .bluf { grid-column: 2; grid-row: 1; }
-  .with-toc > .prose { grid-column: 2; }
+  /* .prose, and anything a page wrongly puts beside it, stays out of the rail column. */
+  .with-toc > :not(.toc):not(.bluf) { grid-column: 2; }
 }
 .toc { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: 1.4; }
 .toc details { border: 0; background: none; margin: 0; }
