@@ -1,165 +1,477 @@
 <!doctype html>
-<html lang="en" data-palette="paper">
+<html lang="en" class="no-js" data-palette="paper">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shared Build Cache</title>
 <!-- In generated pages, replace this link with the full contents of base.css in a <style> tag. -->
 <link rel="stylesheet" href="base.css">
+<script>
+/* Before first paint: script is on, and the reader's saved theme for this page applies. */
+(() => { const r = document.documentElement, k = "hs:" + location.pathname + ":"; r.classList.remove("no-js");
+  try { const t = localStorage.getItem(k + "theme"), p = localStorage.getItem(k + "palette");
+    if (t && !r.hasAttribute("data-theme")) r.dataset.theme = t;
+    if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
+</script>
 </head>
 <body class="doc">
 <div class="page">
 
   <header class="masthead">
-    <div class="toolbar no-print" style="justify-content:flex-end">
-      <button data-set-palette="paper">Paper</button>
-      <button data-set-palette="slate">Slate</button>
-      <button data-set-palette="graphite">Graphite</button>
-      <button data-toggle-theme>Light / dark</button>
+    <!-- Palette and theme switches: keep only for tools the reader will live in. -->
+    <div class="toolbar no-print">
+      <button type="button" data-set-palette="paper">Paper</button>
+      <button type="button" data-set-palette="slate">Slate</button>
+      <button type="button" data-set-palette="graphite">Graphite</button>
+      <button type="button" data-toggle-theme>Theme: auto</button>
     </div>
     <div class="kicker">Decision brief · Platform engineering</div>
     <h1>Move every team to one shared build cache this quarter</h1>
-    <p class="dek">A shared cache cuts median CI time by about a third. It costs one platform engineer for six weeks, and we can reverse it in a day.</p>
-    <div class="meta"><span>Draft 2</span><span>Updated 22 Oct 2026</span><span>12 min read</span></div>
+    <p class="dek">A shared cache should cut median continuous integration (CI) time by about a third, based on September's cold-start rate. It costs one platform engineer for six weeks, and we can reverse it in a day.</p>
+    <div class="meta"><span>Draft 3</span><span>Updated 22 Oct 2026</span><span>7 min read</span></div>
   </header>
 
-  <div class="with-toc">
-    <nav class="toc" aria-label="Contents">
-      <div class="toc-title">Contents</div>
-      <ol id="toc-list"></ol>
-    </nav>
-
-    <main class="prose">
+  <main>
+    <div class="with-toc">
       <section class="bluf">
         <span class="label">Bottom line</span>
         <p>Approve phase 1: put the four largest repositories on the shared cache by 30 November, then decide on the rest from measured results.</p>
         <ul>
-          <li><strong>Why now:</strong> CI queue time doubled since July, and the pipeline is now the slowest step to production.</li>
-          <li><strong>Cost:</strong> one engineer for six weeks, plus about $1,400 a month in storage.</li>
-          <li><strong>Stop if:</strong> cache hit rate stays under 60% after two weeks, or any build turns red because of a stale artifact.</li>
+          <li><strong>Why now:</strong> queue time grew 2.1 times between July and October (runner metrics), and CI is now the slowest step to production.</li>
+          <li><strong>Cost:</strong> one engineer for six weeks, plus about $1,400 a month for storage and compute (cloud price sheet, Oct 2026).</li>
+          <li><strong>Stop if:</strong> the <span class="term" tabindex="0" data-def="The share of build steps served from the cache instead of run again.">cache hit rate</span> stays under 60% after two weeks, or any build turns red because of a stale artifact.</li>
         </ul>
       </section>
 
-      <h2 id="situation">CI time is now the bottleneck between merge and deploy</h2>
-      <p>Each team runs its own cache on its own runners. A cold runner rebuilds everything, and roughly half of all runs start cold. The numbers below come from the CI analytics export for September.</p>
+      <nav class="toc" aria-label="Contents">
+        <details open>
+          <summary>Contents</summary>
+          <ol>
+            <li><a href="#situation">CI is now the slowest step between merge and deploy</a></li>
+            <li><a href="#design">One cache service sits between runners and storage</a></li>
+            <li><a href="#options">A shared service beats bigger runners on hit rate and cost</a></li>
+            <li><a href="#plan">Phase 1 runs six weeks, in three steps</a></li>
+            <li class="annex-start"><a href="#detail">Detail</a></li>
+            <li><a href="#gallery">Component gallery</a></li>
+            <li><a href="#glossary">Glossary</a></li>
+            <li><a href="#sources">Sources</a></li>
+          </ol>
+        </details>
+      </nav>
 
-      <div class="stats">
-        <div class="stat"><div class="value">18.4 min</div><div class="what">Median pipeline time</div><div class="src">CI export, Sep 2026</div></div>
-        <div class="stat"><div class="value">52%</div><div class="what">Runs that start with a cold cache</div><div class="src">CI export, Sep 2026</div></div>
-        <div class="stat"><div class="value">2.1×</div><div class="what">Queue time growth since July</div><div class="src">Runner metrics</div></div>
-        <div class="stat"><div class="value"><span class="status warn">At risk</span></div><div class="what">Q4 deploy-frequency goal</div><div class="src">Platform OKR tracker</div></div>
-      </div>
+      <div class="prose">
+        <h2 id="situation">CI is now the slowest step between merge and deploy</h2>
+        <p>Each team runs its own cache on its own runners. A <span class="term" tabindex="0" data-def="A runner that starts with an empty local cache, so it rebuilds everything.">cold runner</span> rebuilds everything, and about half of all runs start cold.<sup class="fn"><a href="#fn1" id="fnref1">1</a></sup> The numbers below come from the CI analytics export for September.</p>
 
-      <h2 id="design">One cache service sits between runners and storage</h2>
-      <p>Runners ask the <span class="term" tabindex="0" data-def="A copy of build output stored by a hash of its inputs, so an identical build can reuse it instead of running again.">content-addressed cache</span> before they build. A hit returns the stored output. A miss builds as today and writes the result back.</p>
-
-      <figure>
-        <div class="figure-frame">
-          <button class="zoom-btn no-print" type="button">Enlarge</button>
-          <svg viewBox="0 0 760 240" role="img" aria-labelledby="fig1-t fig1-d" xmlns="http://www.w3.org/2000/svg">
-            <title id="fig1-t">Build request path through the shared cache</title>
-            <desc id="fig1-d">A runner sends a build request to the cache service. On a hit the cache returns stored output. On a miss the runner builds and writes the output back to object storage through the cache.</desc>
-            <defs><marker id="fig1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
-            <rect class="d-box" x="20" y="80" width="160" height="72" rx="6"/>
-            <text class="d-label" x="100" y="112" text-anchor="middle">CI runner</text>
-            <text class="d-small" x="100" y="132" text-anchor="middle">any team</text>
-            <rect class="d-focus" x="300" y="80" width="170" height="72" rx="6"/>
-            <text class="d-label" x="385" y="112" text-anchor="middle">Cache service</text>
-            <text class="d-small" x="385" y="132" text-anchor="middle">new in phase 1</text>
-            <rect class="d-box" x="580" y="80" width="160" height="72" rx="6"/>
-            <text class="d-label" x="660" y="112" text-anchor="middle">Object storage</text>
-            <text class="d-small" x="660" y="132" text-anchor="middle">existing bucket</text>
-            <path class="d-edge focus" d="M180 104 H298" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="239" y="94" text-anchor="middle">1. lookup</text>
-            <path class="d-edge" d="M300 130 H182" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="241" y="148" text-anchor="middle">2. hit: output</text>
-            <path class="d-edge" d="M470 116 H578" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="524" y="106" text-anchor="middle">read / write</text>
-            <path class="d-edge control" d="M100 152 V200 H385 V154" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="242" y="218" text-anchor="middle">3. miss: build, then write back</text>
-          </svg>
+        <div class="stats">
+          <div class="stat"><div class="value">18.4 min</div><div class="what">Median pipeline time</div><div class="src">CI export, Sep 2026</div></div>
+          <div class="stat"><div class="value">52%</div><div class="what">Runs that start with a cold cache</div><div class="src">CI export, Sep 2026</div></div>
+          <div class="stat"><div class="value">2.1×</div><div class="what">Queue time growth since July</div><div class="src">Runner metrics, Jul to Oct 2026</div></div>
+          <div class="stat"><div class="value"><span class="status warn">At risk</span></div><div class="what">Fourth-quarter deploy-frequency goal</div><div class="src">Platform goals tracker, Oct 2026</div></div>
         </div>
-        <figcaption><span class="fig-id">FIG-1</span> <strong>Every build checks the cache first; only misses do real work.</strong> Solid lines carry data; the dashed line is the fallback path on a miss.</figcaption>
-      </figure>
+        <p class="footnote" id="fn1">1. A run counts as cold when its runner has no cached output for any step. <a href="#fnref1">Back to text</a></p>
 
-      <h2 id="options">We compared three ways to get there</h2>
-      <div class="compare">
-        <div class="option recommended"><h4>A. Shared service <span class="chip">Recommended</span></h4><p>One cache for all runners. Highest hit rate. Needs an owner.</p></div>
-        <div class="option"><h4>B. Bigger runners</h4><p>Keep per-team caches on larger disks. Fewer cold starts, same duplication, higher spend.</p></div>
-        <div class="option"><h4>C. Do nothing</h4><p>No cost now. Queue time keeps growing with headcount.</p></div>
-      </div>
+        <h2 id="design">One cache service sits between runners and storage</h2>
+        <p>Runners ask the <span class="term" tabindex="0" data-def="A copy of build output stored under a hash of its inputs, so an identical build can reuse it instead of running again.">content-addressed cache</span> before they build. A hit returns the stored output. A miss builds as today and writes the result back.</p>
 
-      <h2 id="plan">Phase 1 runs six weeks, in three steps</h2>
-      <ol class="steps">
-        <li><strong>Stand up the service (weeks 1 and 2)</strong>Deploy behind the existing load balancer. Read-only for one repository.</li>
-        <li><strong>Turn on writes for four repositories (weeks 3 and 4)</strong>Watch hit rate and stale-artifact errors daily.</li>
-        <li><strong>Decide (week 6)</strong>Expand, adjust, or roll back, using the stop conditions above.</li>
-      </ol>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <svg viewBox="0 64 760 172" style="--fig-min: 760px" role="img" aria-labelledby="fig1-t fig1-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig1-t">Build request path through the shared cache</title>
+              <desc id="fig1-d">A runner sends a build request to the cache service. On a hit the cache returns stored output. On a miss the runner builds and writes the output back to object storage through the cache.</desc>
+              <defs>
+                <marker id="fig1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+                <marker id="fig1-arrow-focus" class="focus" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+              </defs>
+              <rect class="d-box" x="20" y="80" width="160" height="72" rx="6"/>
+              <text class="d-label" x="100" y="112" text-anchor="middle">CI runner</text>
+              <text class="d-small" x="100" y="132" text-anchor="middle">any team</text>
+              <rect class="d-focus" x="300" y="80" width="170" height="72" rx="6"/>
+              <text class="d-label" x="385" y="112" text-anchor="middle">Cache service</text>
+              <text class="d-small" x="385" y="132" text-anchor="middle">new in phase 1</text>
+              <rect class="d-box" x="580" y="80" width="160" height="72" rx="6"/>
+              <text class="d-label" x="660" y="112" text-anchor="middle">Object storage</text>
+              <text class="d-small" x="660" y="132" text-anchor="middle">existing bucket</text>
+              <path class="d-edge focus" d="M180 104 H298" marker-end="url(#fig1-arrow-focus)"/>
+              <text class="d-small" x="239" y="94" text-anchor="middle">1. lookup</text>
+              <path class="d-edge" d="M300 130 H182" marker-end="url(#fig1-arrow)"/>
+              <text class="d-small" x="241" y="148" text-anchor="middle">2. hit: output</text>
+              <path class="d-edge" d="M470 116 H578" marker-end="url(#fig1-arrow)"/>
+              <text class="d-small" x="524" y="106" text-anchor="middle">read / write</text>
+              <path class="d-edge control" d="M100 152 V200 H385 V154" marker-end="url(#fig1-arrow)"/>
+              <text class="d-small" x="242" y="222" text-anchor="middle">3. miss: build, then write back</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-1</span> <strong>Every build checks the cache first; only misses do real work.</strong> Solid lines carry data; the dashed line is the fallback path on a miss.</figcaption>
+          <script type="text/plain" class="diagram-source">
+flowchart LR
+  R[CI runner] -- 1 lookup --> C[Cache service]
+  C -- 2 hit: output --> R
+  C <-- read / write --> S[Object storage]
+  R -. 3 miss: build, then write back .-> C
+          </script>
+        </figure>
 
-      <div class="callout risk"><span class="label">Main risk</span>A stale artifact could ship a wrong binary. Cache keys include the full toolchain hash, and phase 1 keeps a one-flag rollback.</div>
+        <h2 id="options">A shared service beats bigger runners on hit rate and cost</h2>
+        <div class="compare">
+          <div class="option recommended"><h3>A. Shared service <span class="chip">Recommended</span></h3><p>One cache for all runners. Highest hit rate. Needs an owner.</p></div>
+          <div class="option"><h3>B. Bigger runners</h3><p>Keep per-team caches on larger disks. Fewer cold starts, same duplication, higher spend.</p></div>
+          <div class="option"><h3>C. Do nothing</h3><p>No cost now. Queue time keeps growing with headcount.</p></div>
+        </div>
 
-      <h2 id="detail">Detail for the people building it</h2>
-      <details><summary>How cache keys are computed</summary><div class="body"><p>Key = hash of source inputs, lockfiles, toolchain version and build flags. Any change produces a new key, so nothing is ever overwritten in place.</p></div></details>
-      <details><summary>Cost breakdown</summary><div class="body">
+        <h2 id="plan">Phase 1 runs six weeks, in three steps</h2>
+        <ol class="steps">
+          <li><strong>Stand up the service (weeks 1 and 2)</strong>Deploy behind the existing load balancer. Read-only for one repository.</li>
+          <li><strong>Turn on writes for four repositories (weeks 3 and 4)</strong>Watch hit rate and stale-artifact errors daily.</li>
+          <li><strong>Decide (week 6)</strong>Expand, adjust, or roll back, using the stop conditions above.</li>
+        </ol>
+
+        <div class="callout risk"><span class="label">Main risk</span>A stale artifact could ship a wrong binary. Cache keys include the full toolchain hash, and phase 1 keeps a one-flag rollback.</div>
+
+        <h2 id="detail" class="annex">Detail</h2>
+        <details><summary>How cache keys are computed</summary><div class="body"><p>Key = hash of source inputs, lockfiles, toolchain version and build flags. Any change produces a new key, so nothing is ever overwritten in place.</p></div></details>
+        <details><summary>Cost breakdown</summary><div class="body">
+          <div class="table-wrap"><table>
+            <thead><tr><th scope="col">Item</th><th scope="col" class="num">Monthly</th><th scope="col">Basis</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Storage, 9 TB</th><td class="num">$1,180</td><td>Cloud price sheet, Oct 2026</td></tr>
+              <tr><th scope="row">Traffic inside the region</th><td class="num">$0</td><td>Same region, no transfer charge</td></tr>
+              <tr><th scope="row">Service compute</th><td class="num">$220</td><td>Two small instances, cloud price sheet, Oct 2026</td></tr>
+            </tbody>
+          </table></div>
+          <p class="table-note">Prices from the cloud provider's public sheet, October 2026. Storage size is an estimate from September's build output.</p>
+        </div></details>
+
+        <!-- ===== Component gallery: every component in base.css once. Delete this section from real pages. ===== -->
+        <h2 id="gallery" class="annex">Component gallery</h2>
+        <p class="purpose">This section shows every component in <code>base.css</code> once, with sample content. Delete it from real pages.</p>
+
+        <h3>Callouts hold one aside per section</h3>
+        <div class="callout"><span class="label">Note</span>Plain callouts use the accent tint.</div>
+        <div class="callout decision"><span class="label">Decision</span>Platform owns the cache service; teams own their cache keys.</div>
+        <div class="callout risk"><span class="label">Risk</span>Storage cost grows with the number of branches kept.</div>
+        <div class="callout stop"><span class="label">Stop</span>Roll back if any build ships a stale artifact.</div>
+
+        <h3>Status is a shape and a word</h3>
+        <ul>
+          <li>Cache service: <span class="status ok">On track</span></li>
+          <li>Write access for four repositories: <span class="status warn">At risk</span></li>
+          <li>Security review: <span class="status danger">Blocked</span></li>
+          <li>Rollout to all teams: <span class="status idle">Not started</span></li>
+        </ul>
+        <p>Chips are small tags: <span class="chip">Recommended</span> <span class="chip">Draft</span> <span class="chip">Platform team</span></p>
+
+        <h3>Cards hold real groups</h3>
+        <div class="cards">
+          <div class="card"><h4>Runner team</h4><p>Owns the runners and their images. Joins weekly reviews in phase 1.</p></div>
+          <div class="card"><h4>Platform team</h4><p>Builds and runs the cache service. One engineer for six weeks.</p></div>
+          <a class="card" href="#design"><h4>Read the design</h4><p>How a lookup, a hit and a miss work.</p></a>
+        </div>
+        <p>A <code>.grid</code> holds peers that are not cards:</p>
+        <div class="grid">
+          <div><h4>Hit</h4><p>Output comes back from the cache in seconds.</p></div>
+          <div><h4>Miss</h4><p>The runner builds as today and writes back.</p></div>
+          <div><h4>Stale</h4><p>A key collision returns the wrong output. Keys prevent it.</p></div>
+        </div>
+
+        <h3>Tabs show parallel views of one thing</h3>
+        <div class="tabs">
+          <div role="tablist" aria-label="Phase 1 views">
+            <button type="button" role="tab" id="tab-week" aria-controls="panel-week" aria-selected="true">By week</button>
+            <button type="button" role="tab" id="tab-team" aria-controls="panel-team" aria-selected="false">By team</button>
+          </div>
+          <div role="tabpanel" id="panel-week" aria-labelledby="tab-week" tabindex="0">
+            <p class="tab-label">By week</p>
+            <p>Weeks 1 and 2: service up, read-only. Weeks 3 and 4: writes on. Week 6: decide.</p>
+          </div>
+          <div role="tabpanel" id="panel-team" aria-labelledby="tab-team" tabindex="0">
+            <p class="tab-label">By team</p>
+            <p>Platform builds the service. Runner team updates images. Four product teams switch on writes.</p>
+          </div>
+        </div>
+
+        <h3>Dated events use a timeline</h3>
+        <ol class="timeline">
+          <li><time datetime="2026-07">Jul 2026</time>Queue time starts to climb (runner metrics).</li>
+          <li><time datetime="2026-09">Sep 2026</time>The CI export shows 52% of runs start cold.</li>
+          <li class="now"><time datetime="2026-10-22">22 Oct 2026</time>This brief.</li>
+          <li><time datetime="2026-11-30">30 Nov 2026</time>Phase 1 decision.</li>
+        </ol>
+
+        <h3>A comparison table puts options in columns</h3>
         <div class="table-wrap"><table>
-          <thead><tr><th>Item</th><th class="num">Monthly</th><th>Source</th></tr></thead>
+          <caption>Options against the deciding criteria</caption>
+          <thead><tr><th scope="col">Criterion</th><th scope="col" class="rec">A. Shared service</th><th scope="col">B. Bigger runners</th><th scope="col">C. Do nothing</th></tr></thead>
           <tbody>
-            <tr><td>Storage, 9 TB</td><td class="num">$1,180</td><td>Cloud price sheet, Oct 2026</td></tr>
-            <tr><td>Egress inside region</td><td class="num">$0</td><td>Same region</td></tr>
-            <tr><td>Service compute</td><td class="num">$220</td><td>Two small instances</td></tr>
+            <tr><th scope="row">Expected hit rate</th><td class="rec">About 80% (estimate)</td><td>About 60% (estimate)</td><td>48% today</td></tr>
+            <tr><th scope="row">Monthly cost</th><td class="rec">$1,400</td><td>$3,100</td><td>$0</td></tr>
+            <tr><th scope="row">Engineering effort</th><td class="rec">Six weeks</td><td>One week</td><td>None</td></tr>
+            <tr><th scope="row">Reversible</th><td class="rec">In a day</td><td>In a week</td><td>Not applicable</td></tr>
           </tbody>
         </table></div>
-      </div></details>
+        <p class="table-note">Costs from the cloud price sheet, Oct 2026. Hit rates are estimates from the September CI export; today's rate is measured.</p>
 
-      <h2 id="terms">Terms used here</h2>
-      <dl class="glossary">
-        <dt>Cache hit rate</dt><dd>The share of build steps served from the cache instead of run.</dd>
-        <dt>Cold runner</dt><dd>A runner that starts with an empty local cache.</dd>
-      </dl>
+        <p>Long tables scroll inside their frame and keep the header in view:</p>
+        <div class="table-wrap scroll-y"><table>
+          <thead><tr><th scope="col">Repository</th><th scope="col">Team</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Cold starts</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">web-app</th><td>Web</td><td class="num">4,210</td><td class="num">61%</td></tr>
+            <tr><th scope="row">data-pipeline</th><td>Data</td><td class="num">3,980</td><td class="num">72%</td></tr>
+            <tr><th scope="row">mobile-ios</th><td>Mobile</td><td class="num">2,870</td><td class="num">55%</td></tr>
+            <tr><th scope="row">mobile-android</th><td>Mobile</td><td class="num">2,640</td><td class="num">53%</td></tr>
+            <tr><th scope="row">payments</th><td>Web</td><td class="num">2,120</td><td class="num">49%</td></tr>
+            <tr><th scope="row">search</th><td>Data</td><td class="num">1,940</td><td class="num">58%</td></tr>
+            <tr><th scope="row">infra-modules</th><td>Infra</td><td class="num">1,610</td><td class="num">31%</td></tr>
+            <tr><th scope="row">design-system</th><td>Web</td><td class="num">1,480</td><td class="num">44%</td></tr>
+            <tr><th scope="row">notifications</th><td>Web</td><td class="num">1,220</td><td class="num">39%</td></tr>
+            <tr><th scope="row">billing</th><td>Web</td><td class="num">1,090</td><td class="num">47%</td></tr>
+            <tr><th scope="row">ml-features</th><td>Data</td><td class="num">980</td><td class="num">68%</td></tr>
+            <tr><th scope="row">auth</th><td>Infra</td><td class="num">910</td><td class="num">28%</td></tr>
+            <tr><th scope="row">reporting</th><td>Data</td><td class="num">870</td><td class="num">51%</td></tr>
+            <tr><th scope="row">docs-site</th><td>Web</td><td class="num">760</td><td class="num">22%</td></tr>
+            <tr><th scope="row">edge-proxy</th><td>Infra</td><td class="num">640</td><td class="num">35%</td></tr>
+            <tr><th scope="row">feature-flags</th><td>Infra</td><td class="num">520</td><td class="num">26%</td></tr>
+            <tr><th scope="row">admin-console</th><td>Web</td><td class="num">480</td><td class="num">41%</td></tr>
+            <tr><th scope="row">load-tests</th><td>Infra</td><td class="num">310</td><td class="num">64%</td></tr>
+          </tbody>
+        </table></div>
+        <p class="table-note">CI export, September 2026. Runs are pipeline runs in the month.</p>
 
-      <hr class="mark">
-      <div class="sources"><strong>Sources</strong><ol><li>CI analytics export, September 2026.</li><li>Runner metrics dashboard, July to October 2026.</li></ol></div>
-    </main>
-  </div>
+        <h3>Charts are hand-drawn SVG with direct labels</h3>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <!-- Scale: x = 96 + minutes * 22. Coordinates computed from the data, not by eye. -->
+            <svg viewBox="0 0 640 224" style="--fig-min: 640px" role="img" aria-labelledby="fig3-t fig3-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig3-t">Median minutes per pipeline stage by team</title>
+              <desc id="fig3-d">Stacked bars of queue, build and test minutes. Data 21.0 minutes, Web 18.4, Mobile 16.2, Infra 11.8. Queue time is the largest part for Data and Web.</desc>
+              <line class="c-grid" x1="206" y1="28" x2="206" y2="196"/>
+              <line class="c-grid" x1="316" y1="28" x2="316" y2="196"/>
+              <line class="c-grid" x1="426" y1="28" x2="426" y2="196"/>
+              <line class="c-grid" x1="536" y1="28" x2="536" y2="196"/>
+              <line class="c-axis" x1="96" y1="28" x2="96" y2="196"/>
+              <text class="c-tick" x="88" y="53" text-anchor="end">Data</text>
+              <rect class="c-cat-1" x="96" y="36" width="184.8" height="24"/>
+              <rect class="c-cat-2" x="280.8" y="36" width="156.2" height="24"/>
+              <rect class="c-cat-3" x="437" y="36" width="121" height="24"/>
+              <text class="c-value" x="566" y="53">21.0 min</text>
+              <text class="c-tick" x="88" y="93" text-anchor="end">Web</text>
+              <rect class="c-cat-1" x="96" y="76" width="154" height="24"/>
+              <rect class="c-cat-2" x="250" y="76" width="134.2" height="24"/>
+              <rect class="c-cat-3" x="384.2" y="76" width="116.6" height="24"/>
+              <text class="c-value" x="508.8" y="93">18.4 min</text>
+              <text class="c-tick" x="88" y="133" text-anchor="end">Mobile</text>
+              <rect class="c-cat-1" x="96" y="116" width="129.8" height="24"/>
+              <rect class="c-cat-2" x="225.8" y="116" width="140.8" height="24"/>
+              <rect class="c-cat-3" x="366.6" y="116" width="85.8" height="24"/>
+              <text class="c-value" x="460.4" y="133">16.2 min</text>
+              <text class="c-tick" x="88" y="173" text-anchor="end">Infra</text>
+              <rect class="c-cat-1" x="96" y="156" width="79.2" height="24"/>
+              <rect class="c-cat-2" x="175.2" y="156" width="110" height="24"/>
+              <rect class="c-cat-3" x="285.2" y="156" width="70.4" height="24"/>
+              <text class="c-value" x="363.6" y="173">11.8 min</text>
+              <text class="c-tick" x="96" y="214" text-anchor="middle">0</text>
+              <text class="c-tick" x="206" y="214" text-anchor="middle">5</text>
+              <text class="c-tick" x="316" y="214" text-anchor="middle">10</text>
+              <text class="c-tick" x="426" y="214" text-anchor="middle">15</text>
+              <text class="c-tick" x="536" y="214" text-anchor="middle">20 min</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-2</span> <strong>Queue time is the largest share of the wait for the two slowest teams.</strong> <span class="key cat-1">Queue</span><span class="key cat-2">Build</span><span class="key cat-3">Test</span> CI export, Sep 2026.</figcaption>
+        </figure>
+        <details><summary>Data for FIG-2</summary><div class="body">
+          <div class="table-wrap"><table>
+            <thead><tr><th scope="col">Team</th><th scope="col" class="num">Queue</th><th scope="col" class="num">Build</th><th scope="col" class="num">Test</th><th scope="col" class="num">Total</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Data</th><td class="num">8.4</td><td class="num">7.1</td><td class="num">5.5</td><td class="num">21.0</td></tr>
+              <tr><th scope="row">Web</th><td class="num">7.0</td><td class="num">6.1</td><td class="num">5.3</td><td class="num">18.4</td></tr>
+              <tr><th scope="row">Mobile</th><td class="num">5.9</td><td class="num">6.4</td><td class="num">3.9</td><td class="num">16.2</td></tr>
+              <tr><th scope="row">Infra</th><td class="num">3.6</td><td class="num">5.0</td><td class="num">3.2</td><td class="num">11.8</td></tr>
+            </tbody>
+          </table></div>
+          <p class="table-note">Median minutes per stage, CI export, September 2026.</p>
+        </div></details>
+
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <!-- Scale: y = 150 - percent * 1.6. -->
+            <svg class="small-ok" viewBox="0 0 320 184" style="--fig-min: 320px" role="img" aria-labelledby="fig4-t fig4-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig4-t">Share of runs that start cold, by repository size</title>
+              <desc id="fig4-d">Large repositories 71 percent, medium 52 percent, small 34 percent.</desc>
+              <line class="c-axis" x1="16" y1="150" x2="304" y2="150"/>
+              <rect class="c-bar focus" x="40" y="36.4" width="64" height="113.6"/>
+              <text class="c-value" x="72" y="28.4" text-anchor="middle">71%</text>
+              <text class="c-tick" x="72" y="170" text-anchor="middle">Large</text>
+              <rect class="c-bar" x="136" y="66.8" width="64" height="83.2"/>
+              <text class="c-value" x="168" y="58.8" text-anchor="middle">52%</text>
+              <text class="c-tick" x="168" y="170" text-anchor="middle">Medium</text>
+              <rect class="c-bar" x="232" y="95.6" width="64" height="54.4"/>
+              <text class="c-value" x="264" y="87.6" text-anchor="middle">34%</text>
+              <text class="c-tick" x="264" y="170" text-anchor="middle">Small</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-3</span> <strong>Large repositories start cold most often, so phase 1 starts with them.</strong> A small chart (<code>.small-ok</code>) keeps its own size and fits a phone. CI export, Sep 2026.</figcaption>
+        </figure>
+
+        <h3>Zones and categories keep one colour each</h3>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <svg viewBox="0 0 720 300" style="--fig-min: 720px" role="img" aria-labelledby="fig2-t fig2-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig2-t">Who owns which part of the cache path</title>
+              <desc id="fig2-d">Three team-owned runner groups in the team zone send requests to the platform-owned cache service, which writes to platform-owned object storage.</desc>
+              <defs><marker id="fig2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
+              <text class="d-mark" x="704" y="24" text-anchor="end">ILLUSTRATIVE</text>
+              <rect class="d-zone" x="16" y="36" width="300" height="248" rx="8"/>
+              <text class="d-small" x="30" y="58">Team zone</text>
+              <rect class="d-zone" x="380" y="36" width="324" height="248" rx="8"/>
+              <text class="d-small" x="394" y="58">Platform zone</text>
+              <rect class="d-cat-1" x="40" y="76" width="150" height="48" rx="6"/>
+              <text class="d-label" x="115" y="105" text-anchor="middle">Web runners</text>
+              <rect class="d-cat-1" x="40" y="146" width="150" height="48" rx="6"/>
+              <text class="d-label" x="115" y="175" text-anchor="middle">Data runners</text>
+              <rect class="d-cat-1" x="40" y="216" width="150" height="48" rx="6"/>
+              <text class="d-label" x="115" y="245" text-anchor="middle">Mobile runners</text>
+              <rect class="d-cat-4" x="440" y="76" width="160" height="56" rx="6"/>
+              <text class="d-label" x="520" y="109" text-anchor="middle">Cache service</text>
+              <rect class="d-cat-4" x="440" y="200" width="160" height="56" rx="6"/>
+              <text class="d-label" x="520" y="233" text-anchor="middle">Object storage</text>
+              <path class="d-edge" d="M190 100 L438 98" marker-end="url(#fig2-arrow)"/>
+              <path class="d-edge" d="M190 170 L438 108" marker-end="url(#fig2-arrow)"/>
+              <path class="d-edge" d="M190 240 L438 118" marker-end="url(#fig2-arrow)"/>
+              <path class="d-edge" d="M520 132 V198" marker-end="url(#fig2-arrow)"/>
+              <text class="d-small" x="530" y="170">write back</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-4</span> <strong>Teams own their runners; platform owns everything behind the cache.</strong> <span class="key cat-1">Team-owned</span><span class="key cat-4">Platform-owned</span> Dashed outlines are ownership zones. <span class="mark-illustrative">Illustrative</span></figcaption>
+        </figure>
+
+        <h3>Annotation dims the context and points at the subject</h3>
+        <div class="annotate">
+          <div class="stats">
+            <div class="stat subject"><div class="value">52%</div><div class="what">Runs that start cold</div></div>
+            <div class="stat context"><div class="value">18.4 min</div><div class="what">Median pipeline time</div></div>
+            <div class="stat context"><div class="value">2.1×</div><div class="what">Queue time growth</div></div>
+          </div>
+          <p class="pointer-note up"><span class="n">1</span>Phase 1 has to move this number. The others follow from it.</p>
+        </div>
+        <div class="grid">
+          <p class="pointer-note down"><span class="n">2</span>Points down at what sits below.</p>
+          <p class="pointer-note right"><span class="n">3</span>Points right.</p>
+          <p class="pointer-note left"><span class="n">4</span>Points left.</p>
+        </div>
+
+        <h3>Quotes, code and forms</h3>
+        <blockquote><p>Half our pipeline time goes to rebuilding things nobody changed.</p><footer>Runner team retrospective notes, Sep 2026</footer></blockquote>
+
+        <figure class="code">
+          <pre><code><span class="tok-c"># Inputs that form a cache key</span>
+<span class="tok-k">key</span> = sha256(source_tree, lockfiles, toolchain_version, build_flags)
+<span class="tok-k">prefix</span> = <span class="tok-s">"cache/v1/"</span></code></pre>
+          <figcaption><code>cache-key.txt</code>: what goes into a key.</figcaption>
+        </figure>
+
+        <form id="calc" class="no-print" onsubmit="return false">
+          <fieldset>
+            <legend>Estimate the time saved</legend>
+            <div class="field"><label for="runs">Runs per day</label><input id="runs" name="runs" type="number" min="0" value="400"></div>
+            <div class="field"><label for="mins">Minutes saved by a hit</label><input id="mins" name="mins" type="number" min="0" step="0.5" value="6"><span class="hint">Your own estimate.</span></div>
+            <div class="field"><label for="rate">Expected hit rate</label><select id="rate" name="rate"><option value="0.6">60%</option><option value="0.7">70%</option><option value="0.8">80%</option></select></div>
+            <label class="check"><input id="week" name="week" type="checkbox"> Show a five-day week</label>
+            <p>Estimated saving: <output id="calc-out" for="runs mins rate week">24 hours a day</output></p>
+          </fieldset>
+        </form>
+
+        <hr>
+        <p>A plain rule (above) separates loose groups. The dotted ornament before the sources is the one decoration a page may use, at most three times.</p>
+
+        <h2 id="glossary" class="annex">Glossary</h2>
+        <dl class="glossary">
+          <dt>Cache hit rate</dt><dd>The share of build steps served from the cache instead of run again.</dd>
+          <dt>Cold runner</dt><dd>A runner that starts with an empty local cache, so it rebuilds everything.</dd>
+          <dt>Content-addressed cache</dt><dd>A copy of build output stored under a hash of its inputs, so an identical build can reuse it instead of running again.</dd>
+        </dl>
+
+        <hr class="mark">
+        <h2 id="sources" class="annex">Sources</h2>
+        <div class="sources"><ol><li>CI analytics export, September 2026.</li><li>Runner metrics dashboard, July to October 2026.</li><li>Cloud provider price sheet, October 2026.</li><li>Platform goals tracker, October 2026.</li></ol></div>
+      </div>
+    </div>
+  </main>
 </div>
 
-<dialog class="zoom" id="zoom"><div class="zoom-bar"><button data-z="-1">−</button><button data-z="0">Fit</button><button data-z="1">+</button><span id="zoom-level" class="muted">100%</span><span style="flex:1"></span><button data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
+<dialog class="zoom" id="zoom" aria-label="Enlarged figure"><div class="zoom-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Fit to window">Fit</button><button type="button" data-z="1" aria-label="Zoom in">+</button><span id="zoom-level" class="muted">100%</span><span class="spacer"></span><button type="button" data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
 
 <script>
 (() => {
-  const root = document.documentElement;
-  const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
-  const p = store.get("hs-palette"), t = store.get("hs-theme");
-  if (p) root.dataset.palette = p; if (t) root.dataset.theme = t;
-  document.querySelectorAll("[data-set-palette]").forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("hs-palette", b.dataset.setPalette); });
-  document.querySelectorAll("[data-toggle-theme]").forEach(b => b.onclick = () => {
-    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = dark ? "light" : "dark"; store.set("hs-theme", root.dataset.theme);
-  });
+  const root = document.documentElement, K = "hs:" + location.pathname + ":";
+  const store = { set: (k, v) => { try { v ? localStorage.setItem(K + k, v) : localStorage.removeItem(K + k); } catch {} } };
 
-  // Contents rail from h2s, with the current section marked.
-  const list = document.getElementById("toc-list");
-  const heads = [...document.querySelectorAll("main h2[id]")];
-  if (list) {
-    heads.forEach(h => { const li = document.createElement("li"); li.innerHTML = `<a href="#${h.id}">${h.textContent}</a>`; list.appendChild(li); });
+  // Palette and theme. Remembered for this page only. Theme cycles auto, light, dark.
+  const palBtns = [...document.querySelectorAll("[data-set-palette]")], themeBtn = document.querySelector("[data-toggle-theme]");
+  const showPal = () => palBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === (root.dataset.palette || "paper")));
+  const showTheme = () => { if (themeBtn) themeBtn.textContent = "Theme: " + (root.dataset.theme || "auto"); };
+  palBtns.forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("palette", b.dataset.setPalette); showPal(); });
+  if (themeBtn) themeBtn.onclick = () => { const next = { auto: "light", light: "dark", dark: "" }[root.dataset.theme || "auto"];
+    if (next) root.dataset.theme = next; else delete root.dataset.theme; store.set("theme", next); showTheme(); };
+  showPal(); showTheme();
+
+  // Contents rail. The list is in the HTML; this marks the current section and
+  // fills the list only if it was left empty. Collapsed by default on narrow screens.
+  const toc = document.querySelector(".toc"), list = toc && toc.querySelector("ol");
+  const heads = [...document.querySelectorAll("main h2")];
+  if (toc && list) {
+    heads.forEach((h, i) => { if (!h.id) h.id = (h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section") + "-" + i; });
+    if (!list.children.length) heads.forEach(h => { const li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.append(a); list.append(li); });
+    if (!list.children.length) toc.hidden = true;
+    const box = toc.querySelector("details"), wide = matchMedia("(min-width: 1100px)");
+    if (box) { box.open = wide.matches; wide.addEventListener("change", e => { box.open = e.matches; }); }
     const links = [...list.querySelectorAll("a")];
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "0px 0px -70% 0px" });
-    heads.forEach(h => io.observe(h));
+    const mark = () => { let cur = heads[0]; for (const h of heads) if (h.getBoundingClientRect().top <= innerHeight * 0.3) cur = h;
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = heads[heads.length - 1];
+      links.forEach(a => a.getAttribute("href") === "#" + (cur && cur.id) ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")); };
+    let raf = 0; addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); }, { passive: true }); mark();
   }
 
-  // Enlarge any figure: real zoom, real scroll.
+  // Enlarge any figure: fit to the window on open, real zoom, real scroll.
   const dlg = document.getElementById("zoom"), stage = document.getElementById("zoom-stage"), lvl = document.getElementById("zoom-level");
-  let z = 1; const apply = () => { const el = stage.firstElementChild; if (el) { el.style.transform = `scale(${z})`; el.style.width = el.dataset.w + "px"; } lvl.textContent = Math.round(z * 100) + "%"; };
+  let z = 1, w = 0, h = 0;
+  const fit = () => { const s = getComputedStyle(stage);
+    return Math.min((stage.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)) / w, (stage.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom)) / h); };
+  const apply = () => { const el = stage.firstElementChild; if (!el) return; el.style.width = w * z + "px"; el.style.height = h * z + "px"; lvl.textContent = Math.round(z * 100) + "%"; };
   document.querySelectorAll(".zoom-btn").forEach(b => b.onclick = () => {
-    const src = b.parentElement.querySelector("svg, img"); const c = src.cloneNode(true);
-    c.dataset.w = src.viewBox?.baseVal?.width || src.naturalWidth || src.getBoundingClientRect().width;
-    stage.replaceChildren(c); z = Math.max(1, (innerWidth * 0.9) / c.dataset.w); apply(); dlg.showModal();
+    const src = b.closest("figure") && b.closest("figure").querySelector(".figure-frame > svg, .figure-frame > img, .figure-frame > picture img");
+    if (!src || !dlg) return;
+    const vb = src.viewBox && src.viewBox.baseVal, r = src.getBoundingClientRect();
+    [w, h] = vb && vb.width ? [vb.width, vb.height] : src.naturalWidth ? [src.naturalWidth, src.naturalHeight] : [r.width, r.height];
+    if (!w || !h) return;
+    const c = src.cloneNode(true), name = src.querySelector("title");
+    c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    c.removeAttribute("aria-labelledby"); c.setAttribute("aria-label", name ? name.textContent : (src.alt || "Enlarged figure"));
+    stage.replaceChildren(c); dlg.showModal(); z = Math.min(fit(), 4); apply(); stage.scrollTo(0, 0);
   });
-  dlg?.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? (innerWidth * 0.9) / stage.firstElementChild.dataset.w : Math.min(6, Math.max(0.5, z * (d > 0 ? 1.25 : 0.8))); apply(); });
-  dlg?.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+  if (dlg) {
+    dlg.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? fit() : Math.min(6, Math.max(0.25, z * (d > 0 ? 1.25 : 0.8))); apply(); });
+    dlg.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  }
 
-  // Tabs.
-  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')]; tabs.forEach(tab => tab.onclick = () => { tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); document.getElementById(x.getAttribute("aria-controls")).hidden = !on; }); }); });
+  // Tabs: one tab stop, arrow keys, Home and End. Panels are visible until this runs.
+  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')];
+    const sel = tab => tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
+      const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    tabs.forEach((tab, i) => { tab.onclick = () => sel(tab); tab.onkeydown = e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (e.key === "Home" || e.key === "End" || d) { e.preventDefault(); const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); } }; });
+    sel(tabs.find(x => x.getAttribute("aria-selected") === "true") || tabs[0]); });
+
+  // Gallery calculator: an estimate, recomputed as the inputs change.
+  const calc = document.getElementById("calc");
+  if (calc) { const run = () => { const f = calc.elements, week = f.week.checked;
+    const hrs = (+f.runs.value * +f.mins.value * +f.rate.value) / 60 * (week ? 5 : 1);
+    document.getElementById("calc-out").textContent = (Math.round(hrs * 10) / 10) + (week ? " hours a week" : " hours a day"); };
+    calc.addEventListener("input", run); run(); }
 
   // Print everything: open collapsed sections first.
   addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));

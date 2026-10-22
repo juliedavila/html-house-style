@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en" data-palette="paper">
+<html lang="en" class="no-js" data-palette="paper">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>House Style Sample</title>
 <style>
 /* ==========================================================================
-   House style: base stylesheet
+   House style: base stylesheet (v1.1)
    Inline this whole file into a <style> tag in every generated page.
    No external fonts, no CDNs, no frameworks. Everything is a token.
 
@@ -14,6 +14,7 @@
    Force a theme:   <html data-theme="light|dark">  (default follows the OS)
    Switch density:  <body class="doc">  long reading (default)
                     <body class="tool"> dashboards, trackers, dense UIs
+   No-JS fallback:  <html class="no-js">; the page script removes the class.
    ========================================================================== */
 
 /* ---------- 1. Tokens: raw palettes (never used directly by components) --- */
@@ -44,13 +45,22 @@
   --p-tint: #E3F0F0;    --p-tint2: #F5E8E0;
 }
 
-/* Status colours are shared by every palette. All pass 5:1 on the grounds. */
+/* Status colours are shared by every palette. All pass 5:1 on the grounds.
+   Category colours (--p-cat-1..6) are for series, zones and actor types only.
+   Checked with a script (WCAG contrast, Machado 2009 colour-vision simulation):
+   light: 3.88 to 9.54 on bg and surface; min pairwise dE76 23.2 normal, 20.3 protan, 12.9 deutan, 12.3 tritan.
+   dark:  4.03 to 10.59 on bg and surface; min pairwise dE76 23.1 normal, 17.7 protan, 16.2 deutan, 13.5 tritan.
+   Always label or legend them anyway. */
 :root {
   --p-danger: #A8281F;  --p-warn: #8A5300;  --p-ok: #2C6B3A;
   --p-danger-bg: #F8E5E2; --p-warn-bg: #F6ECDA; --p-ok-bg: #E3F0E5;
+  --p-cat-1: #2F7FC1; --p-cat-2: #8C7A0B; --p-cat-3: #C24D7A;   /* sky, olive, rose */
+  --p-cat-4: #4E4AA8; --p-cat-5: #2F8A57; --p-cat-6: #7E2340;   /* indigo, green, wine */
+  --p-scroll-shadow: rgb(0 0 0 / 0.14);
 }
 
-/* Dark theme: one neutral dark ground, palette keeps its accent family. */
+/* Dark theme: one neutral dark ground, palette keeps its accent family.
+   Every dark rule sits under @media screen so print always uses light values. */
 @media screen and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --p-bg: #17161A; --p-surface: #1F1E23; --p-sunken: #141317;
@@ -60,6 +70,9 @@
     --p-tint: #24303F; --p-tint2: #3A2A24;
     --p-danger: #FF8A80; --p-warn: #F0B44C; --p-ok: #7CCB8F;
     --p-danger-bg: #3A1E1C; --p-warn-bg: #362A14; --p-ok-bg: #1C3022;
+    --p-cat-1: #86D0F5; --p-cat-2: #C9B23C; --p-cat-3: #F29CBC;
+    --p-cat-4: #8778DC; --p-cat-5: #5DBE88; --p-cat-6: #C25C7C;
+    --p-scroll-shadow: rgb(255 255 255 / 0.12);
   }
   :root[data-palette="slate"]:not([data-theme="light"])    { --p-accent: #86A8FF; --p-accent2: #E3A57A; }
   :root[data-palette="graphite"]:not([data-theme="light"]) { --p-accent: #5FC4C4; --p-accent2: #E8A27C; --p-tint: #1D3233; }
@@ -73,6 +86,9 @@
     --p-tint: #24303F; --p-tint2: #3A2A24;
     --p-danger: #FF8A80; --p-warn: #F0B44C; --p-ok: #7CCB8F;
     --p-danger-bg: #3A1E1C; --p-warn-bg: #362A14; --p-ok-bg: #1C3022;
+    --p-cat-1: #86D0F5; --p-cat-2: #C9B23C; --p-cat-3: #F29CBC;
+    --p-cat-4: #8778DC; --p-cat-5: #5DBE88; --p-cat-6: #C25C7C;
+    --p-scroll-shadow: rgb(255 255 255 / 0.12);
   }
   :root[data-theme="dark"][data-palette="slate"]    { --p-accent: #86A8FF; --p-accent2: #E3A57A; }
   :root[data-theme="dark"][data-palette="graphite"] { --p-accent: #5FC4C4; --p-accent2: #E8A27C; --p-tint: #1D3233; }
@@ -89,23 +105,34 @@
   --danger: var(--p-danger);    --danger-bg: var(--p-danger-bg);
   --warn: var(--p-warn);        --warn-bg: var(--p-warn-bg);
   --ok: var(--p-ok);            --ok-bg: var(--p-ok-bg);
+  --cat-1: var(--p-cat-1); --cat-2: var(--p-cat-2); --cat-3: var(--p-cat-3);
+  --cat-4: var(--p-cat-4); --cat-5: var(--p-cat-5); --cat-6: var(--p-cat-6);
+  --scroll-shadow: var(--p-scroll-shadow);
 
-  /* Type. Local fonts only: these resolve on macOS, Windows and Linux. */
+  /* Type. Local fonts only. Good matches on macOS and Windows; on Linux and
+     ChromeOS the stacks fall back to the system serif, sans and mono. */
   --font-read: "Iowan Old Style", "Charter", "Bitstream Charter", "Source Serif 4", "Source Serif Pro", "Sitka Text", Cambria, Georgia, serif;
   --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --font-mono: Menlo, "Cascadia Code", Consolas, "DejaVu Sans Mono", "Liberation Mono", ui-monospace, monospace;
 
-  /* Scale: 1.2 ratio. Reading base 18px, UI base 14px. */
-  --fs-xs: 0.78rem; --fs-sm: 0.875rem; --fs-base: 1rem;
-  --fs-md: 1.2rem;  --fs-lg: 1.44rem;  --fs-xl: 1.73rem; --fs-2xl: 2.07rem; --fs-3xl: 2.49rem;
+  /* Scale. Reading sizes step by 1.2 from an 18px base; UI sizes are 14 and 12.
+     Pixel values assume the browser default 16px root. Use only these tokens. */
+  --fs-xs: 0.75rem;    /* 12px: kickers, block labels, sources */
+  --fs-sm: 0.875rem;   /* 14px: interface text, captions, tables, code */
+  --fs-base: 1.125rem; /* 18px: reading text, h4 */
+  --fs-md: 1.35rem;    /* 21.6px: h3, dek */
+  --fs-lg: 1.62rem;    /* 25.9px: h2 */
+  --fs-xl: 1.944rem;   /* 31.1px: stat values, h1 on phones */
+  --fs-2xl: 2.333rem;  /* 37.3px: h1 */
+  --fs-3xl: 2.8rem;    /* 44.8px: display only */
   --lh-read: 1.62;  --lh-ui: 1.45;     --lh-tight: 1.2;
-  --measure: 64ch;
+  --measure: 64ch;  /* about 70 to 75 characters of running text */
 
   /* Space: 4px grid. */
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
 
-  --radius: 6px;    --radius-sm: 4px;
+  --radius: 6px;    --radius-sm: 4px;   --radius-pill: 999px;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 2px 8px rgb(0 0 0 / 0.04);
   --ease: cubic-bezier(.2,.7,.2,1);
   --gutter: 16px;
@@ -119,24 +146,26 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: lig
 :root[data-theme="dark"]  { color-scheme: dark; }
 body {
   margin: 0; background: var(--bg); color: var(--fg);
-  font-family: var(--font-read); font-size: 18px; line-height: var(--lh-read);
+  font-family: var(--font-read); font-size: var(--fs-base); line-height: var(--lh-read);
   font-optical-sizing: auto; text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased; overflow-wrap: break-word;
 }
-body.tool { font-family: var(--font-ui); font-size: 14px; line-height: var(--lh-ui); }
+body.tool { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: var(--lh-ui); }
 
 h1, h2, h3, h4 { font-family: var(--font-display); color: var(--fg); line-height: var(--lh-tight); font-weight: 600; text-wrap: balance; margin: 0; }
 body.tool h1, body.tool h2, body.tool h3, body.tool h4 { font-family: var(--font-ui); letter-spacing: -0.01em; }
-h1 { font-size: var(--fs-3xl); letter-spacing: -0.015em; }
-h2 { font-size: var(--fs-xl); margin-top: var(--s8); }
+h1 { font-size: var(--fs-2xl); letter-spacing: -0.015em; }
+h2 { font-size: var(--fs-lg); margin-top: var(--s8); }
 h3 { font-size: var(--fs-md); margin-top: var(--s6); }
 h4 { font-size: var(--fs-base); margin-top: var(--s5); font-family: var(--font-ui); font-weight: 600; }
 h2 + *, h3 + *, h4 + * { margin-top: var(--s3); }
-@media (max-width: 520px) { body { font-size: 17px; } h1 { font-size: var(--fs-2xl); } h2 { font-size: var(--fs-lg); margin-top: var(--s7); } h3 { font-size: var(--fs-base); } }
-body.tool h1 { font-size: var(--fs-2xl); } body.tool h2 { font-size: var(--fs-lg); margin-top: var(--s7); }
+/* Phones: body 17px; h4 (18) and h3 (21.6) stay above it. */
+@media (max-width: 520px) { body.doc, body:not(.tool) { font-size: 17px; } h1 { font-size: var(--fs-xl); } h2 { margin-top: var(--s7); } }
+body.tool h1 { font-size: var(--fs-xl); } body.tool h2 { font-size: var(--fs-md); margin-top: var(--s7); }
+body.tool h3 { font-size: var(--fs-base); } body.tool h4 { font-size: var(--fs-sm); }
 
-p, ul, ol, dl, blockquote, figure, table, pre, details, .callout { margin: var(--s4) 0 0; }
-.stats, .cards, .compare, .grid, .table-wrap, ol.steps { margin-top: var(--s5); }
+p, ul, ol, dl, blockquote, figure, table, pre, details, .callout, .tabs, form, fieldset { margin: var(--s4) 0 0; }
+.stats, .cards, .compare, .grid, .table-wrap, ol.steps, ol.timeline { margin-top: var(--s5); }
 p { text-wrap: pretty; }
 li + li { margin-top: var(--s2); }
 ul, ol { padding-left: 1.3em; }
@@ -144,21 +173,28 @@ strong { font-weight: 650; }
 small, .small { font-size: var(--fs-sm); }
 .muted { color: var(--fg-muted); }
 .num, td.num, .tabular { font-variant-numeric: tabular-nums lining-nums; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 a:hover { text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
-code, kbd, samp { font-family: var(--font-mono); font-size: 0.86em; }
-:not(pre) > code { background: var(--sunken); padding: 0.1em 0.35em; border-radius: var(--radius-sm); }
-pre { background: var(--sunken); padding: var(--s4); border-radius: var(--radius); overflow-x: auto; font-size: 0.82rem; line-height: 1.5; }
+code, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
+:not(pre) > code { background: var(--sunken); padding: 0.1em 0.35em; border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+pre { background: var(--sunken); padding: var(--s4); border-radius: var(--radius); overflow-x: auto; font-size: var(--fs-sm); line-height: 1.5; }
+pre code { font-size: inherit; }
+/* A code block with a file-name caption. */
+figure.code > figcaption { margin-top: var(--s2); }
+/* Optional hand-written highlighting: wrap tokens in these spans. */
+.tok-k { color: var(--accent); } .tok-s { color: var(--ok); } .tok-c { color: var(--fg-subtle); font-style: italic; }
 
 hr { border: 0; border-top: 1px solid var(--hairline); margin: var(--s7) 0; }
-/* The one ornament. Use at most three times per page. */
+/* The one ornament: four whole dots. Use at most three times per page. */
 hr.mark { border: 0; height: 12px; margin: var(--s8) auto; width: 64px;
-  background: radial-gradient(circle, var(--accent-2) 2.5px, transparent 3px) center/16px 12px repeat-x; }
+  background: radial-gradient(circle, var(--accent-2) 2.5px, transparent 3px) 0 50% / 16px 12px repeat-x; }
 
-blockquote { margin-left: 0; padding-left: var(--s4); border-left: 3px solid var(--accent-2); color: var(--fg-muted); font-style: italic; }
+blockquote { margin-left: 0; padding-left: var(--s4); border-left: 3px solid var(--border); color: var(--fg-muted); font-style: italic; }
+blockquote footer { font-style: normal; font-family: var(--font-ui); font-size: var(--fs-sm); margin-top: var(--s2); }
 
 /* ---------- 4. Layout --------------------------------------------------- */
 
@@ -168,23 +204,39 @@ body.tool .page { max-width: 1440px; padding-top: var(--s5); }
 
 /* Reading column: prose holds the measure, wide things may break out. */
 .prose > * { max-width: var(--measure); }
-.prose > .wide, .prose > figure, .prose > .table-wrap, .prose > .grid, .prose > .cards, .prose > .stats, .prose > .compare { max-width: none; }
+.prose > .wide, .prose > figure, .prose > .table-wrap, .prose > .grid, .prose > .cards, .prose > .stats, .prose > .compare, .prose > .tabs { max-width: none; }
+.grid > *, .cards > *, .compare > *, .stats > *, .with-toc > * { min-width: 0; }
 
-/* Document with a sticky contents rail on wide screens. */
+.bluf > * { max-width: var(--measure); }
+
+/* Contents rail. The list is written into the HTML; script only marks the
+   current section. Markup order is .bluf, nav.toc, .prose, so on a phone the
+   bottom line comes first and the rail is a collapsible box under it. On wide
+   screens the rail sits in its own column beside both. */
 .with-toc { display: block; }
 @media (min-width: 1100px) {
-  .with-toc { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--s8); }
+  .with-toc { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: var(--s8); }
+  .with-toc > .toc { grid-column: 1; grid-row: 1 / span 2; }
+  .with-toc > .bluf { grid-column: 2; grid-row: 1; }
+  .with-toc > .prose { grid-column: 2; }
 }
 .toc { font-family: var(--font-ui); font-size: var(--fs-sm); line-height: 1.4; }
-.toc .toc-title { font-size: var(--fs-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); margin-bottom: var(--s3); }
+.toc details { border: 0; background: none; margin: 0; }
+.toc summary, .toc .toc-title { font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); padding: 0; }
+.toc details[open] > summary { border-bottom: 0; margin-bottom: var(--s3); }
 .toc ol { list-style: none; padding: 0; margin: 0; }
 .toc li + li { margin-top: var(--s2); }
+.toc li.annex-start { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--hairline); }
 .toc a { color: var(--fg-muted); text-decoration: none; display: block; padding-left: var(--s3); border-left: 2px solid transparent; }
 .toc a:hover { color: var(--fg); }
-.toc a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
-@media (min-width: 1100px) { .toc { position: sticky; top: var(--s6); align-self: start; max-height: calc(100vh - 64px); overflow-y: auto; } }
-@media (max-width: 1099px) {
-  .toc { border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s4); margin-bottom: var(--s6); background: var(--surface); }
+.toc a[aria-current] { color: var(--accent); border-left-color: var(--accent); }
+@media (min-width: 1100px) {
+  .toc { position: sticky; top: var(--s6); align-self: start; max-height: calc(100vh - 64px); overflow-y: auto; }
+  .toc summary { pointer-events: none; }
+}
+@media (max-width: 1099.98px) {
+  .toc { border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s3) var(--s4); margin-top: var(--s5); margin-bottom: 0; background: var(--surface); }
+  .toc summary { padding: var(--s1) 0; }
 }
 
 .grid { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
@@ -192,41 +244,48 @@ body.tool .page { max-width: 1440px; padding-top: var(--s5); }
 /* ---------- 5. Page header and answer-first block ------------------------ */
 
 .masthead { padding-bottom: var(--s5); border-bottom: 1px solid var(--hairline); margin-bottom: var(--s6); }
+.masthead .toolbar { justify-content: flex-end; margin-bottom: var(--s4); }
 .kicker { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
 .masthead h1 { margin-top: var(--s2); max-width: 32ch; }
 .dek { font-size: var(--fs-md); color: var(--fg-muted); margin-top: var(--s3); max-width: 58ch; line-height: 1.45; }
 .meta { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-subtle); margin-top: var(--s4); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.meta > * { min-width: 0; overflow-wrap: anywhere; }
+/* Reference, tool and log pages open with one sentence of purpose instead of .bluf. */
+.purpose { font-size: var(--fs-md); line-height: 1.45; max-width: var(--measure); }
 
-/* The bottom line, up front. One per page. */
-.bluf { background: var(--surface); border: 1px solid var(--hairline); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: var(--s5) var(--s5) var(--s5) var(--s5); margin-top: var(--s6); }
+/* The bottom line, up front. One per page that argues or reports a finding.
+   Dashboards: one computed status sentence in .bluf, no list. */
+.bluf { background: var(--surface); border: 1px solid var(--hairline); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: var(--s5); margin-top: var(--s6); }
 .bluf > .label { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
 .bluf p:first-of-type { margin-top: var(--s2); font-size: var(--fs-md); line-height: 1.5; }
 .bluf ul { margin-top: var(--s3); }
+/* Phones: a tighter masthead so the bottom line starts on the first screen. */
+@media (max-width: 520px) { .page { padding-top: var(--s5); } .dek, .bluf p:first-of-type, .purpose { font-size: var(--fs-base); } .bluf { padding: var(--s4); } }
 
 /* ---------- 6. Callouts ------------------------------------------------- */
 
-.callout { border-radius: var(--radius); padding: var(--s4) var(--s5); background: var(--accent-bg); font-size: 0.95em; }
+.callout { border-radius: var(--radius); padding: var(--s4) var(--s5); background: var(--accent-bg); }
 .callout > :first-child { margin-top: 0; }
 .callout .label { font-family: var(--font-ui); font-weight: 650; font-size: var(--fs-sm); display: block; margin-bottom: var(--s1); }
 .callout.decision { background: var(--accent-2-bg); }
 .callout.risk     { background: var(--warn-bg); }
-.callout.stop     { background: var(--danger-bg); }
+.callout.stop     { background: var(--danger-bg); box-shadow: inset 4px 0 0 var(--danger); }
 
 /* ---------- 7. Status: always an icon shape and a word ------------------- */
 
-.status { display: inline-flex; align-items: center; gap: 0.4em; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; padding: 0.1em 0.55em; border-radius: 999px; white-space: nowrap; }
-.status::before { content: ""; width: 0.6em; height: 0.6em; background: currentColor; }
+.status { display: inline-flex; align-items: center; gap: 0.4em; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; padding: 0.1em 0.55em; border-radius: var(--radius-pill); white-space: nowrap; }
+.status::before { content: ""; width: 0.6em; height: 0.6em; background: currentColor; flex: none; }
 .status.ok     { color: var(--ok); background: var(--ok-bg); }     .status.ok::before     { border-radius: 50%; }
 .status.warn   { color: var(--warn); background: var(--warn-bg); } .status.warn::before   { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .status.danger { color: var(--danger); background: var(--danger-bg); } .status.danger::before { border-radius: 1px; }
 .status.idle   { color: var(--fg-muted); background: var(--sunken); } .status.idle::before { border-radius: 50%; background: transparent; border: 1.5px solid currentColor; }
 
-/* ---------- 8. Stats, cards, steps, comparison --------------------------- */
+/* ---------- 8. Stats, cards, steps, timeline, comparison ----------------- */
 
-.stats { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
-@media (max-width: 520px) { .stats { grid-template-columns: 1fr 1fr; } .stat .value { font-size: var(--fs-xl); } }
+.stats { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+@media (max-width: 520px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat .value { font-size: var(--fs-lg); } }
 .stat { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s4); }
-.stat .value { font-family: var(--font-ui); font-size: var(--fs-2xl); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat .value { font-family: var(--font-ui); font-size: var(--fs-xl); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; }
 .stat .what { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); margin-top: var(--s1); }
 .stat .src { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--fg-subtle); margin-top: var(--s2); }
 
@@ -247,63 +306,120 @@ ol.steps > li::after { content: ""; position: absolute; left: calc(1rem - 1px); 
 ol.steps > li:last-child::after { display: none; }
 ol.steps > li > strong:first-child { display: block; }
 
+/* Dated events: a date column and the event. Use a table for overlapping work. */
+ol.timeline { list-style: none; padding: 0; border-left: 2px solid var(--hairline); margin-left: var(--s2); }
+ol.timeline > li { position: relative; padding-left: var(--s5); }
+ol.timeline > li + li { margin-top: var(--s4); }
+ol.timeline > li::before { content: ""; position: absolute; left: -7px; top: 0.45em; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); }
+ol.timeline > li.now::before { background: var(--accent); border-color: var(--accent); }
+ol.timeline time { display: block; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+
 /* Side-by-side options. Stacks on narrow screens. */
 .compare { display: grid; gap: var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
 .compare > .option { border-top: 3px solid var(--hairline); padding-top: var(--s4); }
 .compare > .option.recommended { border-top-color: var(--accent); }
-.compare .option h4 { margin-top: 0; }
+.compare .option > :is(h3, h4):first-child { margin-top: 0; font: 600 var(--fs-base)/1.3 var(--font-ui); }
 
 /* ---------- 9. Tables: always inside .table-wrap ------------------------- */
 
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+/* Long tables (about 15+ rows): the wrapper scrolls and the header sticks. */
+.table-wrap.scroll-y { max-height: min(70vh, 640px); overflow: auto; }
 table { border-collapse: collapse; width: 100%; font-family: var(--font-ui); font-size: var(--fs-sm); line-height: 1.45; margin: 0; }
 th, td { text-align: left; vertical-align: top; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--hairline); }
-thead th { font-weight: 650; color: var(--fg-muted); background: var(--sunken); position: sticky; top: 0; }
-tbody tr:last-child td { border-bottom: 0; }
-tbody tr:hover td { background: color-mix(in srgb, var(--accent-bg) 45%, transparent); }
+thead th { font-weight: 650; color: var(--fg-muted); background: var(--sunken); position: sticky; top: 0; z-index: 1; }
+th[scope="row"] { font-weight: 650; color: var(--fg); }
+/* The recommended column: accent rule on the header, light tint below. */
+thead th.rec { color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+td.rec { background: var(--accent-bg); background: color-mix(in srgb, var(--accent-bg) 55%, transparent); }
+tbody tr:last-child > * { border-bottom: 0; }
+tbody tr:hover > * { background: color-mix(in srgb, var(--accent-bg) 45%, transparent); }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-caption { caption-side: bottom; text-align: left; padding: var(--s3) var(--s4); font-size: var(--fs-xs); color: var(--fg-subtle); }
+/* Keep captions to a short title. The source line goes in .table-note after
+   the wrapper, so it never scrolls off a phone screen. */
+caption { caption-side: top; text-align: left; padding: var(--s3) var(--s4) 0; font-weight: 600; color: var(--fg); }
+.table-note { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--fg-subtle); margin-top: var(--s2); max-width: var(--measure); }
+body.tool th, body.tool td { padding: 6px var(--s3); }
 
 /* ---------- 10. Figures and diagrams ------------------------------------ */
 
 figure { margin-left: 0; margin-right: 0; }
+/* The Enlarge button sits above the frame, right-aligned, so it never covers
+   the figure and never scrolls away with it. */
+figure > .zoom-btn { display: block; margin: 0 0 var(--s2) auto; }
 .figure-frame { position: relative; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s4); overflow-x: auto; }
-.figure-frame svg, .figure-frame img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
-.figure-frame svg.natural { max-width: none; } /* wide diagrams keep their size and scroll */
-/* Never let a diagram shrink below legible: on narrow screens it scrolls inside its frame. */
-.figure-frame > svg { min-width: var(--fig-min, 560px); }
-.figure-frame > svg.small-ok { min-width: 0; }
+.figure-frame img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+/* Figures draw at 1:1 or larger, never smaller. Set style="--fig-min: Wpx" on
+   every figure SVG, W = viewBox width. Below that width the frame scrolls.
+   Above it the SVG may grow to 1.25x and no further. */
+.figure-frame > svg { display: block; width: 100%; height: auto; margin: 0 auto; min-width: var(--fig-min, 0px); max-width: calc(var(--fig-min, 800px) * 1.25); }
+/* Small charts (viewBox up to about 400 wide) keep exactly their own size. */
+.figure-frame > svg.small-ok { max-width: var(--fig-min, 400px); }
 /* Scroll cue: a soft shadow appears at whichever edge has more content. */
 .figure-frame, .table-wrap {
   background:
     linear-gradient(to right, var(--surface) 30%, transparent) left / 24px 100% no-repeat local,
     linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
-    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / .14), transparent) left / 10px 100% no-repeat scroll,
-    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / .14), transparent) right / 10px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow), transparent) left / 10px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow), transparent) right / 10px 100% no-repeat scroll,
     var(--surface);
 }
 figcaption { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); margin-top: var(--s3); max-width: var(--measure); }
 figcaption strong { color: var(--fg); }
 .fig-id { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--fg-subtle); }
+/* "Illustrative" mark: in HTML (caption) use this class; inside an SVG use text.d-mark. */
 .mark-illustrative { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-subtle); }
-.zoom-btn { position: absolute; top: var(--s2); right: var(--s2); font: 600 var(--fs-xs)/1 var(--font-ui); color: var(--fg-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 8px; cursor: zoom-in; }
+.zoom-btn { font: 600 var(--fs-xs)/1 var(--font-ui); color: var(--fg-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; cursor: zoom-in; }
 .zoom-btn:hover { color: var(--accent); border-color: var(--accent); }
-dialog.zoom { width: 96vw; height: 92vh; max-width: none; max-height: none; padding: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); }
+dialog.zoom { width: 96vw; height: 92vh; max-width: none; max-height: none; padding: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); overflow: hidden; }
 dialog.zoom::backdrop { background: rgb(0 0 0 / 0.55); }
-dialog.zoom .zoom-bar { display: flex; gap: var(--s2); align-items: center; padding: var(--s2) var(--s3); border-bottom: 1px solid var(--hairline); font: 500 var(--fs-sm) var(--font-ui); }
+dialog.zoom .zoom-bar { display: flex; gap: var(--s2); align-items: center; height: 44px; padding: 0 var(--s3); border-bottom: 1px solid var(--hairline); font: 500 var(--fs-sm) var(--font-ui); }
+dialog.zoom .zoom-bar .spacer { flex: 1; }
 dialog.zoom .zoom-bar button { font: inherit; padding: 4px 10px; border: 1px solid var(--border); background: var(--surface); color: var(--fg); border-radius: var(--radius-sm); cursor: pointer; }
 dialog.zoom .zoom-stage { overflow: auto; height: calc(100% - 44px); padding: var(--s5); }
-dialog.zoom .zoom-stage > * { transform-origin: 0 0; max-width: none !important; }
+dialog.zoom .zoom-stage > * { display: block; max-width: none !important; min-width: 0 !important; margin: 0 auto; }
 
-/* Diagram text and strokes take theme colours. Use these classes inside SVG. */
-svg .d-label { font: 500 13px var(--font-ui); fill: var(--fg); }
-svg .d-small { font: 400 11.5px var(--font-ui); fill: var(--fg-muted); }
+/* Diagram text and strokes take theme colours. Use these classes inside SVG.
+   Labels are sized in viewBox units; at 1:1 they are the displayed size. */
+svg .d-label { font: 500 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); }
+svg .d-small { font: 400 12px var(--font-ui, system-ui, sans-serif); fill: var(--fg-muted); }
+svg .d-mark  { font: 650 12px var(--font-ui, system-ui, sans-serif); letter-spacing: 0.06em; fill: var(--fg-subtle); }
 svg .d-box   { fill: var(--surface); stroke: var(--border); stroke-width: 1.25; }
 svg .d-focus { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 1.75; }
 svg .d-edge  { fill: none; stroke: var(--fg-muted); stroke-width: 1.5; }
 svg .d-edge.control  { stroke-dasharray: 7 4; }
 svg .d-edge.evidence { stroke-dasharray: 2 3; }
 svg .d-edge.focus    { stroke: var(--accent); stroke-width: 2.25; }
+/* A zone or group boundary: dashed outline, no fill. */
+svg .d-zone  { fill: none; stroke: var(--border); stroke-width: 1; stroke-dasharray: 4 4; }
+/* Arrowheads: colour from CSS, matched to the line where supported. Use two
+   markers per figure: plain, and class="focus" for accent edges. */
+svg marker path { fill: var(--fg-muted); fill: context-stroke; }
+svg marker.focus path { fill: var(--accent); fill: context-stroke; }
+/* Category nodes: tinted fill, category stroke. Text on them stays --fg. */
+svg .d-cat-1 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-1) 14%, var(--surface)); stroke: var(--cat-1); stroke-width: 1.5; }
+svg .d-cat-2 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-2) 14%, var(--surface)); stroke: var(--cat-2); stroke-width: 1.5; }
+svg .d-cat-3 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-3) 14%, var(--surface)); stroke: var(--cat-3); stroke-width: 1.5; }
+svg .d-cat-4 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-4) 14%, var(--surface)); stroke: var(--cat-4); stroke-width: 1.5; }
+svg .d-cat-5 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-5) 14%, var(--surface)); stroke: var(--cat-5); stroke-width: 1.5; }
+svg .d-cat-6 { fill: var(--surface); fill: color-mix(in srgb, var(--cat-6) 14%, var(--surface)); stroke: var(--cat-6); stroke-width: 1.5; }
+/* Charts: bars, axis, light grid, tick labels, direct value labels. */
+svg .c-bar       { fill: var(--fg-subtle); }
+svg .c-bar.focus { fill: var(--accent); }
+svg .c-cat-1 { fill: var(--cat-1); } svg .c-cat-2 { fill: var(--cat-2); } svg .c-cat-3 { fill: var(--cat-3); }
+svg .c-cat-4 { fill: var(--cat-4); } svg .c-cat-5 { fill: var(--cat-5); } svg .c-cat-6 { fill: var(--cat-6); }
+svg :is(.c-cat-1, .c-cat-2, .c-cat-3, .c-cat-4, .c-cat-5, .c-cat-6) { stroke: var(--surface); stroke-width: 1; } /* hairline gap between stacked segments */
+svg .c-line  { fill: none; stroke: var(--accent); stroke-width: 2; }
+svg .c-axis  { stroke: var(--border); stroke-width: 1; fill: none; }
+svg .c-grid  { stroke: var(--hairline); stroke-width: 1; fill: none; }
+svg .c-tick  { font: 400 12px var(--font-ui, system-ui, sans-serif); fill: var(--fg-muted); font-variant-numeric: tabular-nums; }
+svg .c-value { font: 600 13px var(--font-ui, system-ui, sans-serif); fill: var(--fg); font-variant-numeric: tabular-nums; stroke: var(--surface); stroke-width: 4px; paint-order: stroke; stroke-linejoin: round; }
+/* HTML legend keys for category colours. */
+.key { display: inline-flex; align-items: center; gap: 0.4em; font: 500 var(--fs-sm) var(--font-ui); color: var(--fg-muted); margin-right: var(--s4); }
+.key::before { content: ""; width: 0.8em; height: 0.8em; border-radius: 2px; background: var(--fg-subtle); }
+.key.cat-1::before { background: var(--cat-1); } .key.cat-2::before { background: var(--cat-2); } .key.cat-3::before { background: var(--cat-3); }
+.key.cat-4::before { background: var(--cat-4); } .key.cat-5::before { background: var(--cat-5); } .key.cat-6::before { background: var(--cat-6); }
+.key.focus::before { background: var(--accent); }
 
 /* Annotation focus: dim the context, keep the subject at full contrast. */
 .annotate { position: relative; }
@@ -319,13 +435,23 @@ svg .d-edge.focus    { stroke: var(--accent); stroke-width: 2.25; }
 
 /* ---------- 11. Terms: hover or tap for a definition --------------------- */
 
-.term { border-bottom: 1px dotted var(--fg-subtle); cursor: help; position: relative; }
-.term:hover, .term:focus { border-bottom-color: var(--accent); outline: none; }
+/* Phones: the definition is pinned to the bottom of the screen, full width,
+   so it can never push the page sideways. Wider screens: a bubble under the term. */
+.term { border-bottom: 1px dotted var(--fg-subtle); cursor: help; position: static; }
+.term:hover, .term:focus { border-bottom-color: var(--accent); }
+.term:focus { outline: none; }
+.term:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 .term[data-def]:hover::after, .term[data-def]:focus::after {
-  content: attr(data-def); position: absolute; left: 0; top: calc(100% + 6px); z-index: 20;
-  width: max-content; max-width: min(36ch, 80vw); padding: var(--s3) var(--s4);
-  background: var(--fg); color: var(--bg); border-radius: var(--radius);
-  font: 400 var(--fs-sm)/1.45 var(--font-ui); font-style: normal; box-shadow: var(--shadow);
+  content: attr(data-def); position: fixed; left: var(--gutter); right: var(--gutter); bottom: var(--s4); z-index: 20;
+  padding: var(--s3) var(--s4); background: var(--fg); color: var(--bg); border-radius: var(--radius);
+  font: 400 var(--fs-sm)/1.45 var(--font-ui); font-style: normal; box-shadow: var(--shadow); white-space: normal;
+}
+@media (min-width: 720px) {
+  .term { position: relative; }
+  .term[data-def]:hover::after, .term[data-def]:focus::after {
+    position: absolute; left: 0; right: auto; bottom: auto; top: calc(100% + 6px);
+    width: max-content; max-width: min(36ch, calc(100vw - 2 * var(--gutter)));
+  }
 }
 dl.glossary dt { font-family: var(--font-ui); font-weight: 650; margin-top: var(--s4); }
 dl.glossary dd { margin: var(--s1) 0 0; color: var(--fg-muted); }
@@ -339,32 +465,59 @@ details > summary::before { content: "+"; font-family: var(--font-mono); color: 
 details[open] > summary::before { content: "\2212"; }
 details[open] > summary { border-bottom: 1px solid var(--hairline); }
 details > .body { padding: var(--s2) var(--s4) var(--s4); }
-details + details { margin-top: var(--s2); }
+details + details { margin-top: var(--s3); }
+@media (min-width: 1100px) { .toc details > summary::before { content: none; } }
 
-/* Tabs: radio-free, driven by a few lines of JS in the template. */
+/* Tabs. Markup: .tabs > [role=tablist] > button[role=tab][aria-controls],
+   then [role=tabpanel] with ids. Author panels WITHOUT hidden; the script
+   hides the inactive ones. Without script, every panel shows with its label. */
 .tabs [role="tablist"] { display: flex; gap: var(--s1); border-bottom: 1px solid var(--hairline); overflow-x: auto; }
-.tabs [role="tab"] { font: 600 var(--fs-sm) var(--font-ui); padding: var(--s2) var(--s4); border: 0; background: none; color: var(--fg-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+.tabs [role="tab"] { font: 600 var(--fs-sm) var(--font-ui); padding: var(--s2) var(--s4); border: 0; background: none; color: var(--fg-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; min-height: 40px; }
 .tabs [role="tab"][aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .tabs [role="tabpanel"] { padding-top: var(--s4); }
 .tabs [role="tabpanel"][hidden] { display: none; }
+.tabs .tab-label { display: none; font: 650 var(--fs-sm) var(--font-ui); }
+.no-js .tabs [role="tablist"] { display: none; }
+.no-js .tabs .tab-label { display: block; }
 
-/* ---------- 13. Small chrome ------------------------------------------- */
+/* ---------- 13. Forms and controls --------------------------------------- */
 
-.chip { display: inline-block; font: 600 var(--fs-xs)/1.6 var(--font-ui); padding: 0 0.55em; border-radius: 999px; background: var(--sunken); color: var(--fg-muted); }
-.toolbar { display: flex; gap: var(--s2); align-items: center; font: 500 var(--fs-sm) var(--font-ui); }
-.toolbar button, .btn { font: 600 var(--fs-sm) var(--font-ui); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer; }
+label { font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; color: var(--fg); }
+.field { display: grid; gap: var(--s1); margin-top: var(--s4); max-width: 40ch; }
+.field .hint { font: 400 var(--fs-xs) var(--font-ui); color: var(--fg-subtle); }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea {
+  font: 400 var(--fs-sm) var(--font-ui); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; min-height: 40px; width: 100%; max-width: 100%;
+}
+textarea { min-height: 96px; line-height: var(--lh-ui); resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+.check { display: flex; align-items: center; gap: var(--s2); min-height: 40px; font-weight: 500; }
+fieldset { border: 1px solid var(--hairline); border-radius: var(--radius); padding: var(--s3) var(--s4) var(--s4); min-width: 0; }
+legend { font: 650 var(--fs-sm) var(--font-ui); padding: 0 var(--s1); }
+
+/* ---------- 14. Small chrome ------------------------------------------- */
+
+.chip { display: inline-block; font: 600 var(--fs-xs)/1.6 var(--font-ui); padding: 0 0.55em; border-radius: var(--radius-pill); background: var(--sunken); color: var(--fg-muted); }
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; font: 500 var(--fs-sm) var(--font-ui); }
+.toolbar button, .btn { font: 600 var(--fs-sm) var(--font-ui); padding: 6px 12px; min-height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer; }
 .toolbar button:hover, .btn:hover { border-color: var(--accent); color: var(--accent); }
+.toolbar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 .footnote, .sources { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--fg-muted); }
 .sources ol { padding-left: 1.4em; }
+sup.fn a { text-decoration: none; font-family: var(--font-ui); font-size: var(--fs-xs); }
+/* Controls that need script are hidden when it does not run. */
+.no-js .zoom-btn, .no-js [data-set-palette], .no-js [data-toggle-theme] { display: none; }
 
-/* ---------- 14. Motion and print --------------------------------------- */
+/* ---------- 15. Motion and print --------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 html { scroll-behavior: smooth; }
 :target { scroll-margin-top: var(--s6); }
 
 @media print {
-  :root { color-scheme: light; --p-bg: #FFFFFF; --p-surface: #FFFFFF; --p-sunken: #F3F3F1; --p-fg: #111111; --p-fg2: #3D3D3D; --p-fg3: #555555; --p-hairline: #CFCFCF; }
+  /* :root[data-palette] outranks the palette blocks above. */
+  :root, :root[data-palette] { --p-bg: #FFFFFF; --p-surface: #FFFFFF; --p-sunken: #F3F3F1; --p-fg: #111111; --p-fg2: #3D3D3D; --p-fg3: #555555; --p-hairline: #CFCFCF; }
   @page { margin: 16mm 14mm; }
   :root, :root[data-theme] { color-scheme: light !important; }
   html, body { background: #fff !important; }
@@ -372,175 +525,499 @@ html { scroll-behavior: smooth; }
   .toc, .zoom-btn, .toolbar, .no-print { display: none !important; }
   .with-toc { display: block; }
   .page { max-width: none; padding: 0; }
-  h2, h3 { break-after: avoid; }
-  figure, .card, .stat, .callout, .bluf, tr, .compare > .option, ol.steps > li, details { break-inside: avoid; }
+  h2, h3, dt { break-after: avoid; }
+  figure, .card, .stat, .callout, .bluf, tr, .compare > .option, ol.steps > li, ol.timeline > li, details, dd { break-inside: avoid; }
+  .table-wrap.scroll-y { max-height: none; overflow: visible; }
+  /* Paper cannot scroll: wide figures shrink to the printed column. */
+  .figure-frame { overflow: visible; }
+  .figure-frame > svg { min-width: 0; max-width: 100%; }
+  .tabs [role="tablist"] { display: none; }
+  .tabs [role="tabpanel"][hidden] { display: block; }
+  .tabs .tab-label { display: block; }
   details { border: 0; background: none; } details > summary { padding: 0; border: 0 !important; font-size: var(--fs-base); } details > summary::before { content: none !important; } details > .body { display: block; padding: var(--s2) 0 0; }
+  /* Closed details print open even without script (Chrome 131+, Safari 18.4+). */
+  details::details-content { content-visibility: visible; display: block; }
   a { color: inherit; text-decoration: none; }
   .card, .stat { box-shadow: none; }
+  .term[data-def]::after { content: none !important; }
 }
+/* end of base.css */
 
-/* Artifact gutter: clears phone side bars. */
-.page { padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--gutter), env(safe-area-inset-right, 0px)); padding-block: var(--s7) var(--s9); }
-.kitnote { font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); background: var(--sunken); border-radius: var(--radius); padding: var(--s3) var(--s4); margin-bottom: var(--s5); }
+/* Sample page only. */
+@media screen {
+  /* Safe-area gutter for phones with notches. */
+  .page { padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--gutter), env(safe-area-inset-right, 0px)); }
+}
+.kitnote { font: 500 var(--fs-sm)/1.45 var(--font-ui); color: var(--fg-muted); background: var(--sunken); border-radius: var(--radius); padding: var(--s3) var(--s4); margin: 0 0 var(--s5); }
 </style>
+<script>
+/* Before first paint: script is on, and the reader's saved theme for this page applies. */
+(() => { const r = document.documentElement, k = "hs:" + location.pathname + ":"; r.classList.remove("no-js");
+  try { const t = localStorage.getItem(k + "theme"), p = localStorage.getItem(k + "palette");
+    if (t && !r.hasAttribute("data-theme")) r.dataset.theme = t;
+    if (p && !r.hasAttribute("data-palette-locked")) r.dataset.palette = p; } catch {} })();
+</script>
 </head>
 <body class="doc">
-
 <div class="page">
 
-  <p class="kitnote no-print">Sample page from the <a href="https://github.com/juliedavila/html-house-style">HTML house style kit</a>. Use the buttons to compare the Paper, Slate and Graphite palettes in light and dark. The content is invented.</p>
+  <p class="kitnote no-print">Sample page from the <a href="https://github.com/juliedavila/html-house-style">HTML house style kit</a>. Use the buttons to compare the Paper, Slate and Graphite palettes in light and dark, and scroll to the component gallery for every component. The content is invented.</p>
+
   <header class="masthead">
-    <div class="toolbar no-print" style="justify-content:flex-end">
-      <button data-set-palette="paper">Paper</button>
-      <button data-set-palette="slate">Slate</button>
-      <button data-set-palette="graphite">Graphite</button>
-      <button data-toggle-theme>Light / dark</button>
+    <!-- Palette and theme switches: keep only for tools the reader will live in. -->
+    <div class="toolbar no-print">
+      <button type="button" data-set-palette="paper">Paper</button>
+      <button type="button" data-set-palette="slate">Slate</button>
+      <button type="button" data-set-palette="graphite">Graphite</button>
+      <button type="button" data-toggle-theme>Theme: auto</button>
     </div>
     <div class="kicker">Decision brief · Platform engineering</div>
     <h1>Move every team to one shared build cache this quarter</h1>
-    <p class="dek">A shared cache cuts median CI time by about a third. It costs one platform engineer for six weeks, and we can reverse it in a day.</p>
-    <div class="meta"><span>Draft 2</span><span>Updated 22 Oct 2026</span><span>12 min read</span></div>
+    <p class="dek">A shared cache should cut median continuous integration (CI) time by about a third, based on September's cold-start rate. It costs one platform engineer for six weeks, and we can reverse it in a day.</p>
+    <div class="meta"><span>Draft 3</span><span>Updated 22 Oct 2026</span><span>7 min read</span></div>
   </header>
 
-  <div class="with-toc">
-    <nav class="toc" aria-label="Contents">
-      <div class="toc-title">Contents</div>
-      <ol id="toc-list"></ol>
-    </nav>
-
-    <main class="prose">
+  <main>
+    <div class="with-toc">
       <section class="bluf">
         <span class="label">Bottom line</span>
         <p>Approve phase 1: put the four largest repositories on the shared cache by 30 November, then decide on the rest from measured results.</p>
         <ul>
-          <li><strong>Why now:</strong> CI queue time doubled since July, and the pipeline is now the slowest step to production.</li>
-          <li><strong>Cost:</strong> one engineer for six weeks, plus about $1,400 a month in storage.</li>
-          <li><strong>Stop if:</strong> cache hit rate stays under 60% after two weeks, or any build turns red because of a stale artifact.</li>
+          <li><strong>Why now:</strong> queue time grew 2.1 times between July and October (runner metrics), and CI is now the slowest step to production.</li>
+          <li><strong>Cost:</strong> one engineer for six weeks, plus about $1,400 a month for storage and compute (cloud price sheet, Oct 2026).</li>
+          <li><strong>Stop if:</strong> the <span class="term" tabindex="0" data-def="The share of build steps served from the cache instead of run again.">cache hit rate</span> stays under 60% after two weeks, or any build turns red because of a stale artifact.</li>
         </ul>
       </section>
 
-      <h2 id="situation">CI time is now the bottleneck between merge and deploy</h2>
-      <p>Each team runs its own cache on its own runners. A cold runner rebuilds everything, and roughly half of all runs start cold. The numbers below come from the CI analytics export for September.</p>
+      <nav class="toc" aria-label="Contents">
+        <details open>
+          <summary>Contents</summary>
+          <ol>
+            <li><a href="#situation">CI is now the slowest step between merge and deploy</a></li>
+            <li><a href="#design">One cache service sits between runners and storage</a></li>
+            <li><a href="#options">A shared service beats bigger runners on hit rate and cost</a></li>
+            <li><a href="#plan">Phase 1 runs six weeks, in three steps</a></li>
+            <li class="annex-start"><a href="#detail">Detail</a></li>
+            <li><a href="#gallery">Component gallery</a></li>
+            <li><a href="#glossary">Glossary</a></li>
+            <li><a href="#sources">Sources</a></li>
+          </ol>
+        </details>
+      </nav>
 
-      <div class="stats">
-        <div class="stat"><div class="value">18.4 min</div><div class="what">Median pipeline time</div><div class="src">CI export, Sep 2026</div></div>
-        <div class="stat"><div class="value">52%</div><div class="what">Runs that start with a cold cache</div><div class="src">CI export, Sep 2026</div></div>
-        <div class="stat"><div class="value">2.1×</div><div class="what">Queue time growth since July</div><div class="src">Runner metrics</div></div>
-        <div class="stat"><div class="value"><span class="status warn">At risk</span></div><div class="what">Q4 deploy-frequency goal</div><div class="src">Platform OKR tracker</div></div>
-      </div>
+      <div class="prose">
+        <h2 id="situation">CI is now the slowest step between merge and deploy</h2>
+        <p>Each team runs its own cache on its own runners. A <span class="term" tabindex="0" data-def="A runner that starts with an empty local cache, so it rebuilds everything.">cold runner</span> rebuilds everything, and about half of all runs start cold.<sup class="fn"><a href="#fn1" id="fnref1">1</a></sup> The numbers below come from the CI analytics export for September.</p>
 
-      <h2 id="design">One cache service sits between runners and storage</h2>
-      <p>Runners ask the <span class="term" tabindex="0" data-def="A copy of build output stored by a hash of its inputs, so an identical build can reuse it instead of running again.">content-addressed cache</span> before they build. A hit returns the stored output. A miss builds as today and writes the result back.</p>
-
-      <figure>
-        <div class="figure-frame">
-          <button class="zoom-btn no-print" type="button">Enlarge</button>
-          <svg viewBox="0 0 760 240" role="img" aria-labelledby="fig1-t fig1-d" xmlns="http://www.w3.org/2000/svg">
-            <title id="fig1-t">Build request path through the shared cache</title>
-            <desc id="fig1-d">A runner sends a build request to the cache service. On a hit the cache returns stored output. On a miss the runner builds and writes the output back to object storage through the cache.</desc>
-            <defs><marker id="fig1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
-            <rect class="d-box" x="20" y="80" width="160" height="72" rx="6"/>
-            <text class="d-label" x="100" y="112" text-anchor="middle">CI runner</text>
-            <text class="d-small" x="100" y="132" text-anchor="middle">any team</text>
-            <rect class="d-focus" x="300" y="80" width="170" height="72" rx="6"/>
-            <text class="d-label" x="385" y="112" text-anchor="middle">Cache service</text>
-            <text class="d-small" x="385" y="132" text-anchor="middle">new in phase 1</text>
-            <rect class="d-box" x="580" y="80" width="160" height="72" rx="6"/>
-            <text class="d-label" x="660" y="112" text-anchor="middle">Object storage</text>
-            <text class="d-small" x="660" y="132" text-anchor="middle">existing bucket</text>
-            <path class="d-edge focus" d="M180 104 H298" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="239" y="94" text-anchor="middle">1. lookup</text>
-            <path class="d-edge" d="M300 130 H182" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="241" y="148" text-anchor="middle">2. hit: output</text>
-            <path class="d-edge" d="M470 116 H578" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="524" y="106" text-anchor="middle">read / write</text>
-            <path class="d-edge control" d="M100 152 V200 H385 V154" marker-end="url(#fig1-arrow)"/>
-            <text class="d-small" x="242" y="218" text-anchor="middle">3. miss: build, then write back</text>
-          </svg>
+        <div class="stats">
+          <div class="stat"><div class="value">18.4 min</div><div class="what">Median pipeline time</div><div class="src">CI export, Sep 2026</div></div>
+          <div class="stat"><div class="value">52%</div><div class="what">Runs that start with a cold cache</div><div class="src">CI export, Sep 2026</div></div>
+          <div class="stat"><div class="value">2.1×</div><div class="what">Queue time growth since July</div><div class="src">Runner metrics, Jul to Oct 2026</div></div>
+          <div class="stat"><div class="value"><span class="status warn">At risk</span></div><div class="what">Fourth-quarter deploy-frequency goal</div><div class="src">Platform goals tracker, Oct 2026</div></div>
         </div>
-        <figcaption><span class="fig-id">FIG-1</span> <strong>Every build checks the cache first; only misses do real work.</strong> Solid lines carry data; the dashed line is the fallback path on a miss.</figcaption>
-      </figure>
+        <p class="footnote" id="fn1">1. A run counts as cold when its runner has no cached output for any step. <a href="#fnref1">Back to text</a></p>
 
-      <h2 id="options">We compared three ways to get there</h2>
-      <div class="compare">
-        <div class="option recommended"><h4>A. Shared service <span class="chip">Recommended</span></h4><p>One cache for all runners. Highest hit rate. Needs an owner.</p></div>
-        <div class="option"><h4>B. Bigger runners</h4><p>Keep per-team caches on larger disks. Fewer cold starts, same duplication, higher spend.</p></div>
-        <div class="option"><h4>C. Do nothing</h4><p>No cost now. Queue time keeps growing with headcount.</p></div>
-      </div>
+        <h2 id="design">One cache service sits between runners and storage</h2>
+        <p>Runners ask the <span class="term" tabindex="0" data-def="A copy of build output stored under a hash of its inputs, so an identical build can reuse it instead of running again.">content-addressed cache</span> before they build. A hit returns the stored output. A miss builds as today and writes the result back.</p>
 
-      <h2 id="plan">Phase 1 runs six weeks, in three steps</h2>
-      <ol class="steps">
-        <li><strong>Stand up the service (weeks 1 and 2)</strong>Deploy behind the existing load balancer. Read-only for one repository.</li>
-        <li><strong>Turn on writes for four repositories (weeks 3 and 4)</strong>Watch hit rate and stale-artifact errors daily.</li>
-        <li><strong>Decide (week 6)</strong>Expand, adjust, or roll back, using the stop conditions above.</li>
-      </ol>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <svg viewBox="0 64 760 172" style="--fig-min: 760px" role="img" aria-labelledby="fig1-t fig1-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig1-t">Build request path through the shared cache</title>
+              <desc id="fig1-d">A runner sends a build request to the cache service. On a hit the cache returns stored output. On a miss the runner builds and writes the output back to object storage through the cache.</desc>
+              <defs>
+                <marker id="fig1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+                <marker id="fig1-arrow-focus" class="focus" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+              </defs>
+              <rect class="d-box" x="20" y="80" width="160" height="72" rx="6"/>
+              <text class="d-label" x="100" y="112" text-anchor="middle">CI runner</text>
+              <text class="d-small" x="100" y="132" text-anchor="middle">any team</text>
+              <rect class="d-focus" x="300" y="80" width="170" height="72" rx="6"/>
+              <text class="d-label" x="385" y="112" text-anchor="middle">Cache service</text>
+              <text class="d-small" x="385" y="132" text-anchor="middle">new in phase 1</text>
+              <rect class="d-box" x="580" y="80" width="160" height="72" rx="6"/>
+              <text class="d-label" x="660" y="112" text-anchor="middle">Object storage</text>
+              <text class="d-small" x="660" y="132" text-anchor="middle">existing bucket</text>
+              <path class="d-edge focus" d="M180 104 H298" marker-end="url(#fig1-arrow-focus)"/>
+              <text class="d-small" x="239" y="94" text-anchor="middle">1. lookup</text>
+              <path class="d-edge" d="M300 130 H182" marker-end="url(#fig1-arrow)"/>
+              <text class="d-small" x="241" y="148" text-anchor="middle">2. hit: output</text>
+              <path class="d-edge" d="M470 116 H578" marker-end="url(#fig1-arrow)"/>
+              <text class="d-small" x="524" y="106" text-anchor="middle">read / write</text>
+              <path class="d-edge control" d="M100 152 V200 H385 V154" marker-end="url(#fig1-arrow)"/>
+              <text class="d-small" x="242" y="222" text-anchor="middle">3. miss: build, then write back</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-1</span> <strong>Every build checks the cache first; only misses do real work.</strong> Solid lines carry data; the dashed line is the fallback path on a miss.</figcaption>
+          <script type="text/plain" class="diagram-source">
+flowchart LR
+  R[CI runner] -- 1 lookup --> C[Cache service]
+  C -- 2 hit: output --> R
+  C <-- read / write --> S[Object storage]
+  R -. 3 miss: build, then write back .-> C
+          </script>
+        </figure>
 
-      <div class="callout risk"><span class="label">Main risk</span>A stale artifact could ship a wrong binary. Cache keys include the full toolchain hash, and phase 1 keeps a one-flag rollback.</div>
+        <h2 id="options">A shared service beats bigger runners on hit rate and cost</h2>
+        <div class="compare">
+          <div class="option recommended"><h3>A. Shared service <span class="chip">Recommended</span></h3><p>One cache for all runners. Highest hit rate. Needs an owner.</p></div>
+          <div class="option"><h3>B. Bigger runners</h3><p>Keep per-team caches on larger disks. Fewer cold starts, same duplication, higher spend.</p></div>
+          <div class="option"><h3>C. Do nothing</h3><p>No cost now. Queue time keeps growing with headcount.</p></div>
+        </div>
 
-      <h2 id="detail">Detail for the people building it</h2>
-      <details><summary>How cache keys are computed</summary><div class="body"><p>Key = hash of source inputs, lockfiles, toolchain version and build flags. Any change produces a new key, so nothing is ever overwritten in place.</p></div></details>
-      <details><summary>Cost breakdown</summary><div class="body">
+        <h2 id="plan">Phase 1 runs six weeks, in three steps</h2>
+        <ol class="steps">
+          <li><strong>Stand up the service (weeks 1 and 2)</strong>Deploy behind the existing load balancer. Read-only for one repository.</li>
+          <li><strong>Turn on writes for four repositories (weeks 3 and 4)</strong>Watch hit rate and stale-artifact errors daily.</li>
+          <li><strong>Decide (week 6)</strong>Expand, adjust, or roll back, using the stop conditions above.</li>
+        </ol>
+
+        <div class="callout risk"><span class="label">Main risk</span>A stale artifact could ship a wrong binary. Cache keys include the full toolchain hash, and phase 1 keeps a one-flag rollback.</div>
+
+        <h2 id="detail" class="annex">Detail</h2>
+        <details><summary>How cache keys are computed</summary><div class="body"><p>Key = hash of source inputs, lockfiles, toolchain version and build flags. Any change produces a new key, so nothing is ever overwritten in place.</p></div></details>
+        <details><summary>Cost breakdown</summary><div class="body">
+          <div class="table-wrap"><table>
+            <thead><tr><th scope="col">Item</th><th scope="col" class="num">Monthly</th><th scope="col">Basis</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Storage, 9 TB</th><td class="num">$1,180</td><td>Cloud price sheet, Oct 2026</td></tr>
+              <tr><th scope="row">Traffic inside the region</th><td class="num">$0</td><td>Same region, no transfer charge</td></tr>
+              <tr><th scope="row">Service compute</th><td class="num">$220</td><td>Two small instances, cloud price sheet, Oct 2026</td></tr>
+            </tbody>
+          </table></div>
+          <p class="table-note">Prices from the cloud provider's public sheet, October 2026. Storage size is an estimate from September's build output.</p>
+        </div></details>
+
+        <!-- ===== Component gallery: every component in base.css once. Delete this section from real pages. ===== -->
+        <h2 id="gallery" class="annex">Component gallery</h2>
+        <p class="purpose">This section shows every component in <code>base.css</code> once, with sample content. Delete it from real pages.</p>
+
+        <h3>Callouts hold one aside per section</h3>
+        <div class="callout"><span class="label">Note</span>Plain callouts use the accent tint.</div>
+        <div class="callout decision"><span class="label">Decision</span>Platform owns the cache service; teams own their cache keys.</div>
+        <div class="callout risk"><span class="label">Risk</span>Storage cost grows with the number of branches kept.</div>
+        <div class="callout stop"><span class="label">Stop</span>Roll back if any build ships a stale artifact.</div>
+
+        <h3>Status is a shape and a word</h3>
+        <ul>
+          <li>Cache service: <span class="status ok">On track</span></li>
+          <li>Write access for four repositories: <span class="status warn">At risk</span></li>
+          <li>Security review: <span class="status danger">Blocked</span></li>
+          <li>Rollout to all teams: <span class="status idle">Not started</span></li>
+        </ul>
+        <p>Chips are small tags: <span class="chip">Recommended</span> <span class="chip">Draft</span> <span class="chip">Platform team</span></p>
+
+        <h3>Cards hold real groups</h3>
+        <div class="cards">
+          <div class="card"><h4>Runner team</h4><p>Owns the runners and their images. Joins weekly reviews in phase 1.</p></div>
+          <div class="card"><h4>Platform team</h4><p>Builds and runs the cache service. One engineer for six weeks.</p></div>
+          <a class="card" href="#design"><h4>Read the design</h4><p>How a lookup, a hit and a miss work.</p></a>
+        </div>
+        <p>A <code>.grid</code> holds peers that are not cards:</p>
+        <div class="grid">
+          <div><h4>Hit</h4><p>Output comes back from the cache in seconds.</p></div>
+          <div><h4>Miss</h4><p>The runner builds as today and writes back.</p></div>
+          <div><h4>Stale</h4><p>A key collision returns the wrong output. Keys prevent it.</p></div>
+        </div>
+
+        <h3>Tabs show parallel views of one thing</h3>
+        <div class="tabs">
+          <div role="tablist" aria-label="Phase 1 views">
+            <button type="button" role="tab" id="tab-week" aria-controls="panel-week" aria-selected="true">By week</button>
+            <button type="button" role="tab" id="tab-team" aria-controls="panel-team" aria-selected="false">By team</button>
+          </div>
+          <div role="tabpanel" id="panel-week" aria-labelledby="tab-week" tabindex="0">
+            <p class="tab-label">By week</p>
+            <p>Weeks 1 and 2: service up, read-only. Weeks 3 and 4: writes on. Week 6: decide.</p>
+          </div>
+          <div role="tabpanel" id="panel-team" aria-labelledby="tab-team" tabindex="0">
+            <p class="tab-label">By team</p>
+            <p>Platform builds the service. Runner team updates images. Four product teams switch on writes.</p>
+          </div>
+        </div>
+
+        <h3>Dated events use a timeline</h3>
+        <ol class="timeline">
+          <li><time datetime="2026-07">Jul 2026</time>Queue time starts to climb (runner metrics).</li>
+          <li><time datetime="2026-09">Sep 2026</time>The CI export shows 52% of runs start cold.</li>
+          <li class="now"><time datetime="2026-10-22">22 Oct 2026</time>This brief.</li>
+          <li><time datetime="2026-11-30">30 Nov 2026</time>Phase 1 decision.</li>
+        </ol>
+
+        <h3>A comparison table puts options in columns</h3>
         <div class="table-wrap"><table>
-          <thead><tr><th>Item</th><th class="num">Monthly</th><th>Source</th></tr></thead>
+          <caption>Options against the deciding criteria</caption>
+          <thead><tr><th scope="col">Criterion</th><th scope="col" class="rec">A. Shared service</th><th scope="col">B. Bigger runners</th><th scope="col">C. Do nothing</th></tr></thead>
           <tbody>
-            <tr><td>Storage, 9 TB</td><td class="num">$1,180</td><td>Cloud price sheet, Oct 2026</td></tr>
-            <tr><td>Egress inside region</td><td class="num">$0</td><td>Same region</td></tr>
-            <tr><td>Service compute</td><td class="num">$220</td><td>Two small instances</td></tr>
+            <tr><th scope="row">Expected hit rate</th><td class="rec">About 80% (estimate)</td><td>About 60% (estimate)</td><td>48% today</td></tr>
+            <tr><th scope="row">Monthly cost</th><td class="rec">$1,400</td><td>$3,100</td><td>$0</td></tr>
+            <tr><th scope="row">Engineering effort</th><td class="rec">Six weeks</td><td>One week</td><td>None</td></tr>
+            <tr><th scope="row">Reversible</th><td class="rec">In a day</td><td>In a week</td><td>Not applicable</td></tr>
           </tbody>
         </table></div>
-      </div></details>
+        <p class="table-note">Costs from the cloud price sheet, Oct 2026. Hit rates are estimates from the September CI export; today's rate is measured.</p>
 
-      <h2 id="terms">Terms used here</h2>
-      <dl class="glossary">
-        <dt>Cache hit rate</dt><dd>The share of build steps served from the cache instead of run.</dd>
-        <dt>Cold runner</dt><dd>A runner that starts with an empty local cache.</dd>
-      </dl>
+        <p>Long tables scroll inside their frame and keep the header in view:</p>
+        <div class="table-wrap scroll-y"><table>
+          <thead><tr><th scope="col">Repository</th><th scope="col">Team</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Cold starts</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">web-app</th><td>Web</td><td class="num">4,210</td><td class="num">61%</td></tr>
+            <tr><th scope="row">data-pipeline</th><td>Data</td><td class="num">3,980</td><td class="num">72%</td></tr>
+            <tr><th scope="row">mobile-ios</th><td>Mobile</td><td class="num">2,870</td><td class="num">55%</td></tr>
+            <tr><th scope="row">mobile-android</th><td>Mobile</td><td class="num">2,640</td><td class="num">53%</td></tr>
+            <tr><th scope="row">payments</th><td>Web</td><td class="num">2,120</td><td class="num">49%</td></tr>
+            <tr><th scope="row">search</th><td>Data</td><td class="num">1,940</td><td class="num">58%</td></tr>
+            <tr><th scope="row">infra-modules</th><td>Infra</td><td class="num">1,610</td><td class="num">31%</td></tr>
+            <tr><th scope="row">design-system</th><td>Web</td><td class="num">1,480</td><td class="num">44%</td></tr>
+            <tr><th scope="row">notifications</th><td>Web</td><td class="num">1,220</td><td class="num">39%</td></tr>
+            <tr><th scope="row">billing</th><td>Web</td><td class="num">1,090</td><td class="num">47%</td></tr>
+            <tr><th scope="row">ml-features</th><td>Data</td><td class="num">980</td><td class="num">68%</td></tr>
+            <tr><th scope="row">auth</th><td>Infra</td><td class="num">910</td><td class="num">28%</td></tr>
+            <tr><th scope="row">reporting</th><td>Data</td><td class="num">870</td><td class="num">51%</td></tr>
+            <tr><th scope="row">docs-site</th><td>Web</td><td class="num">760</td><td class="num">22%</td></tr>
+            <tr><th scope="row">edge-proxy</th><td>Infra</td><td class="num">640</td><td class="num">35%</td></tr>
+            <tr><th scope="row">feature-flags</th><td>Infra</td><td class="num">520</td><td class="num">26%</td></tr>
+            <tr><th scope="row">admin-console</th><td>Web</td><td class="num">480</td><td class="num">41%</td></tr>
+            <tr><th scope="row">load-tests</th><td>Infra</td><td class="num">310</td><td class="num">64%</td></tr>
+          </tbody>
+        </table></div>
+        <p class="table-note">CI export, September 2026. Runs are pipeline runs in the month.</p>
 
-      <hr class="mark">
-      <div class="sources"><strong>Sources</strong><ol><li>CI analytics export, September 2026.</li><li>Runner metrics dashboard, July to October 2026.</li></ol></div>
-    </main>
-  </div>
+        <h3>Charts are hand-drawn SVG with direct labels</h3>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <!-- Scale: x = 96 + minutes * 22. Coordinates computed from the data, not by eye. -->
+            <svg viewBox="0 0 640 224" style="--fig-min: 640px" role="img" aria-labelledby="fig3-t fig3-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig3-t">Median minutes per pipeline stage by team</title>
+              <desc id="fig3-d">Stacked bars of queue, build and test minutes. Data 21.0 minutes, Web 18.4, Mobile 16.2, Infra 11.8. Queue time is the largest part for Data and Web.</desc>
+              <line class="c-grid" x1="206" y1="28" x2="206" y2="196"/>
+              <line class="c-grid" x1="316" y1="28" x2="316" y2="196"/>
+              <line class="c-grid" x1="426" y1="28" x2="426" y2="196"/>
+              <line class="c-grid" x1="536" y1="28" x2="536" y2="196"/>
+              <line class="c-axis" x1="96" y1="28" x2="96" y2="196"/>
+              <text class="c-tick" x="88" y="53" text-anchor="end">Data</text>
+              <rect class="c-cat-1" x="96" y="36" width="184.8" height="24"/>
+              <rect class="c-cat-2" x="280.8" y="36" width="156.2" height="24"/>
+              <rect class="c-cat-3" x="437" y="36" width="121" height="24"/>
+              <text class="c-value" x="566" y="53">21.0 min</text>
+              <text class="c-tick" x="88" y="93" text-anchor="end">Web</text>
+              <rect class="c-cat-1" x="96" y="76" width="154" height="24"/>
+              <rect class="c-cat-2" x="250" y="76" width="134.2" height="24"/>
+              <rect class="c-cat-3" x="384.2" y="76" width="116.6" height="24"/>
+              <text class="c-value" x="508.8" y="93">18.4 min</text>
+              <text class="c-tick" x="88" y="133" text-anchor="end">Mobile</text>
+              <rect class="c-cat-1" x="96" y="116" width="129.8" height="24"/>
+              <rect class="c-cat-2" x="225.8" y="116" width="140.8" height="24"/>
+              <rect class="c-cat-3" x="366.6" y="116" width="85.8" height="24"/>
+              <text class="c-value" x="460.4" y="133">16.2 min</text>
+              <text class="c-tick" x="88" y="173" text-anchor="end">Infra</text>
+              <rect class="c-cat-1" x="96" y="156" width="79.2" height="24"/>
+              <rect class="c-cat-2" x="175.2" y="156" width="110" height="24"/>
+              <rect class="c-cat-3" x="285.2" y="156" width="70.4" height="24"/>
+              <text class="c-value" x="363.6" y="173">11.8 min</text>
+              <text class="c-tick" x="96" y="214" text-anchor="middle">0</text>
+              <text class="c-tick" x="206" y="214" text-anchor="middle">5</text>
+              <text class="c-tick" x="316" y="214" text-anchor="middle">10</text>
+              <text class="c-tick" x="426" y="214" text-anchor="middle">15</text>
+              <text class="c-tick" x="536" y="214" text-anchor="middle">20 min</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-2</span> <strong>Queue time is the largest share of the wait for the two slowest teams.</strong> <span class="key cat-1">Queue</span><span class="key cat-2">Build</span><span class="key cat-3">Test</span> CI export, Sep 2026.</figcaption>
+        </figure>
+        <details><summary>Data for FIG-2</summary><div class="body">
+          <div class="table-wrap"><table>
+            <thead><tr><th scope="col">Team</th><th scope="col" class="num">Queue</th><th scope="col" class="num">Build</th><th scope="col" class="num">Test</th><th scope="col" class="num">Total</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Data</th><td class="num">8.4</td><td class="num">7.1</td><td class="num">5.5</td><td class="num">21.0</td></tr>
+              <tr><th scope="row">Web</th><td class="num">7.0</td><td class="num">6.1</td><td class="num">5.3</td><td class="num">18.4</td></tr>
+              <tr><th scope="row">Mobile</th><td class="num">5.9</td><td class="num">6.4</td><td class="num">3.9</td><td class="num">16.2</td></tr>
+              <tr><th scope="row">Infra</th><td class="num">3.6</td><td class="num">5.0</td><td class="num">3.2</td><td class="num">11.8</td></tr>
+            </tbody>
+          </table></div>
+          <p class="table-note">Median minutes per stage, CI export, September 2026.</p>
+        </div></details>
+
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <!-- Scale: y = 150 - percent * 1.6. -->
+            <svg class="small-ok" viewBox="0 0 320 184" style="--fig-min: 320px" role="img" aria-labelledby="fig4-t fig4-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig4-t">Share of runs that start cold, by repository size</title>
+              <desc id="fig4-d">Large repositories 71 percent, medium 52 percent, small 34 percent.</desc>
+              <line class="c-axis" x1="16" y1="150" x2="304" y2="150"/>
+              <rect class="c-bar focus" x="40" y="36.4" width="64" height="113.6"/>
+              <text class="c-value" x="72" y="28.4" text-anchor="middle">71%</text>
+              <text class="c-tick" x="72" y="170" text-anchor="middle">Large</text>
+              <rect class="c-bar" x="136" y="66.8" width="64" height="83.2"/>
+              <text class="c-value" x="168" y="58.8" text-anchor="middle">52%</text>
+              <text class="c-tick" x="168" y="170" text-anchor="middle">Medium</text>
+              <rect class="c-bar" x="232" y="95.6" width="64" height="54.4"/>
+              <text class="c-value" x="264" y="87.6" text-anchor="middle">34%</text>
+              <text class="c-tick" x="264" y="170" text-anchor="middle">Small</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-3</span> <strong>Large repositories start cold most often, so phase 1 starts with them.</strong> A small chart (<code>.small-ok</code>) keeps its own size and fits a phone. CI export, Sep 2026.</figcaption>
+        </figure>
+
+        <h3>Zones and categories keep one colour each</h3>
+        <figure>
+          <button class="zoom-btn no-print" type="button">Enlarge</button>
+          <div class="figure-frame">
+            <svg viewBox="0 0 720 300" style="--fig-min: 720px" role="img" aria-labelledby="fig2-t fig2-d" xmlns="http://www.w3.org/2000/svg">
+              <title id="fig2-t">Who owns which part of the cache path</title>
+              <desc id="fig2-d">Three team-owned runner groups in the team zone send requests to the platform-owned cache service, which writes to platform-owned object storage.</desc>
+              <defs><marker id="fig2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>
+              <text class="d-mark" x="704" y="24" text-anchor="end">ILLUSTRATIVE</text>
+              <rect class="d-zone" x="16" y="36" width="300" height="248" rx="8"/>
+              <text class="d-small" x="30" y="58">Team zone</text>
+              <rect class="d-zone" x="380" y="36" width="324" height="248" rx="8"/>
+              <text class="d-small" x="394" y="58">Platform zone</text>
+              <rect class="d-cat-1" x="40" y="76" width="150" height="48" rx="6"/>
+              <text class="d-label" x="115" y="105" text-anchor="middle">Web runners</text>
+              <rect class="d-cat-1" x="40" y="146" width="150" height="48" rx="6"/>
+              <text class="d-label" x="115" y="175" text-anchor="middle">Data runners</text>
+              <rect class="d-cat-1" x="40" y="216" width="150" height="48" rx="6"/>
+              <text class="d-label" x="115" y="245" text-anchor="middle">Mobile runners</text>
+              <rect class="d-cat-4" x="440" y="76" width="160" height="56" rx="6"/>
+              <text class="d-label" x="520" y="109" text-anchor="middle">Cache service</text>
+              <rect class="d-cat-4" x="440" y="200" width="160" height="56" rx="6"/>
+              <text class="d-label" x="520" y="233" text-anchor="middle">Object storage</text>
+              <path class="d-edge" d="M190 100 L438 98" marker-end="url(#fig2-arrow)"/>
+              <path class="d-edge" d="M190 170 L438 108" marker-end="url(#fig2-arrow)"/>
+              <path class="d-edge" d="M190 240 L438 118" marker-end="url(#fig2-arrow)"/>
+              <path class="d-edge" d="M520 132 V198" marker-end="url(#fig2-arrow)"/>
+              <text class="d-small" x="530" y="170">write back</text>
+            </svg>
+          </div>
+          <figcaption><span class="fig-id">FIG-4</span> <strong>Teams own their runners; platform owns everything behind the cache.</strong> <span class="key cat-1">Team-owned</span><span class="key cat-4">Platform-owned</span> Dashed outlines are ownership zones. <span class="mark-illustrative">Illustrative</span></figcaption>
+        </figure>
+
+        <h3>Annotation dims the context and points at the subject</h3>
+        <div class="annotate">
+          <div class="stats">
+            <div class="stat subject"><div class="value">52%</div><div class="what">Runs that start cold</div></div>
+            <div class="stat context"><div class="value">18.4 min</div><div class="what">Median pipeline time</div></div>
+            <div class="stat context"><div class="value">2.1×</div><div class="what">Queue time growth</div></div>
+          </div>
+          <p class="pointer-note up"><span class="n">1</span>Phase 1 has to move this number. The others follow from it.</p>
+        </div>
+        <div class="grid">
+          <p class="pointer-note down"><span class="n">2</span>Points down at what sits below.</p>
+          <p class="pointer-note right"><span class="n">3</span>Points right.</p>
+          <p class="pointer-note left"><span class="n">4</span>Points left.</p>
+        </div>
+
+        <h3>Quotes, code and forms</h3>
+        <blockquote><p>Half our pipeline time goes to rebuilding things nobody changed.</p><footer>Runner team retrospective notes, Sep 2026</footer></blockquote>
+
+        <figure class="code">
+          <pre><code><span class="tok-c"># Inputs that form a cache key</span>
+<span class="tok-k">key</span> = sha256(source_tree, lockfiles, toolchain_version, build_flags)
+<span class="tok-k">prefix</span> = <span class="tok-s">"cache/v1/"</span></code></pre>
+          <figcaption><code>cache-key.txt</code>: what goes into a key.</figcaption>
+        </figure>
+
+        <form id="calc" class="no-print" onsubmit="return false">
+          <fieldset>
+            <legend>Estimate the time saved</legend>
+            <div class="field"><label for="runs">Runs per day</label><input id="runs" name="runs" type="number" min="0" value="400"></div>
+            <div class="field"><label for="mins">Minutes saved by a hit</label><input id="mins" name="mins" type="number" min="0" step="0.5" value="6"><span class="hint">Your own estimate.</span></div>
+            <div class="field"><label for="rate">Expected hit rate</label><select id="rate" name="rate"><option value="0.6">60%</option><option value="0.7">70%</option><option value="0.8">80%</option></select></div>
+            <label class="check"><input id="week" name="week" type="checkbox"> Show a five-day week</label>
+            <p>Estimated saving: <output id="calc-out" for="runs mins rate week">24 hours a day</output></p>
+          </fieldset>
+        </form>
+
+        <hr>
+        <p>A plain rule (above) separates loose groups. The dotted ornament before the sources is the one decoration a page may use, at most three times.</p>
+
+        <h2 id="glossary" class="annex">Glossary</h2>
+        <dl class="glossary">
+          <dt>Cache hit rate</dt><dd>The share of build steps served from the cache instead of run again.</dd>
+          <dt>Cold runner</dt><dd>A runner that starts with an empty local cache, so it rebuilds everything.</dd>
+          <dt>Content-addressed cache</dt><dd>A copy of build output stored under a hash of its inputs, so an identical build can reuse it instead of running again.</dd>
+        </dl>
+
+        <hr class="mark">
+        <h2 id="sources" class="annex">Sources</h2>
+        <div class="sources"><ol><li>CI analytics export, September 2026.</li><li>Runner metrics dashboard, July to October 2026.</li><li>Cloud provider price sheet, October 2026.</li><li>Platform goals tracker, October 2026.</li></ol></div>
+      </div>
+    </div>
+  </main>
 </div>
 
-<dialog class="zoom" id="zoom"><div class="zoom-bar"><button data-z="-1">−</button><button data-z="0">Fit</button><button data-z="1">+</button><span id="zoom-level" class="muted">100%</span><span style="flex:1"></span><button data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
+<dialog class="zoom" id="zoom" aria-label="Enlarged figure"><div class="zoom-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Fit to window">Fit</button><button type="button" data-z="1" aria-label="Zoom in">+</button><span id="zoom-level" class="muted">100%</span><span class="spacer"></span><button type="button" data-close>Close</button></div><div class="zoom-stage" id="zoom-stage"></div></dialog>
 
 <script>
 (() => {
-  const root = document.documentElement;
-  if (!root.dataset.palette) root.dataset.palette = "paper";
-  document.body.classList.add("doc");
-  const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
-  const p = store.get("hs-palette"), t = store.get("hs-theme");
-  if (p) root.dataset.palette = p; if (t) root.dataset.theme = t;
-  document.querySelectorAll("[data-set-palette]").forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("hs-palette", b.dataset.setPalette); });
-  document.querySelectorAll("[data-toggle-theme]").forEach(b => b.onclick = () => {
-    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = dark ? "light" : "dark"; store.set("hs-theme", root.dataset.theme);
-  });
+  const root = document.documentElement, K = "hs:" + location.pathname + ":";
+  const store = { set: (k, v) => { try { v ? localStorage.setItem(K + k, v) : localStorage.removeItem(K + k); } catch {} } };
 
-  // Contents rail from h2s, with the current section marked.
-  const list = document.getElementById("toc-list");
-  const heads = [...document.querySelectorAll("main h2[id]")];
-  if (list) {
-    heads.forEach(h => { const li = document.createElement("li"); li.innerHTML = `<a href="#${h.id}">${h.textContent}</a>`; list.appendChild(li); });
+  // Palette and theme. Remembered for this page only. Theme cycles auto, light, dark.
+  const palBtns = [...document.querySelectorAll("[data-set-palette]")], themeBtn = document.querySelector("[data-toggle-theme]");
+  const showPal = () => palBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.setPalette === (root.dataset.palette || "paper")));
+  const showTheme = () => { if (themeBtn) themeBtn.textContent = "Theme: " + (root.dataset.theme || "auto"); };
+  palBtns.forEach(b => b.onclick = () => { root.dataset.palette = b.dataset.setPalette; store.set("palette", b.dataset.setPalette); showPal(); });
+  if (themeBtn) themeBtn.onclick = () => { const next = { auto: "light", light: "dark", dark: "" }[root.dataset.theme || "auto"];
+    if (next) root.dataset.theme = next; else delete root.dataset.theme; store.set("theme", next); showTheme(); };
+  showPal(); showTheme();
+
+  // Contents rail. The list is in the HTML; this marks the current section and
+  // fills the list only if it was left empty. Collapsed by default on narrow screens.
+  const toc = document.querySelector(".toc"), list = toc && toc.querySelector("ol");
+  const heads = [...document.querySelectorAll("main h2")];
+  if (toc && list) {
+    heads.forEach((h, i) => { if (!h.id) h.id = (h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section") + "-" + i; });
+    if (!list.children.length) heads.forEach(h => { const li = document.createElement("li"), a = document.createElement("a"); a.href = "#" + h.id; a.textContent = h.textContent; li.append(a); list.append(li); });
+    if (!list.children.length) toc.hidden = true;
+    const box = toc.querySelector("details"), wide = matchMedia("(min-width: 1100px)");
+    if (box) { box.open = wide.matches; wide.addEventListener("change", e => { box.open = e.matches; }); }
     const links = [...list.querySelectorAll("a")];
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "0px 0px -70% 0px" });
-    heads.forEach(h => io.observe(h));
+    const mark = () => { let cur = heads[0]; for (const h of heads) if (h.getBoundingClientRect().top <= innerHeight * 0.3) cur = h;
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = heads[heads.length - 1];
+      links.forEach(a => a.getAttribute("href") === "#" + (cur && cur.id) ? a.setAttribute("aria-current", "location") : a.removeAttribute("aria-current")); };
+    let raf = 0; addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(mark); }, { passive: true }); mark();
   }
 
-  // Enlarge any figure: real zoom, real scroll.
+  // Enlarge any figure: fit to the window on open, real zoom, real scroll.
   const dlg = document.getElementById("zoom"), stage = document.getElementById("zoom-stage"), lvl = document.getElementById("zoom-level");
-  let z = 1; const apply = () => { const el = stage.firstElementChild; if (el) { el.style.transform = `scale(${z})`; el.style.width = el.dataset.w + "px"; } lvl.textContent = Math.round(z * 100) + "%"; };
+  let z = 1, w = 0, h = 0;
+  const fit = () => { const s = getComputedStyle(stage);
+    return Math.min((stage.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)) / w, (stage.clientHeight - parseFloat(s.paddingTop) - parseFloat(s.paddingBottom)) / h); };
+  const apply = () => { const el = stage.firstElementChild; if (!el) return; el.style.width = w * z + "px"; el.style.height = h * z + "px"; lvl.textContent = Math.round(z * 100) + "%"; };
   document.querySelectorAll(".zoom-btn").forEach(b => b.onclick = () => {
-    const src = b.parentElement.querySelector("svg, img"); const c = src.cloneNode(true);
-    c.dataset.w = src.viewBox?.baseVal?.width || src.naturalWidth || src.getBoundingClientRect().width;
-    stage.replaceChildren(c); z = Math.max(1, (innerWidth * 0.9) / c.dataset.w); apply(); dlg.showModal();
+    const src = b.closest("figure") && b.closest("figure").querySelector(".figure-frame > svg, .figure-frame > img, .figure-frame > picture img");
+    if (!src || !dlg) return;
+    const vb = src.viewBox && src.viewBox.baseVal, r = src.getBoundingClientRect();
+    [w, h] = vb && vb.width ? [vb.width, vb.height] : src.naturalWidth ? [src.naturalWidth, src.naturalHeight] : [r.width, r.height];
+    if (!w || !h) return;
+    const c = src.cloneNode(true), name = src.querySelector("title");
+    c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    c.removeAttribute("aria-labelledby"); c.setAttribute("aria-label", name ? name.textContent : (src.alt || "Enlarged figure"));
+    stage.replaceChildren(c); dlg.showModal(); z = Math.min(fit(), 4); apply(); stage.scrollTo(0, 0);
   });
-  dlg?.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? (innerWidth * 0.9) / stage.firstElementChild.dataset.w : Math.min(6, Math.max(0.5, z * (d > 0 ? 1.25 : 0.8))); apply(); });
-  dlg?.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+  if (dlg) {
+    dlg.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { const d = +b.dataset.z; z = d === 0 ? fit() : Math.min(6, Math.max(0.25, z * (d > 0 ? 1.25 : 0.8))); apply(); });
+    dlg.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  }
 
-  // Tabs.
-  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')]; tabs.forEach(tab => tab.onclick = () => { tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); document.getElementById(x.getAttribute("aria-controls")).hidden = !on; }); }); });
+  // Tabs: one tab stop, arrow keys, Home and End. Panels are visible until this runs.
+  document.querySelectorAll(".tabs").forEach(t => { const tabs = [...t.querySelectorAll('[role="tab"]')];
+    const sel = tab => tabs.forEach(x => { const on = x === tab; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1;
+      const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    tabs.forEach((tab, i) => { tab.onclick = () => sel(tab); tab.onkeydown = e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (e.key === "Home" || e.key === "End" || d) { e.preventDefault(); const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + d + tabs.length) % tabs.length]; sel(n); n.focus(); } }; });
+    sel(tabs.find(x => x.getAttribute("aria-selected") === "true") || tabs[0]); });
+
+  // Gallery calculator: an estimate, recomputed as the inputs change.
+  const calc = document.getElementById("calc");
+  if (calc) { const run = () => { const f = calc.elements, week = f.week.checked;
+    const hrs = (+f.runs.value * +f.mins.value * +f.rate.value) / 60 * (week ? 5 : 1);
+    document.getElementById("calc-out").textContent = (Math.round(hrs * 10) / 10) + (week ? " hours a week" : " hours a day"); };
+    calc.addEventListener("input", run); run(); }
 
   // Print everything: open collapsed sections first.
   addEventListener("beforeprint", () => document.querySelectorAll("details").forEach(d => { d.dataset.wasOpen = d.open; d.open = true; }));
