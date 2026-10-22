@@ -2,6 +2,26 @@
 
 All notable changes to this kit. Versions follow semantic versioning.
 
+## 1.4.0 (2026-10-22)
+
+### Brands
+
+- New `BRAND.md` and `brand.example.json`: a company writes its colours and fonts once in `brand.json` (name, colors with optional dark overrides, fonts, radius, logoText, deck hints), in brand-guide words.
+- New `tools/brand.mjs`: turns a brand file into a complete palette for `[data-palette="NAME"]`, light and dark (same `@media screen` selectors as base.css) plus a print block, deriving everything left out in OKLCH. It checks WCAG contrast for every pairing the kit uses in both themes and moves a failing brand colour in lightness only, by the smallest passing step, reporting each move; categories must stay 10 dE76 apart under normal, protan and deutan vision (Machado 2009), and a close pair's later colour is replaced by the nearest separable one. `--strict` refuses (exit 1), `--report` prints the report, `--json` gives every final value for deck builders. Fed the kit's own paper palette, it changes nothing and reproduces base.css's recorded category numbers.
+- `page.mjs --brand brand.json`: the palette goes in after base.css between `/* brand palette: NAME */` and `/* end brand palette */`, the page gets `data-palette="NAME" data-palette-locked`, the fonts and radius apply, and logoText leads the kicker. Without `--brand` the output is byte-identical to 1.3.
+- `check.mjs` treats the marked brand block like base.css, names it in the PASS line, and fails a page whose `data-palette` is neither built in nor an inlined brand.
+- `selftest.mjs` builds a branded page (0 FAIL), checks the generated block defines all 25 palette tokens in light and both dark selectors, and proves a bad brand is adjusted, holds every guarantee after, and is refused by `--strict`.
+
+### Decks
+
+- Added `deck-architecture/`, a skill for deck structure: DECKS.md (two decisions: reader's job and delivery mode; each pattern as a deck; rules carried over and rules that change on a slide; the outline schema; checks; handover), `tools/outline.mjs` (page to outline.json: claim titles, notes vs body by mode, native chart data recovered from bars.mjs and hand-drawn SVG, diagrams as positioned shapes and connectors, dataset cuts with hash links to the filtered live view, appendix from the annex, Look up and Do pages to one pointer slide), `tools/check-outline.mjs` (schema, ghost deck, sources, word and point limits, links, summary), `tools/check-pptx.mjs` (dependency-free .pptx reader: titles, font floors with inherited sizes, words, points, notes, source lines, chart parts), `tools/selftest.mjs`, and example outlines in both modes. `--brand` takes chart and status colours from brand.json through html-house-style's brand.mjs.
+- Delivery mode is chosen when the deck is made: `presented` (the default; sparse slides, the prose in speaker notes) or `preread` (sent ahead; denser slides that stand alone, an executive summary first).
+- DECKS.md: the evidence on a slide must show its title's claim (a title about repositories needs a chart of repositories), and `check-outline.mjs` warns on a chart slide with no focus bar. Found in an end-to-end test where a slide titled "Criticals cluster in 21 repositories" carried a chart of teams.
+
+### Fixes
+
+- The dataset example said Platform had "five to renew" next to nine expired certificates; it has four of the nine.
+
 ## 1.3.0 (2026-10-22)
 
 ### Speed

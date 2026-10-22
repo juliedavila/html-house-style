@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "schema": "deck-outline/1",
+    "title": "Move the platform team to a one-week on-call rotation in January",
+    "pattern": "decide",
+    "mode": "presented",
+    "source": "decide.html",
+    "date": "22 Oct 2026",
+    "sourceUrl": "https://juliedavila.github.io/html-house-style/examples/decide.html",
+    "rules": {
+      "bodyWords": 30,
+      "bullets": 6,
+      "titlePt": 28,
+      "bodyPt": 18,
+      "labelPt": 14,
+      "sourcePt": 12,
+      "tableRows": 5,
+      "points": 3
+    }
+  },
+  "slides": [
+    {
+      "kind": "title",
+      "title": "Move the platform team to a one-week on-call rotation in January",
+      "body": [],
+      "notes": "mode: presented. Response to pages slows by more than half in the second week of a two-week shift. Halving the shift keeps everyone in the fast first week, costs no new hire, and can be reversed at any handover.",
+      "sources": [],
+      "kicker": "Decision memo · Northwind platform team",
+      "date": "22 Oct 2026"
+    },
+    {
+      "kind": "summary",
+      "title": "Approve a one-week on-call shift for the six platform engineers",
+      "body": [
+        "Starting Monday 5 January, with a review on 30 March.",
+        "Why now: median time to acknowledge a page rises from 4.3 minutes in week one to 7.5 in week two",
+        "Cost: no new hire.",
+        "Stop if: any handover drops an open incident"
+      ],
+      "notes": "mode: presented. Why now: median time to acknowledge a page rises from 4.3 minutes in week one to 7.5 in week two, and two of six engineers have asked to leave the rotation. Cost: no new hire. Each engineer is on call the same number of days a year, in shorter stretches, with twice as many handovers (52 a year instead of 26). Stop if: any handover drops an open incident, or week-one response is no faster by the March review.",
+      "sources": [
+        "Paging system export, 1 July to 30 September 2026; Platform team survey, September 2026; team roster and rotation schedule, October 2026; recruiting records for the last two platform hires, 2025 and 2026"
+      ]
+    },
+    {
+      "kind": "stats",
+      "title": "Six engineers share a two-week shift that pages about four times a night",
+      "body": [],
+      "notes": "Each engineer holds the pager for fourteen days, then hands over to the next. Pages arrive mostly at night, when batch jobs run. The figures come from the paging system export for July to September. The rotation is now losing people. In the September survey, which all six answered, two engineers asked to come off the rotation and named the second week as the reason. If they leave it, the remaining four each hold the pager one week in four instead of one in six, which would push more people toward the same request. Hiring a seventh engineer takes about four months, based on the last two platform hires.",
+      "sources": [
+        "Team roster, Oct 2026",
+        "Paging export, Jul to Sep 2026",
+        "Rotation schedule",
+        "Team survey, Sep 2026"
+      ],
+      "stats": [
+        {
+          "value": "6",
+          "label": "Engineers on the rotation",
+          "source": "Team roster, Oct 2026"
+        },
+        {
+          "value": "3.8",
+          "label": "Median pages per night",
+          "source": "Paging export, Jul to Sep 2026"
+        },
+        {
+          "value": "14 days",
+          "label": "Length of one shift today",
+          "source": "Rotation schedule"
+        },
+        {
+          "value": "2 of 6",
+          "label": "Engineers who asked to leave the rotation",
+          "source": "Team survey, Sep 2026"
+        }
+      ]
+    },
+    {
+      "kind": "chart",
+      "title": "Response time tracks days on shift, so a shorter shift is faster",
+      "body": [
+        "Week one is flat at about four minutes; week two climbs every day."
+      ],
+      "notes": "The paging export shows how long each page waited before someone acknowledged it. Grouped by the day of the shift, the wait is flat through week one and climbs every day of week two. A one-week shift removes the second week without changing how many days each person covers in a year.",
+      "sources": [
+        "Paging export, July to September 2026, 1,046 pages."
+      ],
+      "chart": {
+        "type": "column",
+        "title": "Median minutes to acknowledge a page, by day of shift",
+        "labels": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
+        ],
+        "values": [
+          4.1,
+          4,
+          4.3,
+          4.2,
+          4.6,
+          4.4,
+          4.8,
+          5.9,
+          6.4,
+          6.8,
+          7.5,
+          7.9,
+          8.6,
+          9.2
+        ],
+        "unit": "",
+        "focus": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "alt": "Days 1 to 7: 4.1, 4.0, 4.3, 4.2, 4.6, 4.4 and 4.8 minutes. Days 8 to 14: 5.9, 6.4, 6.8, 7.5, 7.9, 8.6 and 9.2 minutes. Week one is flat; week two rises every day.",
+        "takeaway": "Week one is flat at about four minutes; week two climbs every day."
+      },
+      "link": "https://juliedavila.github.io/html-house-style/examples/decide.html#model"
+    },
+    {
+      "kind": "options",
+      "title": "A one-week shift beats both a new hire and doing nothing",
+      "body": [],
+      "notes": "Hiring helps the load but not the second week, and it lands after the people asking to leave have decided. Doing nothing keeps response near five and a half minutes only while all six stay on the rotation.",
+      "sources": [
+        "Response estimates use the week-one medians in figure 1 on the page; today's figure is the median of all fourteen daily medians. Days on call assume 365 days shared by the engineers on the rotation. Hiring time is from the last two platform hires."
+      ],
+      "table": {
+        "caption": "Options against what decides this",
+        "header": [
+          "Criterion",
+          "A. One-week shift",
+          "B. Hire a seventh engineer",
+          "C. Keep two weeks"
+        ],
+        "rows": [
+          [
+            "Expected median response",
+            "About 4.5 minutes (estimate)",
+            "About 7 minutes until the hire starts (estimate)",
+            "5.4 minutes today"
+          ],
+          [
+            "Days on call per engineer a year",
+            "About 61",
+            "About 52",
+            "About 61, rising to 91 if two leave"
+          ],
+          [
+            "Cost",
+            "None beyond handovers",
+            "One salary, four months to hire",
+            "The cost of doing nothing: two engineers may leave the rotation"
+          ],
+          [
+            "Reversible",
+            "At any handover",
+            "No",
+            "Not applicable"
+          ]
+        ],
+        "recommended": 1
+      }
+    },
+    {
+      "kind": "steps",
+      "title": "The switch takes three steps and ends with a review in March",
+      "body": [],
+      "notes": "Publish the new schedule (platform lead, by 1 December) One-week shifts from Monday 5 January, handover Mondays at 10:00, each engineer's weeks named a quarter ahead. Write the handover checklist (on-call owner, by 15 December) Open incidents, silenced alerts, risky changes planned for the week. The checklist is the handover; nothing is passed on by memory. Review the first twelve weeks (platform lead, 30 March) Compare response by day of shift with figure 1 on the page, count dropped handovers, and ask the team again. Keep, adjust or revert using the stop conditions.",
+      "sources": [],
+      "steps": [
+        {
+          "title": "Publish the new schedule (platform lead, by 1 December)",
+          "text": ""
+        },
+        {
+          "title": "Write the handover checklist (on-call owner, by 15 December)",
+          "text": ""
+        },
+        {
+          "title": "Review the first twelve weeks (platform lead, 30 March)",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "kind": "callout",
+      "title": "Two failures would send us back to two weeks",
+      "body": [],
+      "notes": "Revert at the next handover if any handover drops an open incident, or if week-one median response is not below 5 minutes by the March review. The written checklist guards against context lost at the extra handovers. The March review also tests the other explanation, harder incidents late in the month, by comparing day of shift with day of month.",
+      "sources": [
+        "Paging system export, 1 July to 30 September 2026; Platform team survey, September 2026; team roster and rotation schedule, October 2026; recruiting records for the last two platform hires, 2025 and 2026"
+      ],
+      "callout": {
+        "kind": "stop",
+        "label": "Stop conditions",
+        "text": "Revert at the next handover if any handover drops an open incident, or if week-one median response is not below 5 minutes by the March review."
+      }
+    },
+    {
+      "kind": "appendix-divider",
+      "title": "Appendix",
+      "body": [],
+      "notes": "",
+      "sources": []
+    },
+    {
+      "kind": "table",
+      "title": "Data for figure 1 on the page",
+      "body": [],
+      "notes": "",
+      "sources": [
+        "Median minutes to acknowledge, paging export, July to September 2026."
+      ],
+      "table": {
+        "caption": "",
+        "header": [
+          "Day of shift",
+          "Week one",
+          "Week two"
+        ],
+        "rows": [
+          [
+            "Day 1 and day 8",
+            "4.1",
+            "5.9"
+          ],
+          [
+            "Day 2 and day 9",
+            "4.0",
+            "6.4"
+          ],
+          [
+            "Day 3 and day 10",
+            "4.3",
+            "6.8"
+          ],
+          [
+            "Day 4 and day 11",
+            "4.2",
+            "7.5"
+          ],
+          [
+            "Day 5 and day 12",
+            "4.6",
+            "7.9"
+          ],
+          [
+            "Day 6 and day 13",
+            "4.4",
+            "8.6"
+          ],
+          [
+            "Day 7 and day 14",
+            "4.8",
+            "9.2"
+          ]
+        ]
+      },
+      "link": "https://juliedavila.github.io/html-house-style/examples/decide.html#detail",
+      "appendix": true
+    },
+    {
+      "kind": "sources",
+      "title": "Sources",
+      "body": [
+        "Paging system export, 1 July to 30 September 2026. Response time runs from the page opening to the first acknowledgement; the 31 of 1,077 pages acknowledged by someone other than the primary are left out.",
+        "Platform team survey, September 2026; team roster and rotation schedule, October 2026; recruiting records for the last two platform hires, 2025 and 2026."
+      ],
+      "notes": "",
+      "sources": [
+        "Paging system export, 1 July to 30 September 2026; Platform team survey, September 2026; team roster and rotation schedule, October 2026; recruiting records for the last two platform hires, 2025 and 2026"
+      ],
+      "link": "https://juliedavila.github.io/html-house-style/examples/decide.html#sources",
+      "appendix": true
+    }
+  ]
+}

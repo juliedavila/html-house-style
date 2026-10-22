@@ -45,6 +45,8 @@ node tools/page.mjs body.html page.html --check      # the page, then check.mjs:
 3. **Assemble with `--check`.** Fix every FAIL, fix each WARN or name it in the handover, and run it again.
 4. **Hand over** at the tier you reached (step 9 below). With no browser: "Not rendered. Checked by reading and by check.mjs (0 FAIL, [n] WARN: [why each stands]): [what you read for]. Please look at: [the two or three things only a render can confirm, such as the figure on a phone, dark mode, print]." With no shell, leave out check.mjs.
 
+**Use your brand.** If the reader's company has a brand guide, put its colours and fonts in a `brand.json` once (BRAND.md; copy `brand.example.json`) and add `--brand brand.json` to step 3: `node tools/page.mjs body.html page.html --brand brand.json --check`. Any brand colour the kit had to change for contrast prints first; name those in the handover.
+
 Read only when needed: STYLE-GUIDE 3 (structure), 4 (writing), 7 (figures drawn by hand), 9 (phones, print), 13 (tools); CHECKLIST "Verified by reading" with no shell, "Verified by looking" with a browser.
 
 ## Files in this skill
@@ -56,7 +58,8 @@ Read only when needed: STYLE-GUIDE 3 (structure), 4 (writing), 7 (figures drawn 
 - `base.css`: the stylesheet. Inline the whole file into a `<style>` tag in every page.
 - `template.html`: a decision brief (the Decide pattern), followed by a component gallery that shows every component in `base.css` once. Its head and closing scripts are the ones every page copies.
 - `CHECKLIST.md`: run it before you hand anything over.
-- `tools/`: `page.mjs` (a pattern's rules, one snippet, a skeleton to edit, and the complete page from it), `bars.mjs` (a bar chart figure from data), `table.mjs` (a table, or a whole `section.dataset`, from records) and `selftest.mjs`. Each runs as a module or a command; `--help` lists the options.
+- `tools/`: `page.mjs` (a pattern's rules, one snippet, a skeleton to edit, and the complete page from it), `bars.mjs` (a bar chart figure from data), `table.mjs` (a table, or a whole `section.dataset`, from records), `brand.mjs` (a brand file as a checked palette) and `selftest.mjs`. Each runs as a module or a command; `--help` lists the options.
+- `BRAND.md` and `brand.example.json`: the brand file's schema, what is derived and what is guaranteed, and a complete example.
 - `check.mjs`: a static checker with no dependencies. `node check.mjs page.html` (or `bun`, or `deno run --allow-read`). It needs no browser.
 
 ## How to build a page

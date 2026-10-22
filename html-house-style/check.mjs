@@ -67,11 +67,20 @@ for (const s of styles) {
   else if (a >= 0) { pageCss.push({ css: "", at: s.at }); warn("base-css", "inlined base.css has no end marker; page CSS after it is not checked for colours", s.at); }
   else pageCss.push(s);
 }
+// A brand palette from tools/brand.mjs is checked when it is generated, so it counts as base.css:
+// the text between its two markers is blanked out of the page CSS (offsets and lines kept).
+const BRAND = /\/\* brand palette: ([a-z][a-z0-9-]*) \*\/[\s\S]*?\/\* end brand palette \*\//g;
+const brands = styles.flatMap(s => [...s.css.matchAll(BRAND)].map(m => m[1]));
+for (const pc of pageCss) pc.css = blank(pc.css, BRAND);
 const inlined = styles.some(s => s.css.includes("House style: base stylesheet"));
 const link = src.match(/<link\b[^>]*rel\s*=\s*["']?stylesheet[^>]*>/i);
 if (fragment) { allCss += "\n" + readFileSync(new URL("base.css", import.meta.url), "utf8");
   info("base-css", "fragment mode: page-level checks skipped; label sizes assume the standard content column"); }
-else if (inlined) add("PASS", "base-css", "base.css is inlined");
+else if (inlined) {
+  add("PASS", "base-css", "base.css is inlined" + (brands.length ? `, with brand palette ${brands.join(", ")}` : ""));
+  const pal = (src.match(/<html\b[^>]*\sdata-palette\s*=\s*["']?([\w-]+)/i) || [])[1];
+  if (pal && !["paper", "slate", "graphite", ...brands].includes(pal)) fail("base-css", `data-palette="${pal}" is not a built-in palette and no brand palette of that name is inlined (tools/page.mjs --brand)`);
+}
 else if (link && /href\s*=\s*["']?[^"'\s>]*base\.css/.test(link[0])) {
   warn("base-css", "base.css is linked, not inlined (fine for template.html; inline it in a page you hand over)", link.index);
   const p = join(dirname(file), attrs(link[0]).href); if (existsSync(p)) allCss += "\n" + readFileSync(p, "utf8");

@@ -1,0 +1,29 @@
+{
+  "name": "harbor",
+  "colors": {
+    "background": "#F6F8F9",
+    "surface": "#FFFFFF",
+    "text": "#16222B",
+    "muted": "#4A5863",
+    "accent": "#0B6E8A",
+    "accent2": "#B4532A",
+    "border": "#83909A",
+    "status": { "good": "#276F46", "warn": "#8A5A00", "bad": "#B3261E", "info": "#0B6E8A" },
+    "categories": ["#0B6E8A", "#B4532A", "#6B5BB5", "#1F7A5A"]
+  },
+  "dark": {
+    "background": "#0F1A21",
+    "accent": "#5FC3E0"
+  },
+  "fonts": {
+    "reading": "Charter",
+    "interface": ["Inter", "Helvetica Neue"],
+    "mono": "JetBrains Mono"
+  },
+  "radius": 4,
+  "logoText": "Harbor",
+  "deck": {
+    "titleFont": "Charter",
+    "bodyFont": "Inter"
+  }
+}

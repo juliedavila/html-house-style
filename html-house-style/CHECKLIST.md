@@ -31,6 +31,7 @@ If you have a shell, start with `node check.mjs page.html` (or `bun check.mjs pa
 
 - [ ] `base.css` is inlined in full; page CSS after it uses tokens only. No colour values in page CSS, `style` attributes or SVG attributes. (script)
 - [ ] Every dark rule sits under `@media screen`. (script)
+- [ ] A branded page is built with `page.mjs --brand` (or `brand.mjs` output pasted whole, markers included), its `data-palette` names the brand, and every adjustment the report lists is named in the handover. (script: palette defined)
 - [ ] Status uses `.status` (shape and word); categories use `--cat-N` classes with a legend.
 - [ ] No gradients, emoji, stock images, icon-per-bullet or ALL CAPS headings.
 - [ ] Cards only for real groups.

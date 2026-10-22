@@ -1,0 +1,337 @@
+{
+  "meta": {
+    "schema": "deck-outline/1",
+    "title": "Seventeen services need a new certificate within 30 days",
+    "pattern": "review",
+    "dataset": true,
+    "mode": "preread",
+    "source": "report-with-dataset.html",
+    "date": "Scanned 20 Oct 2026",
+    "sourceUrl": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html",
+    "rules": {
+      "bodyWords": 80,
+      "bullets": 6,
+      "titlePt": 28,
+      "bodyPt": 14,
+      "labelPt": 14,
+      "sourcePt": 12,
+      "tableRows": 8,
+      "points": 4
+    }
+  },
+  "slides": [
+    {
+      "kind": "title",
+      "title": "Seventeen services need a new certificate within 30 days",
+      "body": [
+        "A scan of every service endpoint found nine expired certificates and eight more that expire within a month. Most of the risk sits where renewal is still done by hand."
+      ],
+      "notes": "mode: preread.",
+      "sources": [
+        "Certificate scan of the service catalogue, 20 October 2026; Monitoring alert rules, exported 21 October 2026"
+      ],
+      "kicker": "Audit · Northwind certificates",
+      "date": "Scanned 20 Oct 2026"
+    },
+    {
+      "kind": "summary",
+      "title": "Renew the nine expired certificates this week",
+      "body": [
+        "Then move the 30 services that renew by hand onto automatic renewal before December.",
+        "Counts: 17 of 140 services need action: 9 expired, 8 expire within 30 days. Three findings: one high, one medium, one low.",
+        "Fix first: the expired certificates (finding 1); Platform has the most, with five to renew.",
+        "Then: automatic renewal for the Data and Mobile teams, who renew 20 of the 30 manual certificates."
+      ],
+      "notes": "mode: preread.",
+      "sources": [
+        "Certificate scan of the service catalogue, 20 October 2026; Monitoring alert rules, exported 21 October 2026"
+      ]
+    },
+    {
+      "kind": "stats",
+      "title": "Seventeen of 140 services need action within a month",
+      "body": [
+        "Every service presents a Transport Layer Security (TLS) certificate that proves who it is to its callers. When one expires, callers that check it refuse to connect, and the service is down for them even though it is running.",
+        "The figures here are counts."
+      ],
+      "notes": "",
+      "sources": [
+        "Certificate scan, 20 Oct 2026"
+      ],
+      "stats": [
+        {
+          "value": "9",
+          "label": "callers that check will refuse them",
+          "source": "Certificate scan, 20 Oct 2026",
+          "status": {
+            "level": "danger",
+            "word": "Expired"
+          }
+        },
+        {
+          "value": "8",
+          "label": "expire before the next audit",
+          "source": "Certificate scan, 20 Oct 2026",
+          "status": {
+            "level": "warn",
+            "word": "Under 30 days"
+          }
+        },
+        {
+          "value": "30",
+          "label": "Services that renew by hand",
+          "source": "Certificate scan, 20 Oct 2026"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "title": "Expiry comes from manual renewal and late alerts",
+      "body": [
+        "High: Nine certificates have already expired",
+        "Medium: Two teams renew most certificates by hand"
+      ],
+      "notes": "Findings run from most to least severe.",
+      "sources": [],
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#findings"
+    },
+    {
+      "kind": "finding",
+      "title": "Nine certificates have already expired",
+      "body": [
+        "Where: mobile-web, mobile-worker, platform-admin-4, search-web-3, payments-web, platform-notify-4, accounts-reports, platform-cache, platform-search",
+        "Evidence: The scan read an expiry date before 22 October on each. The oldest expired 28 days ago.",
+        "Impact: Any caller that verifies the certificate fails to connect. Callers that skip verification still connect, which is why some of these went unnoticed.",
+        "Fix: Renew each one, then confirm with a second scan of those endpoints."
+      ],
+      "notes": "",
+      "sources": [
+        "Certificate scan of the service catalogue, 20 October 2026; Monitoring alert rules, exported 21 October 2026"
+      ],
+      "status": {
+        "level": "danger",
+        "word": "High"
+      },
+      "chip": "Fix this week",
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#finding-1"
+    },
+    {
+      "kind": "finding",
+      "title": "Two teams renew most certificates by hand",
+      "body": [
+        "Where: Data (9 of 19 services) and Mobile (11 of 24)",
+        "Evidence: 20 of the 30 manual renewals belong to these two teams.",
+        "Impact: A renewal that depends on a person's calendar fails when that person is away.",
+        "Fix: Move both teams to the automatic renewal the other four teams use."
+      ],
+      "notes": "",
+      "sources": [
+        "Certificate scan of the service catalogue, 20 October 2026; Monitoring alert rules, exported 21 October 2026"
+      ],
+      "status": {
+        "level": "warn",
+        "word": "Medium"
+      },
+      "chip": "Fix before December",
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#finding-2"
+    },
+    {
+      "kind": "table",
+      "title": "The other finding is low severity",
+      "body": [],
+      "notes": "The only alert fires after a certificate expires. Where: Monitoring rules for all services Evidence: The certificate alert triggers on a failed handshake, which happens only once the certificate has expired. Impact: Owners learn of an expiry from their callers. Fix: Add a warning at 30 days and a page at 7 days.",
+      "sources": [],
+      "table": {
+        "header": [
+          "Finding",
+          "Severity",
+          "Decision"
+        ],
+        "rows": [
+          [
+            "The only alert fires after a certificate expires",
+            "Low",
+            "Fix next quarter"
+          ]
+        ]
+      },
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#findings"
+    },
+    {
+      "kind": "data",
+      "title": "The scan covers all 140 services, one row each",
+      "body": [
+        "Platform runs the most services, 31 of 140."
+      ],
+      "notes": "The live view: https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#dataset",
+      "sources": [
+        "Certificate scan, 20 Oct 2026."
+      ],
+      "chart": {
+        "type": "bar",
+        "title": "Services by team",
+        "labels": [
+          "Platform",
+          "Mobile",
+          "Payments",
+          "Accounts",
+          "Search",
+          "Data"
+        ],
+        "values": [
+          31,
+          24,
+          24,
+          22,
+          20,
+          19
+        ],
+        "unit": "",
+        "focus": [],
+        "alt": "Platform 31 services; Mobile 24 services; Payments 24 services; Accounts 22 services; Search 20 services; Data 19 services.",
+        "takeaway": "Platform runs the most services, 31 of 140."
+      },
+      "sentence": "All 140 services",
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#dataset",
+      "how": "Filter, sort, or pick a bar to narrow the table."
+    },
+    {
+      "kind": "data",
+      "title": "Expired: Platform has 4 of the 9 services",
+      "body": [
+        "9 of 140 services are expired."
+      ],
+      "notes": "The live view: https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#at=dataset&status=expired",
+      "sources": [
+        "Certificate scan, 20 Oct 2026."
+      ],
+      "chart": {
+        "type": "bar",
+        "title": "Services by team, expired only",
+        "labels": [
+          "Platform",
+          "Mobile",
+          "Search",
+          "Payments",
+          "Accounts"
+        ],
+        "values": [
+          4,
+          2,
+          1,
+          1,
+          1
+        ],
+        "unit": "services",
+        "focus": [
+          0
+        ],
+        "alt": "Platform 4; Mobile 2; Search 1; Payments 1; Accounts 1."
+      },
+      "sentence": "9 of 140 services: expired",
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#at=dataset&status=expired",
+      "cut": {
+        "status": "expired"
+      }
+    },
+    {
+      "kind": "data",
+      "title": "Manual: Mobile and Data have 20 of the 30 services",
+      "body": [
+        "30 of 140 services are manual."
+      ],
+      "notes": "The live view: https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#at=dataset&renewal=manual",
+      "sources": [
+        "Certificate scan, 20 Oct 2026."
+      ],
+      "chart": {
+        "type": "bar",
+        "title": "Services by team, manual only",
+        "labels": [
+          "Mobile",
+          "Data",
+          "Search",
+          "Accounts",
+          "Payments",
+          "Platform"
+        ],
+        "values": [
+          11,
+          9,
+          4,
+          3,
+          2,
+          1
+        ],
+        "unit": "services",
+        "focus": [
+          0,
+          1
+        ],
+        "alt": "Mobile 11; Data 9; Search 4; Accounts 3; Payments 2; Platform 1."
+      },
+      "sentence": "30 of 140 services: manual",
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#at=dataset&renewal=manual",
+      "cut": {
+        "renewal": "manual"
+      }
+    },
+    {
+      "kind": "section",
+      "title": "The scan checked every endpoint once, from inside the network",
+      "body": [
+        "Each service endpoint in the service catalogue was contacted once on 20 October 2026, from a host inside the network, and its certificate's expiry date, issuer and renewal setting were recorded. Days left are counted from 22 October. Services were matched to teams by the catalogue's owner field."
+      ],
+      "notes": "",
+      "sources": [],
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#scope"
+    },
+    {
+      "kind": "section",
+      "title": "Three things this audit did not check",
+      "body": [
+        "Certificates used between services inside a cluster, which the platform rotates on its own schedule.",
+        "Certificates on third-party services we call.",
+        "Whether each caller verifies certificates at all."
+      ],
+      "notes": "",
+      "sources": [],
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#not-checked"
+    },
+    {
+      "kind": "appendix-divider",
+      "title": "Appendix",
+      "body": [
+        "Sources",
+        "Full table: all 140 services"
+      ],
+      "notes": "",
+      "sources": []
+    },
+    {
+      "kind": "sources",
+      "title": "Sources",
+      "body": [
+        "Certificate scan of the service catalogue, 20 October 2026.",
+        "Monitoring alert rules, exported 21 October 2026."
+      ],
+      "notes": "",
+      "sources": [],
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#sources",
+      "appendix": true
+    },
+    {
+      "kind": "pointer",
+      "title": "Full table: all 140 services",
+      "body": [
+        "Certificate scan, one row per service, filterable and sortable, is on the page at the link below."
+      ],
+      "notes": "",
+      "sources": [
+        "Certificate scan, 20 Oct 2026. Days left are counted from 22 Oct 2026; a negative number is days since expiry."
+      ],
+      "link": "https://juliedavila.github.io/html-house-style/examples/report-with-dataset.html#dataset",
+      "appendix": true
+    }
+  ]
+}

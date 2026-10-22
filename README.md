@@ -11,6 +11,8 @@ Generated pages tend to share one look: a gradient hero, emoji section markers, 
 ## What it does
 
 - **Page patterns.** Before choosing a component, Claude names what the reader will do with the page: decide, understand, look up, monitor, do or review. That job sets the opening, the order of sections, the navigation, what the page remembers and how it prints. Each of the six patterns has a [working example](https://juliedavila.github.io/html-house-style/examples/), plus a mixed page: a report with an explorable dataset.
+- **Your brand.** Put your company's hex codes and font names in `brand.json` once; `page.mjs --brand brand.json` builds every page in it, with contrast and colour-blind separation still checked and any adjustment reported ([BRAND.md](html-house-style/BRAND.md)).
+- **Decks from the same analysis.** A second skill, `deck-architecture`, sets the structure of a slide deck: the delivery mode (presented live, or a pre-read sent ahead) and the reader's job decide the slide order, the titles, what goes in notes and what goes in the appendix. `outline.mjs` turns a finished page into a slide outline for your own deck-building skill, with native chart data and links from each data slide to the same filtered view of the page. Your deck skill and company template own the look.
 - **Records you can explore.** More than about 25 records in a report become a `section.dataset`: a bar chart that filters the table under it, chips, search and sortable columns, in a frame capped in height. The state lives in the address, Back undoes a change, and a sentence says what the table shows.
 - **Charts and tables from data.** `tools/bars.mjs` and `tools/table.mjs` turn data into a finished figure or table (or a whole dataset section) that passes the checker by construction.
 - **Answer first.** Pages that argue or report open with a bottom-line block, and every argument heading states a claim, so skimming the headings gives you the argument. Reference and tool pages open with one sentence of purpose.
@@ -33,7 +35,14 @@ html-house-style/          the skill: this inner folder is what you install
   CHECKLIST.md             the pre-handover check, split into reading and looking
   check.mjs                static checker: node, bun or deno, no dependencies
   examples/                one working page per pattern, a mixed page and a contents page
-  tools/                   page.mjs (skeleton and assembly), bars.mjs, table.mjs, selftest.mjs
+  BRAND.md                 your company colours and fonts in one file
+  brand.example.json       a complete brand file to copy
+  tools/                   page.mjs (skeleton and assembly), brand.mjs, bars.mjs, table.mjs, selftest.mjs
+deck-architecture/         the second skill: deck structure for presented and pre-read decks
+  SKILL.md                 when and how Claude uses it, beside your deck-building skill
+  DECKS.md                 the guide and the outline schema
+  tools/                   outline.mjs (page to outline), check-outline.mjs, check-pptx.mjs, selftest.mjs
+  examples/                outlines in both modes
 index.html                 the sample page, built from template.html and base.css
 examples/                  the pattern examples with base.css inlined, for the Pages site
 build-index.mjs            rebuilds index.html and examples/
@@ -49,7 +58,10 @@ docs/screenshot.png        the image above
 git clone https://github.com/juliedavila/html-house-style.git
 mkdir -p ~/.claude/skills
 cp -R html-house-style/html-house-style ~/.claude/skills/
+cp -R html-house-style/deck-architecture ~/.claude/skills/     # optional: decks
 ```
+
+Install the two folders side by side: the deck tools use `html-house-style/tools/brand.mjs` for brand colours when it sits next to them.
 
 **Claude Code, one repository:** copy the inner folder, the one that contains `SKILL.md`, into that repository's `.claude/skills/`:
 

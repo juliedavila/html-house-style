@@ -150,7 +150,9 @@ Colour comes from tokens in `base.css`. Never write a colour value in page CSS, 
 | `slate` | Cool neutral, blue accent | The most conservative corporate audience |
 | `graphite` | Near-monochrome, teal accent | Dense tools and dashboards; austere pages |
 
-To make a new palette, copy one `:root[data-palette=...]` block and change the ground (`--p-bg`, `--p-surface`, `--p-sunken`), the accent pair (`--p-accent`, `--p-accent2`) and their tints. Keep text and border values unless you re-check contrast: body text at least 4.5:1 against every ground (aim for 7:1), control borders and meaningful graphics at least 3:1. Add a matching dark accent.
+**Company brands.** To use a company's brand colours and fonts, write a `brand.json` and build with `tools/page.mjs --brand`; see BRAND.md. It derives the full palette, keeps every contrast and category rule below, and reports any brand colour it had to change. Prefer it to a hand-made palette.
+
+To make a new palette by hand, copy one `:root[data-palette=...]` block and change the ground (`--p-bg`, `--p-surface`, `--p-sunken`), the accent pair (`--p-accent`, `--p-accent2`) and their tints. Keep text and border values unless you re-check contrast: body text at least 4.5:1 against every ground (aim for 7:1), control borders and meaningful graphics at least 3:1. Add a matching dark accent.
 
 **Dark mode.** Every page follows the reader's system setting and also works when forced with `data-theme="light"` or `"dark"`. Dark mode is the same layout on a dark neutral ground with lightened accents. Printing always uses the light values.
 

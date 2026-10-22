@@ -8,6 +8,7 @@
 //   node tools/page.mjs --snippet list                       (component names; --snippet callouts prints one)
 //   node tools/page.mjs --skeleton monitor > body.html      (edit body.html)
 //   node tools/page.mjs body.html page.html --check          (assemble, then run check.mjs)
+//   node tools/page.mjs body.html page.html --brand brand.json   (in a company's brand; BRAND.md)
 //
 //   import { skeleton, assemble, rules, snippet, includes } from "./tools/page.mjs";
 //
@@ -19,6 +20,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
+import { loadBrand, resolve as resolveBrand, brandCss, refusals } from "./brand.mjs";
 
 const kit = new URL("../", import.meta.url);
 const read = path => readFileSync(new URL(path, kit), "utf8");
@@ -121,18 +123,23 @@ export function parseBody(src) {
   return { meta, body: body.trimEnd() };
 }
 
-// A complete page from a body and its meta.
-export function assemble(body, meta = {}) {
+// A complete page from a body and its meta. With a brand (resolved by brand.mjs), the brand's
+// palette goes in after base.css, the page uses it and keeps it, and its wordmark leads the kicker.
+export function assemble(body, meta = {}, brand = null) {
   const key = name(meta.pattern || ""), p = PATTERNS[key];
   if (!p) throw new Error(`page.mjs: pattern "${meta.pattern}" is not one of ${Object.keys(PATTERNS).join(", ")}`);
-  const pattern = p.pattern || key, density = meta.density || p.density, palette = meta.palette || p.palette;
+  const pattern = p.pattern || key, density = meta.density || p.density, palette = brand ? brand.name : meta.palette || p.palette;
   if (!["doc", "tool"].includes(density)) throw new Error(`page.mjs: density must be doc or tool, not "${density}"`);
-  if (!["paper", "slate", "graphite"].includes(palette)) throw new Error(`page.mjs: palette must be paper, slate or graphite, not "${palette}"`);
+  if (!brand && !["paper", "slate", "graphite"].includes(palette)) throw new Error(`page.mjs: palette must be paper, slate or graphite, not "${palette}"`);
   if (!meta.title) throw new Error("page.mjs: the page needs a title (--title, or title in the meta line)");
   const title = String(meta.title).replace(/&(?![a-z#0-9]+;)/gi, "&amp;").replace(/</g, "&lt;");
-  const base = read("base.css").trimEnd(), { head, dialog, close } = parts();
+  const base = read("base.css").trimEnd() + (brand ? "\n" + brandCss(brand) : ""), { head, dialog, close } = parts();
+  if (brand && brand.logoText) {
+    const mark = brand.logoText.replace(/&/g, "&amp;").replace(/</g, "&lt;"), open = '<div class="kicker">', i = body.indexOf(open);
+    if (i >= 0 && !body.startsWith(mark, i + open.length)) body = body.slice(0, i + open.length) + mark + " · " + body.slice(i + open.length);
+  }
   return `<!doctype html>
-<html lang="en" class="no-js" data-palette="${palette}">
+<html lang="en" class="no-js" data-palette="${palette}"${brand ? " data-palette-locked" : ""}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -172,6 +179,8 @@ const HELP = `usage:
       --pattern P      one of the patterns above (sets density and palette)
       --palette X      paper, slate or graphite
       --density D      doc or tool
+      --brand B.json   a company's colours and fonts (BRAND.md); any colour the kit
+                       had to change for contrast or separation prints first
       --check          run check.mjs on page.html; print FAIL and WARN lines only;
                        exit 1 on any FAIL
   Flags win over the meta line. A line <!-- include: piece.html --> in body.html is
@@ -196,7 +205,9 @@ if (isMain) {
     const parsed = parseBody(readFileSync(files[0], "utf8")), meta = parsed.meta, body = includes(parsed.body, dirname(resolve(files[0])));
     for (const k of ["title", "pattern", "palette", "density"]) if (opts[k]) meta[k] = opts[k];
     if (opts.pattern) { const p = PATTERNS[name(opts.pattern)]; if (p && !opts.palette) meta.palette = p.palette; if (p && !opts.density) meta.density = p.density; }
-    const html = assemble(body, meta);
+    const brand = opts.brand ? resolveBrand(loadBrand(opts.brand)) : null;
+    if (brand) for (const line of refusals(brand)) console.log("brand: " + line);
+    const html = assemble(body, meta, brand);
     writeFileSync(files[1], html);
     if (!opts.check) console.log(`${files[1]} written: ${html.length} characters`);
     if (opts.check) {
